@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>NBS Dashboard</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
+  </head>
+
+  <body>
+    <header class="header">
+      <div class="headerInner">
+        <h1>NBS Dashboard</h1>
+        <p>
+          Filter by <code>economic_impacts</code> and explore interventions.
+        </p>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card" aria-label="Filters and summary">
+        <h2>Filters</h2>
+
+        <div class="controls">
+          <div class="control" aria-label="Economic impacts filter">
+            <div class="impactHeader">
+              <span>Economic impacts</span>
+              <span class="impactMeta" id="impactMeta"></span>
+            </div>
+
+            <div id="impactCheckboxes" class="impactCheckboxes"></div>
+
+            <div class="btnRow">
+              <button id="selectAllBtn" type="button">Select all</button>
+              <button id="clearBtn" type="button">Clear</button>
+            </div>
+
+            <small class="help">
+              Tick impacts to filter (AND across selected impacts). If none are
+              ticked, all interventions are shown.
+            </small>
+          </div>
+
+          <div class="control" aria-label="Start year range filter">
+            <div class="rangeHeader">
+              <span>Start year range</span>
+              <span class="rangeMeta" id="startYearLabel">—</span>
+            </div>
+
+            <div class="rangeBox">
+              <label class="rangeRow">
+                <span class="rangeTag">Min</span>
+                <input id="startYearMin" type="range" />
+                <span class="rangeVal" id="startYearMinVal">—</span>
+              </label>
+
+              <label class="rangeRow">
+                <span class="rangeTag">Max</span>
+                <input id="startYearMax" type="range" />
+                <span class="rangeVal" id="startYearMaxVal">—</span>
+              </label>
+
+              <div class="btnRow">
+                <button id="resetStartYearBtn" type="button">Reset years</button>
+              </div>
+            </div>
+
+            <small class="help">
+              Bounds come from dataset min/max <code>start_year</code>.
+            </small>
+          </div>
+
+          <label class="control" aria-label="Search">
+            <span>Search title/city/country</span>
+            <input
+              id="searchInput"
+              type="text"
+              placeholder="e.g. Rotterdam"
+              autocomplete="off"
+            />
+          </label>
+        </div>
+
+        <div class="kpis" aria-label="Key metrics">
+          <div class="kpi">
+            <div class="kpiLabel">Rows</div>
+            <div id="rowCount" class="kpiValue">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiLabel">Unique cities</div>
+            <div id="cityCount" class="kpiValue">0</div>
+          </div>
+          <div class="kpi">
+            <div class="kpiLabel">Unique countries</div>
+            <div id="countryCount" class="kpiValue">0</div>
+          </div>
+        </div>
+
+        <div id="statusBox" class="statusBox" aria-live="polite"></div>
+      </section>
+
+      <section class="card" aria-label="Map and city results">
+        <div class="mapHeader">
+          <h2>Map of filtered cities</h2>
+          <div class="mapMeta" id="mapMeta"></div>
+        </div>
+
+        <svg
+          id="mapVis"
+          width="920"
+          height="460"
+          role="img"
+          aria-label="Map of filtered cities"
+        ></svg>
+
+        <div class="hint">
+          Circles represent cities in the filtered results (size = number of
+          interventions). Click a circle to see city-specific results.
+        </div>
+
+        <div class="cityPanel" aria-label="City results panel">
+          <div class="cityPanelHeader">
+            <div class="cityPanelTitle" id="cityPanelTitle">City results</div>
+            <button id="clearCityBtn" type="button">Clear selection</button>
+          </div>
+          <div id="cityPanelBody" class="cityPanelBody">
+            Select a city on the map to list the interventions.
+          </div>
+        </div>
+      </section>
+
+      <section class="card full" aria-label="Filtered results table">
+        <div class="tableHeader">
+          <h2>Filtered results</h2>
+          <div class="tableMeta" id="tableMeta"></div>
+        </div>
+
+        <div class="tableWrap">
+          <table id="resultsTable">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Economic impacts</th>
+                <th>Start</th>
+                <th>End</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="./js/main.js"></script>
+  </body>
+</html>
