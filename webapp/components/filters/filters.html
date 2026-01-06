@@ -1,0 +1,80 @@
+<section id="filters" class="card" aria-label="Filters and summary">
+  <h2>Filters</h2>
+
+  <div class="controls">
+    <div class="control" aria-label="Economic impacts filter">
+      <div id="impactHeader">
+        <span>Economic impacts</span>
+        <span id="impactMeta"></span>
+      </div>
+
+      <div id="impactCheckboxes"></div>
+
+      <div class="btnRow">
+        <button id="selectAllBtn" type="button">Select all</button>
+        <button id="clearBtn" type="button">Clear</button>
+      </div>
+
+      <small class="help">
+        Tick impacts to filter (AND across selected impacts). If none are
+        ticked, all interventions are shown.
+      </small>
+    </div>
+
+    <div class="control" aria-label="Start year range filter">
+      <div id="rangeHeader">
+        <span>Start year range</span>
+        <span class="rangeMeta" id="startYearLabel">—</span>
+      </div>
+
+      <div id="rangeBox">
+        <label class="rangeRow">
+          <span class="rangeTag">Min</span>
+          <input id="startYearMin" type="range" />
+          <span class="rangeVal" id="startYearMinVal">—</span>
+        </label>
+
+        <label class="rangeRow">
+          <span class="rangeTag">Max</span>
+          <input id="startYearMax" type="range" />
+          <span class="rangeVal" id="startYearMaxVal">—</span>
+        </label>
+
+        <div class="btnRow">
+          <button id="resetStartYearBtn" type="button">Reset years</button>
+        </div>
+      </div>
+
+      <small class="help">
+        Bounds come from dataset min/max <code>start_year</code>.
+      </small>
+    </div>
+
+    <label class="control" aria-label="Search">
+      <span>Search title/city/country</span>
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="e.g. Rotterdam"
+        autocomplete="off"
+      />
+    </label>
+  </div>
+
+  <div id="kpis" aria-label="Key metrics">
+    <div class="kpi">
+      <div class="kpiLabel">Rows</div>
+      <div id="rowCount" class="kpiValue">0</div>
+    </div>
+    <div class="kpi">
+      <div class="kpiLabel">Unique cities</div>
+      <div id="cityCount" class="kpiValue">0</div>
+    </div>
+    <div class="kpi">
+      <div class="kpiLabel">Unique countries</div>
+      <div id="countryCount" class="kpiValue">0</div>
+    </div>
+  </div>
+
+  <div id="statusBox" aria-live="polite"></div>
+</section>
