@@ -1,7 +1,7 @@
 class Results {
   constructor() {
     this.max = 250
-    this.tableBody = document.querySelector("#resultsTable tbody")
+    this.tableBody = d3.select("#resultsTable tbody")
     this.data = []
   }
 
@@ -22,42 +22,34 @@ class Results {
         )
       )
       .slice(0, this.max)
-    this.tableBody.innerHTML = ""
 
-    for (const r of rows) {
-      const tr = document.createElement("tr")
+    this.tableBody.selectAll("tr").remove()
 
+    const trs = this.tableBody.selectAll("tr").data(rows).enter().append("tr")
+
+    trs.each(function (d) {
+      const tr = d3.select(this)
       const title =
-        r.name_of_the_nbs_intervention_short_english_title ??
-        r.native_title_of_the_nbs_intervention ??
+        d.name_of_the_nbs_intervention_short_english_title ??
+        d.native_title_of_the_nbs_intervention ??
         ""
 
-      const impacts = r.__economicImpacts.join(", ")
-
-      tr.appendChild(this.td(title))
-      tr.appendChild(this.td(r.city))
-      tr.appendChild(this.td(r.country))
-      tr.appendChild(this.td(impacts))
-      tr.appendChild(this.td(r.start_year))
-      tr.appendChild(this.td(r.end_year))
-
-      this.tableBody.appendChild(tr)
-    }
+      tr.append("td").text(title)
+      tr.append("td").text(d.city)
+      tr.append("td").text(d.country)
+      tr.append("td").text(d.__economicImpacts.join(", "))
+      tr.append("td").text(d.start_year)
+      tr.append("td").text(d.end_year)
+    })
 
     if (this.data.length > this.max) {
-      const tr = document.createElement("tr")
-      const cell = document.createElement("td")
-      cell.colSpan = 6
-      cell.textContent = `Showing first ${this.max} of ${this.data.length} rows. Add more filters to narrow results.`
-      cell.style.color = "#a8b3cf"
-      tr.appendChild(cell)
-      this.tableBody.appendChild(tr)
+      const tr = this.tableBody.append("tr")
+      tr.append("td")
+        .attr("colspan", 6)
+        .text(
+          `Showing first ${this.max} of ${this.data.length} rows. Add more filters to narrow results.`
+        )
+        .style("color", "#a8b3cf")
     }
-  }
-
-  td(text) {
-    const cell = document.createElement("td")
-    cell.textContent = (text ?? "").toString()
-    return cell
   }
 }

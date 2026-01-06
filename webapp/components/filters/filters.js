@@ -16,23 +16,19 @@ class Filters {
   constructor(data) {
     this.originalData = data
 
-    this.impactCheckboxes = document.getElementById("impactCheckboxes")
-    this.impactMeta = document.getElementById("impactMeta")
-    this.rowCount = document.getElementById("rowCount")
-    this.cityCount = document.getElementById("cityCount")
-    this.countryCount = document.getElementById("countryCount")
+    this.impactCheckboxes = d3.select("#impactCheckboxes").node()
 
     this.startYearBounds = null
     this.yearRange = null
 
-    document.getElementById("resetStartYearBtn").onclick = () => {
+    d3.select("#resetStartYearBtn").on("click", () => {
       this.yearRange = this.startYearBounds
       this.yearRangeSlider.value([
         this.startYearBounds.min,
         this.startYearBounds.max,
       ])
       this.updateStartYearUI()
-    }
+    })
 
     this.components = [new Results(), new MapFilteredCities()]
 
@@ -40,13 +36,13 @@ class Filters {
   }
 
   init() {
-    document.getElementById("clearBtn").onclick = () => {
+    d3.select("#clearBtn").on("click", () => {
       this.getImpactCheckboxes().forEach((cb) => (cb.checked = false))
       this.getSelectedImpactsText()
       this.applyFilters()
-    }
+    })
 
-    searchInput.oninput = () => this.applyFilters()
+    d3.select("#searchInput").on("input", () => this.applyFilters())
 
     this.wrangleData()
   }
@@ -58,7 +54,7 @@ class Filters {
     this.startYearBounds = { min: Math.min(...years), max: Math.max(...years) }
     this.yearRange = { min: Math.min(...years), max: Math.max(...years) }
 
-    this.yearRangeSlider = rangeSlider(document.getElementById("rangeSlider"), {
+    this.yearRangeSlider = rangeSlider(d3.select("#rangeSlider").node(), {
       min: this.startYearBounds.min,
       max: this.startYearBounds.max,
       value: [this.yearRange.min, this.yearRange.max],
@@ -73,9 +69,7 @@ class Filters {
   }
 
   update() {
-    document.getElementById(
-      "startYearLabel"
-    ).textContent = `${this.startYearBounds.min}–${this.startYearBounds.max}`
+    d3.select("#startYearLabel").text(`${this.startYearBounds.min}–${this.startYearBounds.max}`)
 
     this.updateStartYearUI()
 
@@ -113,10 +107,7 @@ class Filters {
 
   applyFilters() {
     const selectedImpacts = this.getSelectedImpacts()
-    const searchQuery = document
-      .getElementById("searchInput")
-      .value.trim()
-      .toLowerCase()
+    const searchQuery = d3.select("#searchInput").property("value").trim().toLowerCase()
 
     this.data = this.originalData.filter((r) => {
       if (r.start_year != null && r.end_year != null) {
@@ -157,23 +148,24 @@ class Filters {
     })
 
     this.components.forEach((component) => component.init(this.data))
+    this.renderKPIs()
   }
 
   renderKPIs() {
-    document.getElementById("rowCount").textContent = filteredRows.length
-    document.getElementById("cityCount").textContent = new Set(
-      filteredRows.map((d) => d.city)
-    ).size
-    document.getElementById("countryCount").textContent = new Set(
-      filteredRows.map((d) => d.country)
-    ).size
-    tableMeta.textContent = `Showing ${Math.min(filteredRows.length, 250)} of ${
-      filteredRows.length
-    }`
+    d3.select("#rowCount").text(this.data.length)
+    d3.select("#cityCount").text(new Set(
+      this.data.map((d) => d.city)
+    ).size)
+    d3.select("#countryCount").text(new Set(
+      this.data.map((d) => d.country)
+    ).size)
+    d3.select("#tableMeta").text(`Showing ${Math.min(this.data.length, 250)} of ${
+      this.data.length
+    }`)
   }
 
   getImpactCheckboxes() {
-    return [...impactCheckboxes.querySelectorAll('input[type="checkbox"]')]
+    return [...this.impactCheckboxes.querySelectorAll('input[type="checkbox"]')]
   }
 
   getSelectedImpacts() {
@@ -183,11 +175,11 @@ class Filters {
   }
 
   getSelectedImpactsText() {
-    this.impactMeta.textContent = `${this.getSelectedImpacts().length} selected`
+    d3.select("#impactMeta").text(`${this.getSelectedImpacts().length} selected`)
   }
 
   updateStartYearUI() {
-    document.getElementById("startYearMinVal").textContent = this.yearRange.min
-    document.getElementById("startYearMaxVal").textContent = this.yearRange.max
+    d3.select("#startYearMinVal").text(this.yearRange.min)
+    d3.select("#startYearMaxVal").text(this.yearRange.max)
   }
 }
