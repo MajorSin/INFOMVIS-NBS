@@ -2,14 +2,20 @@ class Results {
   constructor() {
     this.max = 250
     this.tableBody = document.querySelector("#resultsTable tbody")
+    this.data = []
   }
 
   init(data) {
-    this.renderTable(data)
+    this.wrangleData(data)
   }
 
-  renderTable(data) {
-    const rows = data
+  wrangleData(data) {
+    this.data = data
+    this.update()
+  }
+
+  update() {
+    const rows = this.data
       .sort((a, b) =>
         a.name_of_the_nbs_intervention_short_english_title.localeCompare(
           b.name_of_the_nbs_intervention_short_english_title
@@ -38,11 +44,11 @@ class Results {
       this.tableBody.appendChild(tr)
     }
 
-    if (data.length > this.max) {
+    if (this.data.length > this.max) {
       const tr = document.createElement("tr")
       const cell = document.createElement("td")
       cell.colSpan = 6
-      cell.textContent = `Showing first ${this.max} of ${data.length} rows. Add more filters to narrow results.`
+      cell.textContent = `Showing first ${this.max} of ${this.data.length} rows. Add more filters to narrow results.`
       cell.style.color = "#a8b3cf"
       tr.appendChild(cell)
       this.tableBody.appendChild(tr)

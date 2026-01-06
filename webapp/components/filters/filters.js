@@ -13,20 +13,17 @@ const ATOMIC_IMPACTS = [
 ]
 
 class Filters {
-  constructor(yearBounds) {
-    this.originalData
+  constructor(data) {
+    this.originalData = data
+
     this.impactCheckboxes = document.getElementById("impactCheckboxes")
     this.impactMeta = document.getElementById("impactMeta")
     this.rowCount = document.getElementById("rowCount")
     this.cityCount = document.getElementById("cityCount")
     this.countryCount = document.getElementById("countryCount")
 
-    this.startYearBounds = yearBounds
-    this.yearRange = yearBounds
-
-    document.getElementById(
-      "startYearLabel"
-    ).textContent = `${this.startYearBounds.min}–${this.startYearBounds.max}`
+    this.startYearBounds = null
+    this.yearRange = null
 
     document.getElementById("resetStartYearBtn").onclick = () => {
       this.yearRange = this.startYearBounds
@@ -37,6 +34,12 @@ class Filters {
       this.updateStartYearUI()
     }
 
+    this.components = [new Results(), new MapFilteredCities()]
+
+    this.init()
+  }
+
+  init() {
     document.getElementById("clearBtn").onclick = () => {
       this.getImpactCheckboxes().forEach((cb) => (cb.checked = false))
       this.getSelectedImpactsText()
@@ -45,10 +48,20 @@ class Filters {
 
     searchInput.oninput = () => this.applyFilters()
 
+    this.wrangleData()
+  }
+
+  wrangleData() {
+    const years = this.originalData
+      .map((r) => r.start_year)
+      .filter(Number.isFinite)
+    this.startYearBounds = { min: Math.min(...years), max: Math.max(...years) }
+    this.yearRange = { min: Math.min(...years), max: Math.max(...years) }
+
     this.yearRangeSlider = rangeSlider(document.getElementById("rangeSlider"), {
-      min: yearBounds.min,
-      max: yearBounds.max,
-      value: [yearBounds.min, yearBounds.max],
+      min: this.startYearBounds.min,
+      max: this.startYearBounds.max,
+      value: [this.yearRange.min, this.yearRange.max],
       onInput: (values) => {
         this.yearRange = { min: values[0], max: values[1] }
         this.updateStartYearUI()
@@ -56,17 +69,20 @@ class Filters {
       },
     })
 
+    this.update()
+  }
+
+  update() {
+    document.getElementById(
+      "startYearLabel"
+    ).textContent = `${this.startYearBounds.min}–${this.startYearBounds.max}`
+
     this.updateStartYearUI()
 
-    this.components = [new Results(), new MapFilteredCities()]
+    this.buildImpactCheckboxes()
   }
 
-  init(data) {
-    this.originalData = data
-    this.buildImpactCheckboxes(data)
-  }
-
-  buildImpactCheckboxes(data) {
+  buildImpactCheckboxes() {
     for (const label of ATOMIC_IMPACTS) {
       const id = `imp_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
 

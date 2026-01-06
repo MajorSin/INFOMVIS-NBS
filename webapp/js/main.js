@@ -1,7 +1,7 @@
 class ExplorationMode {
   constructor() {
     this.startYearBounds = null
-    this.allRows = null
+    this.data = null
   }
 
   async init() {
@@ -9,7 +9,7 @@ class ExplorationMode {
   }
 
   async loadData() {
-    this.allRows = await d3
+    this.data = await d3
       .csv("./data/cleaned_nbs_data.csv", d3.autoType)
       .then((rows) =>
         rows.map((row) => ({
@@ -20,20 +20,18 @@ class ExplorationMode {
         }))
       )
 
-    const years = this.allRows.map((r) => r.start_year).filter(Number.isFinite)
+    const years = this.data.map((r) => r.start_year).filter(Number.isFinite)
     this.startYearBounds = { min: Math.min(...years), max: Math.max(...years) }
 
     this.init()
   }
 
   init() {
-    this.filters = new Filters(this.startYearBounds)
-
     this.render()
   }
 
   async render() {
-    this.filters.init(this.allRows)
+    new Filters(this.data)
   }
 }
 

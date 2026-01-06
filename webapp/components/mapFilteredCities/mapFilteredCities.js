@@ -74,7 +74,12 @@ class MapFilteredCities {
     await this.loadWorldMap(data)
   }
 
-  async loadWorldMap(data) {
+  async wrangleData(data) {
+    this.data = data
+    await loadWorldMap()
+  }
+
+  async loadWorldMap() {
     const topo = await fetch(
       "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
     ).then((r) => r.json())
