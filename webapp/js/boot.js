@@ -1,16 +1,27 @@
 async function injectHtml(selectors) {
   const head = document.getElementsByTagName("head")[0]
+  const body = document.getElementsByTagName("body")[0]
   await Promise.all(
     selectors.map(async (selector) => {
       // Mount stylesheet
-      let link = document.createElement("link")
-      link.rel = "stylesheet"
-      link.type = "text/css"
-      link.href = selector.styleSheet
-      link.media = "all"
-      head.appendChild(link)
+      if (selector.styleSheet != null) {
+        let link = document.createElement("link")
+        link.rel = "stylesheet"
+        link.type = "text/css"
+        link.href = selector.styleSheet
+        link.media = "all"
+        head.appendChild(link)
+      }
 
-      // Mount file
+      // Mount javascript file
+      if (selector.jsFile != null) {
+        let script = document.createElement("script")
+        script.src = selector.jsFile
+        script.type = "text/javascript"
+        body.appendChild(script)
+      }
+
+      // Mount HTML file
       const mount = document.querySelector(selector.element)
       if (!mount) throw new Error(`Mount not found: ${selector.element}`)
 
@@ -33,16 +44,19 @@ async function boot(jsFile) {
       element: "#filtersMount",
       url: "./components/filters/filters.html",
       styleSheet: "./components/filters/filters.css",
+      jsFile: "./components/filters/filters.js",
     },
     {
       element: "#mapMount",
       url: "./components/mapFilteredCities/mapFilteredCities.html",
       styleSheet: "./components/mapFilteredCities/mapFilteredCities.css",
+      jsFile: "./components/mapFilteredCities/mapFilteredCities.js",
     },
     {
       element: "#resultsMount",
       url: "./components/results/results.html",
       styleSheet: "./components/results/results.css",
+      jsFile: "./components/results/results.js",
     },
   ])
 
