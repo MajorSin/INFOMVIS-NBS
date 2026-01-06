@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>NBS Dashboard</title>
     <link rel="stylesheet" href="./css/styles.css" />
-
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
   </head>
@@ -14,14 +13,17 @@
     <header class="header">
       <div class="headerInner">
         <h1>NBS Dashboard</h1>
-        <p>
-          Filter by <code>economic_impacts</code> and explore interventions.
-        </p>
       </div>
     </header>
 
+    <nav class="topnav" aria-label="Primary">
+      <a href="#exploration">Exploration Mode</a>
+      <a href="#filter">Filter Mode</a>
+      <a href="#Compare">Compare</a>
+    </nav>
+
     <main class="grid">
-      <section class="card" aria-label="Filters and summary">
+      <section id="filters" class="card" aria-label="Filters and summary">
         <h2>Filters</h2>
 
         <div class="controls">
@@ -102,7 +104,7 @@
         <div id="statusBox" class="statusBox" aria-live="polite"></div>
       </section>
 
-      <section class="card" aria-label="Map and city results">
+      <section id="map" class="card" aria-label="Map and city results">
         <div class="mapHeader">
           <h2>Map of filtered cities</h2>
           <div class="mapMeta" id="mapMeta"></div>
@@ -132,7 +134,11 @@
         </div>
       </section>
 
-      <section class="card full" aria-label="Filtered results table">
+      <section
+        id="results"
+        class="card full"
+        aria-label="Filtered results table"
+      >
         <div class="tableHeader">
           <h2>Filtered results</h2>
           <div class="tableMeta" id="tableMeta"></div>
@@ -150,8 +156,7 @@
                 <th>End</th>
               </tr>
             </thead>
-            <tbody>
-            </tbody>
+            <tbody></tbody>
           </table>
         </div>
       </section>
