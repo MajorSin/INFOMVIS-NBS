@@ -1,50 +1,45 @@
-<section id="filters" class="card" aria-label="Filters and summary">
+<section id="filters" class="card">
   <h2>Filters</h2>
 
-  <div class="controls">
-    <div class="control" aria-label="Economic impacts filter">
-      <div id="impactHeader">
+  <div class="filterControls">
+    <div class="filterControl">
+      <div id="economicImpactHeader">
         <span>Economic impacts</span>
-        <span id="impactMeta"></span>
+        <span id="economicImpactMeta"></span>
       </div>
 
-      <div id="impactCheckboxes"></div>
+      <div id="economicImpactCheckboxes"></div>
 
-      <div class="btnRow">
-        <button id="selectAllBtn" type="button">Select all</button>
-        <button id="clearBtn" type="button">Clear</button>
-      </div>
+      <button id="clearEconomicImpacts" type="button">Clear</button>
 
-      <small class="help">
+      <small class="helpText">
         Tick impacts to filter (AND across selected impacts). If none are
-        ticked, all interventions are shown.
+        ticked, all options are shown.
       </small>
     </div>
 
-    <div class="control" aria-label="Start year range filter">
-      <div id="rangeHeader">
+    <div>
+      <div id="yearRangeHeader">
         <span>Start year range</span>
-        <span class="rangeMeta" id="startYearLabel">—</span>
+        <span class="yearRangeMeta" id="startYearLabel">—</span>
       </div>
 
-      <div id="rangeBox">
-        <label class="rangeRow">
-          <span class="rangeVal" id="startYearMinVal">—</span>
-          <div id="rangeSlider"></div>
-          <span class="rangeVal" id="startYearMaxVal">—</span>
+      <div id="yearRangeBox">
+        <label class="yearRangeRow">
+          <span class="yearRangeVal" id="startYearMinVal">—</span>
+          <div id="yearRangeSlider"></div>
+          <span class="yearRangeVal" id="startYearMaxVal">—</span>
         </label>
 
-        <div class="btnRow">
-          <button id="resetStartYearBtn" type="button">Reset years</button>
-        </div>
+        <button id="resetYearBtn" type="button">Reset years</button>
       </div>
 
-      <small class="help">
+      <small class="helpText">
         Bounds come from dataset min/max <code>start_year</code>.
       </small>
     </div>
 
-    <label class="control" aria-label="Search">
+    <label>
       <span>Search title/city/country</span>
       <input
         id="searchInput"
@@ -55,7 +50,7 @@
     </label>
   </div>
 
-  <div id="kpis" aria-label="Key metrics">
+  <div id="kpis">
     <div class="kpi">
       <div class="kpiLabel">Rows</div>
       <div id="rowCount" class="kpiValue">0</div>
@@ -69,6 +64,4 @@
       <div id="countryCount" class="kpiValue">0</div>
     </div>
   </div>
-
-  <div id="statusBox" aria-live="polite"></div>
 </section>

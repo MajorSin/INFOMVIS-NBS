@@ -1,22 +1,22 @@
-<section id="map" class="card" aria-label="Map and city results">
+<section id="map" class="card">
   <div id="mapHeader">
     <h2>Map of filtered cities</h2>
     <div id="mapMeta"></div>
   </div>
 
-  <svg id="mapVis" width="920" height="460" role="img" aria-label="Map of filtered cities"></svg>
+  <svg id="mapVis" width="920" height="460" role="img"></svg>
 
-  <div id="hint">
-    Circles represent cities in the filtered results (size = number of interventions). Click a
-    circle to see city-specific results.
+  <div id="mapHelp">
+    Circles represent cities in the filtered results (size = number of
+    interventions). Click a circle to see city-specific results.
   </div>
 
-  <div id="cityPanel" aria-label="City results panel">
-    <div id="cityPanelHeader">
-      <div id="cityPanelTitle">City results</div>
+  <div id="cityResults">
+    <div id="cityResultsHeader">
+      <div id="cityResultsTitle">City results</div>
       <button id="clearCityBtn" type="button">Clear selection</button>
     </div>
-    <div id="cityPanelBody">
+    <div id="cityResultsBody">
       Select a city on the map to list the interventions.
     </div>
   </div>

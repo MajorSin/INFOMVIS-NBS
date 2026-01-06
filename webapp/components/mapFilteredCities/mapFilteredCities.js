@@ -6,8 +6,8 @@ class MapFilteredCities {
 
     this.selectedCity = null
 
-    this.cityPanelTitle = document.getElementById("cityPanelTitle")
-    this.cityPanelBody = document.getElementById("cityPanelBody")
+    this.cityResultsTitle = document.getElementById("cityResultsTitle")
+    this.cityResultsBody = document.getElementById("cityResultsBody")
     this.clearCityBtn = document.getElementById("clearCityBtn")
     clearCityBtn.onclick = () => {
       this.selectedCity = null
@@ -125,7 +125,7 @@ class MapFilteredCities {
   //               city: d.city,
   //               country: d.country,
   //             }
-  //             renderCityPanel()
+  //             rendercityResults()
   //           })
   //           .call((sel) =>
   //             sel
@@ -148,13 +148,13 @@ class MapFilteredCities {
   //       (exit) => exit.remove()
   //     )
 
-  //   this.renderCityPanel()
+  //   this.rendercityResults()
   // }
 
-  // renderCityPanel() {
+  // rendercityResults() {
   //   if (!this.selectedCity) {
-  //     cityPanelTitle.textContent = "City results"
-  //     cityPanelBody.textContent =
+  //     cityResultsTitle.textContent = "City results"
+  //     cityResultsBody.textContent =
   //       "Select a city on the map to list the interventions."
   //     return
   //   }
@@ -163,12 +163,12 @@ class MapFilteredCities {
   //     (r) => cityKey(r.city, r.country) === selectedCity.key
   //   )
 
-  //   cityPanelTitle.textContent = `${selectedCity.city}${
+  //   cityResultsTitle.textContent = `${selectedCity.city}${
   //     selectedCity.country ? ", " + selectedCity.country : ""
   //   } (${rows.length})`
 
   //   if (rows.length === 0) {
-  //     cityPanelBody.textContent =
+  //     cityResultsBody.textContent =
   //       "No results for this city under the current filters."
   //     return
   //   }
@@ -197,7 +197,7 @@ class MapFilteredCities {
   //     ul.appendChild(li)
   //   }
 
-  //   cityPanelBody.innerHTML = ""
-  //   cityPanelBody.appendChild(ul)
+  //   cityResultsBody.innerHTML = ""
+  //   cityResultsBody.appendChild(ul)
   // }
 }

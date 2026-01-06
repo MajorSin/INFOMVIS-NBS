@@ -1,16 +1,32 @@
-#impactHeader {
+.filterControls {
+  display: grid;
+  gap: 12px;
+}
+
+.filterControls button,
+.filterControls input {
+  margin-top: 8px;
+}
+
+#economicImpactCheckboxes {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+#economicImpactHeader {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  color: var(--muted);
   margin-bottom: 8px;
 }
 
-#impactMeta {
+#economicImpactMeta {
   font-size: 12px;
+  color: var(--muted);
 }
 
-#impactCheckboxes {
+#economicImpactCheckboxes {
   display: grid;
   gap: 8px;
   padding: 10px;
@@ -25,7 +41,6 @@
   display: flex;
   gap: 10px;
   align-items: flex-start;
-  color: var(--text);
 }
 
 .impactItem input[type="checkbox"] {
@@ -37,30 +52,19 @@
   line-height: 1.2rem;
 }
 
-.btnRow {
-  margin-top: 8px;
-  display: flex;
-  gap: 10px;
-}
-
-.btnRow button {
-  width: auto;
-  flex: 1;
-}
-
-#rangeHeader {
+#yearRangeHeader {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  color: var(--muted);
   margin-bottom: 8px;
 }
 
-.rangeMeta {
+.yearRangeMeta {
   font-size: 12px;
+  color: var(--muted);
 }
 
-#rangeBox {
+#yearRangeBox {
   border: 1px solid var(--border);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.02);
@@ -69,19 +73,18 @@
   gap: 10px;
 }
 
-.rangeRow {
+.yearRangeRow {
   display: grid;
   grid-template-columns: 44px 1fr 44px;
   gap: 10px;
   align-items: center;
-  color: var(--text);
 }
 
-.rangeVal {
+.yearRangeVal {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   font-size: 12px;
-  text-align: right;
+  text-align: center;
 }
 
 #kpis {
@@ -107,14 +110,4 @@
   margin-top: 4px;
   font-size: 18px;
   font-weight: 800;
-}
-
-#statusBox {
-  margin-top: 12px;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px dashed var(--border);
-  color: var(--muted);
-  font-size: 12px;
-  min-height: 20px;
 }

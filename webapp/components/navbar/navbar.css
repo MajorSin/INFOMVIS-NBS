@@ -9,19 +9,13 @@
   max-width: 1200px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  overflow-x: auto;
+  gap: 15px;
 }
 
 #topnav a {
-  display: inline-flex;
-  align-items: center;
   padding: 10px 12px;
-  border-radius: 10px;
   text-decoration: none;
   color: var(--text);
-  border: 1px solid transparent;
-  white-space: nowrap;
 }
 
 #topnav a.brand {

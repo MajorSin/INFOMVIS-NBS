@@ -16,14 +16,16 @@ class Filters {
   constructor(data) {
     this.originalData = data
 
-    this.impactCheckboxes = d3.select("#impactCheckboxes").node()
+    this.economicImpactCheckboxes = d3
+      .select("#economicImpactCheckboxes")
+      .node()
 
     this.startYearBounds = null
     this.yearRange = null
 
-    d3.select("#resetStartYearBtn").on("click", () => {
+    d3.select("#resetYearBtn").on("click", () => {
       this.yearRange = this.startYearBounds
-      this.yearRangeSlider.value([
+      this.yearyearRangeSlider.value([
         this.startYearBounds.min,
         this.startYearBounds.max,
       ])
@@ -36,8 +38,8 @@ class Filters {
   }
 
   init() {
-    d3.select("#clearBtn").on("click", () => {
-      this.getImpactCheckboxes().forEach((cb) => (cb.checked = false))
+    d3.select("#clearEconomicImpacts").on("click", () => {
+      this.geteconomicImpactCheckboxes().forEach((cb) => (cb.checked = false))
       this.getSelectedImpactsText()
       this.applyFilters()
     })
@@ -54,7 +56,7 @@ class Filters {
     this.startYearBounds = { min: Math.min(...years), max: Math.max(...years) }
     this.yearRange = { min: Math.min(...years), max: Math.max(...years) }
 
-    this.yearRangeSlider = rangeSlider(d3.select("#rangeSlider").node(), {
+    this.yearRangeSlider = rangeSlider(d3.select("#yearRangeSlider").node(), {
       min: this.startYearBounds.min,
       max: this.startYearBounds.max,
       value: [this.yearRange.min, this.yearRange.max],
@@ -69,14 +71,16 @@ class Filters {
   }
 
   update() {
-    d3.select("#startYearLabel").text(`${this.startYearBounds.min}–${this.startYearBounds.max}`)
+    d3.select("#startYearLabel").text(
+      `${this.startYearBounds.min}–${this.startYearBounds.max}`
+    )
 
     this.updateStartYearUI()
 
-    this.buildImpactCheckboxes()
+    this.buildeconomicImpactCheckboxes()
   }
 
-  buildImpactCheckboxes() {
+  buildeconomicImpactCheckboxes() {
     for (const label of ATOMIC_IMPACTS) {
       const id = `imp_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
 
@@ -99,7 +103,7 @@ class Filters {
 
       item.appendChild(checkbox)
       item.appendChild(text)
-      impactCheckboxes.appendChild(item)
+      economicImpactCheckboxes.appendChild(item)
     }
 
     this.applyFilters()
@@ -107,7 +111,11 @@ class Filters {
 
   applyFilters() {
     const selectedImpacts = this.getSelectedImpacts()
-    const searchQuery = d3.select("#searchInput").property("value").trim().toLowerCase()
+    const searchQuery = d3
+      .select("#searchInput")
+      .property("value")
+      .trim()
+      .toLowerCase()
 
     this.data = this.originalData.filter((r) => {
       if (r.start_year != null && r.end_year != null) {
@@ -153,29 +161,33 @@ class Filters {
 
   renderKPIs() {
     d3.select("#rowCount").text(this.data.length)
-    d3.select("#cityCount").text(new Set(
-      this.data.map((d) => d.city)
-    ).size)
-    d3.select("#countryCount").text(new Set(
-      this.data.map((d) => d.country)
-    ).size)
-    d3.select("#tableMeta").text(`Showing ${Math.min(this.data.length, 250)} of ${
-      this.data.length
-    }`)
+    d3.select("#cityCount").text(new Set(this.data.map((d) => d.city)).size)
+    d3.select("#countryCount").text(
+      new Set(this.data.map((d) => d.country)).size
+    )
+    d3.select("#tableMeta").text(
+      `Showing ${Math.min(this.data.length, 250)} of ${this.data.length}`
+    )
   }
 
-  getImpactCheckboxes() {
-    return [...this.impactCheckboxes.querySelectorAll('input[type="checkbox"]')]
+  geteconomicImpactCheckboxes() {
+    return [
+      ...this.economicImpactCheckboxes.querySelectorAll(
+        'input[type="checkbox"]'
+      ),
+    ]
   }
 
   getSelectedImpacts() {
-    return this.getImpactCheckboxes()
+    return this.geteconomicImpactCheckboxes()
       .filter((cb) => cb.checked)
       .map((cb) => cb.value)
   }
 
   getSelectedImpactsText() {
-    d3.select("#impactMeta").text(`${this.getSelectedImpacts().length} selected`)
+    d3.select("#economicImpactMeta").text(
+      `${this.getSelectedImpacts().length} selected`
+    )
   }
 
   updateStartYearUI() {
