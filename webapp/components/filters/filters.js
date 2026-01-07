@@ -14,73 +14,73 @@ const ATOMIC_IMPACTS = [
 
 class Filters {
   constructor(data) {
-    this.originalData = data
-
-    this.economicImpactCheckboxes = d3
-      .select("#economicImpactCheckboxes")
-      .node()
-
     this.startYearBounds = null
-    this.yearRange = null
+    this.yearRangeSlider = null
+
+    this.init(data)
+  }
+
+  init(data) {
+    d3.select("#clearEconomicImpacts").on("click", () => {
+      this.getEconomicImpactCheckboxes().forEach((cb) => (cb.checked = false))
+      window.selectedEconomicImpacts = []
+      this.setEconomicImpactsText()
+    })
 
     d3.select("#resetYearBtn").on("click", () => {
-      this.yearRange = this.startYearBounds
-      this.yearyearRangeSlider.value([
+      window.yearRange = {
+        min: this.startYearBounds.min,
+        max: this.startYearBounds.max,
+      }
+      this.yearRangeSlider.value([
         this.startYearBounds.min,
         this.startYearBounds.max,
       ])
       this.updateStartYearUI()
     })
 
-    this.components = [new Results(), new MapFilteredCities()]
+    d3.select("#searchInput").on(
+      "input",
+      (e) => (window.searchQuery = e.target.value)
+    )
 
-    this.init()
+    this.wrangleData(this.transformData(data))
   }
 
-  init() {
-    d3.select("#clearEconomicImpacts").on("click", () => {
-      this.geteconomicImpactCheckboxes().forEach((cb) => (cb.checked = false))
-      this.getSelectedImpactsText()
-      this.applyFilters()
-    })
-
-    d3.select("#searchInput").on("input", () => this.applyFilters())
-
-    this.wrangleData()
-  }
-
-  wrangleData() {
-    const years = this.originalData
-      .map((r) => r.start_year)
-      .filter(Number.isFinite)
-    this.startYearBounds = { min: Math.min(...years), max: Math.max(...years) }
-    this.yearRange = { min: Math.min(...years), max: Math.max(...years) }
+  wrangleData(data) {
+    this.startYearBounds = data.yearRange
+    window._yearRange = data.yearRange
 
     this.yearRangeSlider = rangeSlider(d3.select("#yearRangeSlider").node(), {
       min: this.startYearBounds.min,
       max: this.startYearBounds.max,
-      value: [this.yearRange.min, this.yearRange.max],
+      value: [window.yearRange.min, window.yearRange.max],
       onInput: (values) => {
-        this.yearRange = { min: values[0], max: values[1] }
+        window.yearRange = { min: values[0], max: values[1] }
         this.updateStartYearUI()
-        this.applyFilters()
       },
     })
 
-    this.update()
+    window._searchQuery = ""
+
+    window._selectedEconomicImpacts = []
+
+    this.render(data)
   }
 
-  update() {
+  render(data) {
     d3.select("#startYearLabel").text(
-      `${this.startYearBounds.min}–${this.startYearBounds.max}`
+      `${data.yearRange.min}–${data.yearRange.max}`
     )
 
     this.updateStartYearUI()
 
-    this.buildeconomicImpactCheckboxes()
+    this.buildEconomicImpactCheckboxes()
+
+    this.renderKPI(data)
   }
 
-  buildeconomicImpactCheckboxes() {
+  buildEconomicImpactCheckboxes() {
     for (const label of ATOMIC_IMPACTS) {
       const id = `imp_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
 
@@ -94,8 +94,8 @@ class Filters {
       checkbox.id = id
 
       checkbox.addEventListener("change", () => {
-        this.getSelectedImpactsText()
-        this.applyFilters()
+        window.selectedEconomicImpacts = this.getSelectedEconomicImpacts()
+        this.setEconomicImpactsText()
       })
 
       const text = document.createElement("span")
@@ -105,93 +105,55 @@ class Filters {
       item.appendChild(text)
       economicImpactCheckboxes.appendChild(item)
     }
-
-    this.applyFilters()
   }
 
-  applyFilters() {
-    const selectedImpacts = this.getSelectedImpacts()
-    const searchQuery = d3
-      .select("#searchInput")
-      .property("value")
-      .trim()
-      .toLowerCase()
-
-    this.data = this.originalData.filter((r) => {
-      if (r.start_year != null && r.end_year != null) {
-        if (
-          r.start_year < this.yearRange.min ||
-          r.end_year > this.yearRange.max
-        )
-          return false
-      } else if (r.start_year != null && r.end_year == null) {
-        if (
-          r.start_year < this.yearRange.min ||
-          r.start_year > this.yearRange.max
-        )
-          return false
-      } else if (r.start_year == null && r.end_year != null) {
-        if (r.end_year < this.yearRange.min || r.end_year > this.yearRange.max)
-          return false
-      }
-
-      if (selectedImpacts.length > 0) {
-        const passImpacts = selectedImpacts.every((impact) =>
-          r.__economicImpacts.includes(impact)
-        )
-        if (!passImpacts) return false
-      }
-
-      if (!searchQuery) return true
-      const hay = [
-        r.name_of_the_nbs_intervention_short_english_title,
-        r.native_title_of_the_nbs_intervention,
-        r.city,
-        r.country,
-        r.economic_impacts,
-      ]
-        .map((x) => x?.toLowerCase())
-        .join(",")
-      return hay.includes(searchQuery)
-    })
-
-    this.components.forEach((component) => component.init(this.data))
-    this.renderKPIs()
-  }
-
-  renderKPIs() {
-    d3.select("#rowCount").text(this.data.length)
-    d3.select("#cityCount").text(new Set(this.data.map((d) => d.city)).size)
-    d3.select("#countryCount").text(
-      new Set(this.data.map((d) => d.country)).size
-    )
+  renderKPI(data) {
+    d3.select("#rowCount").text(data.rows)
+    d3.select("#cityCount").text(data.cities)
+    d3.select("#countryCount").text(data.countries)
     d3.select("#tableMeta").text(
-      `Showing ${Math.min(this.data.length, 250)} of ${this.data.length}`
+      `Showing ${Math.min(data.rows, 250)} of ${data.rows}`
     )
   }
 
-  geteconomicImpactCheckboxes() {
+  update(data) {
+    this.renderKPI(data)
+  }
+
+  getEconomicImpactCheckboxes() {
     return [
-      ...this.economicImpactCheckboxes.querySelectorAll(
-        'input[type="checkbox"]'
-      ),
+      ...d3
+        .select("#economicImpactCheckboxes")
+        .node()
+        .querySelectorAll('input[type="checkbox"]'),
     ]
   }
 
-  getSelectedImpacts() {
-    return this.geteconomicImpactCheckboxes()
+  getSelectedEconomicImpacts() {
+    return this.getEconomicImpactCheckboxes()
       .filter((cb) => cb.checked)
       .map((cb) => cb.value)
   }
 
-  getSelectedImpactsText() {
+  setEconomicImpactsText() {
     d3.select("#economicImpactMeta").text(
-      `${this.getSelectedImpacts().length} selected`
+      `${window.selectedEconomicImpacts.length} selected`
     )
   }
 
   updateStartYearUI() {
-    d3.select("#startYearMinVal").text(this.yearRange.min)
-    d3.select("#startYearMaxVal").text(this.yearRange.max)
+    d3.select("#startYearMinVal").text(window.yearRange.min)
+    d3.select("#startYearMaxVal").text(window.yearRange.max)
+  }
+
+  transformData(data) {
+    const years = data.map((r) => r.start_year).filter(Number.isFinite)
+    const wrangledData = {
+      yearRange: { min: d3.min(years), max: d3.max(years) },
+      rows: data.length,
+      cities: new Set(data.map((d) => d.city)).size,
+      countries: new Set(data.map((d) => d.country)).size,
+    }
+    return wrangledData
   }
 }
