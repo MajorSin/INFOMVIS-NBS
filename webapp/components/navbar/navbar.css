@@ -1,0 +1,31 @@
+#navbar {
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px 14px;
+}
+
+#topnav {
+  margin: 0 auto;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#topnav a {
+  padding: 10px 12px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+#topnav a.brand {
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+#topnav a:hover,
+#topnav a:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border);
+  outline: none;
+}

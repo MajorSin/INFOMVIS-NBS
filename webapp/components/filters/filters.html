@@ -1,0 +1,67 @@
+<section id="filters" class="card">
+  <h2>Filters</h2>
+
+  <div class="filterControls">
+    <div class="filterControl">
+      <div id="economicImpactHeader">
+        <span>Economic impacts</span>
+        <span id="economicImpactMeta"></span>
+      </div>
+
+      <div id="economicImpactCheckboxes"></div>
+
+      <button id="clearEconomicImpacts" type="button">Clear</button>
+
+      <small class="helpText">
+        Tick impacts to filter (AND across selected impacts). If none are
+        ticked, all options are shown.
+      </small>
+    </div>
+
+    <div>
+      <div id="yearRangeHeader">
+        <span>Start year range</span>
+        <span class="yearRangeMeta" id="startYearLabel">—</span>
+      </div>
+
+      <div id="yearRangeBox">
+        <label class="yearRangeRow">
+          <span class="yearRangeVal" id="startYearMinVal">—</span>
+          <div id="yearRangeSlider"></div>
+          <span class="yearRangeVal" id="startYearMaxVal">—</span>
+        </label>
+
+        <button id="resetYearBtn" type="button">Reset years</button>
+      </div>
+
+      <small class="helpText">
+        Bounds come from dataset min/max <code>start_year</code>.
+      </small>
+    </div>
+
+    <label>
+      <span>Search title/city/country</span>
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="e.g. Rotterdam"
+        autocomplete="off"
+      />
+    </label>
+  </div>
+
+  <div id="kpis">
+    <div class="kpi">
+      <div class="kpiLabel">Rows</div>
+      <div id="rowCount" class="kpiValue">0</div>
+    </div>
+    <div class="kpi">
+      <div class="kpiLabel">Unique cities</div>
+      <div id="cityCount" class="kpiValue">0</div>
+    </div>
+    <div class="kpi">
+      <div class="kpiLabel">Unique countries</div>
+      <div id="countryCount" class="kpiValue">0</div>
+    </div>
+  </div>
+</section>

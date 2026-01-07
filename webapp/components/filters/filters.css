@@ -1,0 +1,113 @@
+.filterControls {
+  display: grid;
+  gap: 12px;
+}
+
+.filterControls button,
+.filterControls input {
+  margin-top: 8px;
+}
+
+#economicImpactCheckboxes {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+#economicImpactHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+#economicImpactMeta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#economicImpactCheckboxes {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  max-height: 260px;
+  overflow: auto;
+}
+
+.impactItem {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.impactItem input[type="checkbox"] {
+  margin-top: 2px;
+  width: auto;
+}
+
+.impactItem span {
+  line-height: 1.2rem;
+}
+
+#yearRangeHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.yearRangeMeta {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#yearRangeBox {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 10px;
+  display: grid;
+  gap: 10px;
+}
+
+.yearRangeRow {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  gap: 10px;
+  align-items: center;
+}
+
+.yearRangeVal {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  text-align: center;
+}
+
+#kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.kpi {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.kpiLabel {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.kpiValue {
+  margin-top: 4px;
+  font-size: 18px;
+  font-weight: 800;
+}
