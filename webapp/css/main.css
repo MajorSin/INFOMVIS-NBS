@@ -20,17 +20,6 @@ body {
   font-size: 13px;
 }
 
-.header {
-  border-bottom: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.headerInner {
-  padding: 18px 16px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 .header h1 {
   margin: 0;
   font-size: 20px;
@@ -45,12 +34,18 @@ h2 {
 }
 
 .grid {
-  max-width: 1200px;
+  max-width: 1800px;
   margin: 0 auto;
   padding: 14px;
   display: grid;
   gap: 14px;
   grid-template-columns: 360px 1fr;
+}
+
+.grid-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 @media (max-width: 980px) {
