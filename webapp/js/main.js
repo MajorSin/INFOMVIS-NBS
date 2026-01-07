@@ -5,7 +5,7 @@ class ExplorationMode {
     this.filteredData = []
     this.worldmapData = null
 
-    this.components = []
+    this.components = null
 
     Object.defineProperty(window, "selectedEconomicImpacts", {
       get: () => _selectedEconomicImpacts,
@@ -70,27 +70,34 @@ class ExplorationMode {
       )
 
     this.filteredData = this.data
+    this.filteredDataForMap = this.data
   }
 
   render() {
-    this.components = [
-      new Filters(this.filteredData),
-      new Results(this.filteredData),
-      new MapFilteredCities({
+    this.components = {
+      filters: new Filters(this.filteredData),
+      results: new Results(this.filteredData),
+      mapFilteredCities: new MapFilteredCities({
         rows: this.filteredData,
         geo: this.worldmapData,
       }),
-    ]
+    }
   }
 
   update() {
-    this.components.map((component) =>
-      component.update(component.transformData(this.filteredData))
+    this.components.filters.update(
+      this.components.filters.transformData(this.filteredData)
+    )
+    this.components.results.update(
+      this.components.results.transformData(this.filteredData)
+    )
+    this.components.mapFilteredCities.update(
+      this.components.mapFilteredCities.transformData(this.filteredDataForMap)
     )
   }
 
   filterData() {
-    this.filteredData = this.data.filter((r) => {
+    let tempFiltered = this.data.filter((r) => {
       if (r.start_year != null && r.end_year != null) {
         if (
           r.start_year < window.yearRange.min ||
@@ -118,9 +125,6 @@ class ExplorationMode {
         if (!passImpacts) return false
       }
 
-      if (window.selectedCities.length > 0)
-        if (!window.selectedCities.some((c) => r.city == c)) return false
-
       const searchFields = [
         r.name_of_the_nbs_intervention_short_english_title,
         r.native_title_of_the_nbs_intervention,
@@ -132,6 +136,15 @@ class ExplorationMode {
         .join(",")
       return searchFields.includes(window.searchQuery)
     })
+
+    this.filteredDataForMap = tempFiltered
+
+    this.filteredData =
+      window.selectedCities.length > 0
+        ? tempFiltered.filter((r) =>
+            window.selectedCities.some((c) => r.city == c)
+          )
+        : tempFiltered
   }
 }
 

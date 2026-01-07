@@ -28,6 +28,8 @@ class MapFilteredCities {
 
     this.mapSvg.call(this.zoom)
 
+    this.fullRows = data.rows
+
     this.init(data)
   }
 
@@ -61,33 +63,35 @@ class MapFilteredCities {
         (enter) =>
           enter
             .append("circle")
-            .attr("class", "mapPoint")
+            .attr(
+              "class",
+              (d) =>
+                `mapPoint${
+                  window.selectedCities.some((s) => s == d.city)
+                    ? " selected"
+                    : ""
+                }`
+            )
             .attr("cx", (d) => d.coordinates.x)
             .attr("cy", (d) => d.coordinates.y)
-            .attr("stroke", "rgba(255,255,255,0.7)")
-            .attr("stroke-width", 0.7)
-            .attr("fill", "rgba(231,238,252,0.65)")
             .on("click", (event, d) => {
-              if (window.selectedCities.some((s) => s == d.city)) {
-                window.selectedCities = window.selectedCities.filter(
-                  (s) => s != d.city
-                )
-                d3.select(event.target)
-                  .transition()
-                  .duration(200)
-                  .attr("stroke-width", "0.7")
-                  .attr("fill", "rgba(231,238,252,0.65)")
-                return
-              }
-              window.selectedCities = window.selectedCities = [
-                ...window.selectedCities,
-                d.city,
-              ]
+              window.selectedCities = window.selectedCities.some(
+                (s) => s == d.city
+              )
+                ? window.selectedCities.filter((s) => s != d.city)
+                : [...window.selectedCities, d.city]
               d3.select(event.target)
                 .transition()
                 .duration(200)
-                .attr("stroke-width", "0px")
-                .attr("fill", "rgba(231,238,252,0.95)")
+                .attr(
+                  "class",
+                  (d) =>
+                    `mapPoint${
+                      window.selectedCities.some((s) => s == d.city)
+                        ? " selected"
+                        : ""
+                    }`
+                )
             })
             .on("mouseover", (event, d) =>
               this.tooltip
@@ -116,10 +120,14 @@ class MapFilteredCities {
           update
             .transition()
             .duration(200)
-            .attr("r", (d) => this.rScale(d.count))
-            .attr("fill", "rgba(231,238,252,0.65)"),
+            .attr("r", (d) => this.rScale(d.count)),
         (exit) => exit.remove()
       )
+
+    // Style based on selection
+    // this.pointsG.selectAll("circle")
+    //   .attr("fill", d => window.selectedCities.includes(d.city) ? "rgba(231,238,252,0.95)" : "rgba(231,238,252,0.65)")
+    //   .attr("stroke-width", d => window.selectedCities.includes(d.city) ? "0px" : "0.7")
   }
 
   transformData(data) {
