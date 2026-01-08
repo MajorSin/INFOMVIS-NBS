@@ -26,46 +26,33 @@
   font-size: 12px;
 }
 
-#cityResults {
-  margin-top: 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.02);
-  overflow: hidden;
+#mapTooltip {
+  display: "none";
+  position: absolute;
+  opacity: 0.9;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 5px;
+  border-radius: 3px;
+  pointer-events: "none";
+  font-size: 12px;
+  display: none;
 }
 
-#cityResultsHeader {
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
+.mapPoint {
+  cursor: pointer;
 }
 
-#cityResultsTitle {
-  font-weight: 800;
+#mapVis:active {
+  cursor: grabbing;
 }
 
-#cityResultsBody {
-  padding: 10px;
-  color: var(--muted);
-  max-height: 220px;
-  overflow: auto;
+.mapPoint {
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 0.7;
+  fill: rgba(231, 238, 252, 0.65);
 }
 
-#cityResultsBody ul {
-  margin: 8px 0 0 18px;
-  padding: 0;
-}
-
-#cityResultsBody li {
-  margin: 6px 0;
-}
-
-#cityResultsBody a {
-  color: var(--text);
-}
-
-#clearCityBtn {
-  width: auto;
+.mapPoint.selected {
+  stroke-width: 0px;
+  fill: rgba(231, 238, 252, 0.95);
 }

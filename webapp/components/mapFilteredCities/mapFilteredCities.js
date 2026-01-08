@@ -1,203 +1,152 @@
-const cityKey = (city, country) => `${city}-${country}`
-
 class MapFilteredCities {
-  constructor() {
-    this.mapMeta = document.getElementById("mapMeta")
-
-    this.selectedCity = null
-
-    this.cityResultsTitle = document.getElementById("cityResultsTitle")
-    this.cityResultsBody = document.getElementById("cityResultsBody")
-    this.clearCityBtn = document.getElementById("clearCityBtn")
-    clearCityBtn.onclick = () => {
-      this.selectedCity = null
-    }
-
-    this.zoom = d3
-      .zoom()
-      .scaleExtent([1, 8])
-      .extent([
-        [0, 0],
-        [this.w, this.h],
-      ])
-      .on("zoom", (event) => {
-        console.log(event.transform)
-        this.mapG.attr("transform", event.transform)
-      })
+  constructor(data) {
+    window._selectedCities = []
 
     this.mapSvg = d3.select("#mapVis")
-    this.w = +this.mapSvg.attr("width")
-    this.h = +this.mapSvg.attr("height")
     this.mapG = this.mapSvg.append("g")
-    this.countriesG = this.mapG.append("g").attr("class", "countries")
-    this.pointsG = this.mapG.append("g").attr("class", "points")
+    this.countriesG = this.mapG.append("g").attr("id", "countries")
+    this.pointsG = this.mapG.append("g").attr("id", "points")
+    this.tooltip = d3.select("#mapTooltip")
+
+    this.w = this.mapSvg.attr("width")
+    this.h = this.mapSvg.attr("height")
 
     this.zoom = d3
       .zoom()
-      .scaleExtent([1, 8])
-      .extent([
-        [0, 0],
-        [this.w, this.h],
-      ])
-      .on("zoom", (event) => {
-        this.mapG.attr("transform", event.transform)
-      })
-
-    this.mapSvg
-      .append("rect")
-      .attr("class", "zoom-capture")
-      .attr("width", this.w)
-      .attr("height", this.h)
-      .attr("fill", "transparent")
-      .lower()
-
-    this.mapSvg.call(this.zoom)
-
-    this.projection = d3
-      .geoMercator()
-      .translate([this.w / 2, this.h / 1.55])
-      .scale(this.w / (2 * Math.PI))
+      .scaleExtent([0.5, 8])
+      .on("zoom", (event) => this.mapG.attr("transform", event.transform))
+    this.projection = d3.geoMercator()
     this.geoPath = d3.geoPath().projection(this.projection)
 
-    this.statusBox = document.getElementById("statusBox")
-  }
-
-  async init(data) {
-    this.mapSvg
-      .append("rect")
-      .attr("class", "zoom-capture")
-      .attr("width", this.w)
-      .attr("height", this.h)
-      .attr("fill", "transparent")
     this.mapSvg.call(this.zoom)
 
-    await this.loadWorldMap(data)
+    this.fullRows = data.rows
+
+    this.init(data)
   }
 
-  async wrangleData(data) {
-    this.data = data
-    await loadWorldMap()
-  }
-
-  async loadWorldMap() {
-    const topo = await fetch(
-      "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
-    ).then((r) => r.json())
-    const geo = topojson.feature(topo, topo.objects.countries)
-
+  init(data) {
     this.countriesG
       .selectAll("path")
-      .data(geo.features)
+      .data(data.geo.features)
       .join("path")
       .attr("d", this.geoPath)
       .attr("fill", "rgba(255,255,255,0.03)")
       .attr("stroke", "rgba(255,255,255,0.10)")
       .attr("stroke-width", 0.7)
 
-    // this.drawCityCircles(data)
+    this.mapG.attr(
+      "transform",
+      `translate(${
+        (this.mapSvg.node().getBoundingClientRect().width -
+          this.countriesG.node().getBoundingClientRect().width) /
+        2
+      }, ${100})`
+    )
+
+    this.wrangleData(data)
   }
 
-  // drawCityCircles(data) {
-  //   const rMax = d3.max(data, (d) => d.count) ?? 1
-  //   const rScale = d3.scaleSqrt().domain([1, rMax]).range([2.5, 12])
+  wrangleData(data) {
+    const newData = this.transformData(data.rows)
 
-  //   this.pointsG
-  //     .selectAll("circle")
-  //     .data(data, (d) => d.key)
-  //     .join(
-  //       (enter) =>
-  //         enter
-  //           .append("circle")
-  //           .attr("cx", (d) => this.projection([d.coords.lon, d.coords.lat])[0])
-  //           .attr("cy", (d) => this.projection([d.coords.lon, d.coords.lat])[1])
-  //           .attr("r", 0)
-  //           .attr("fill", (d) =>
-  //             this.selectedCity && this.selectedCity.key === d.key
-  //               ? "rgba(231,238,252,0.95)"
-  //               : "rgba(231,238,252,0.65)"
-  //           )
-  //           .attr("stroke", "rgba(255,255,255,0.7)")
-  //           .attr("stroke-width", 0.7)
-  //           .on("click", (event, d) => {
-  //             event.stopPropagation()
-  //             this.selectedCity = {
-  //               key: d.key,
-  //               city: d.city,
-  //               country: d.country,
-  //             }
-  //             rendercityResults()
-  //           })
-  //           .call((sel) =>
-  //             sel
-  //               .transition()
-  //               .duration(200)
-  //               .attr("r", (d) => rScale(d.count))
-  //           ),
-  //       (update) =>
-  //         update
-  //           .transition()
-  //           .duration(200)
-  //           .attr("cx", (d) => this.projection([d.coords.lon, d.coords.lat])[0])
-  //           .attr("cy", (d) => this.projection([d.coords.lon, d.coords.lat])[1])
-  //           .attr("r", (d) => rScale(d.count))
-  //           .attr("fill", (d) =>
-  //             this.selectedCity && this.selectedCity.key === d.key
-  //               ? "rgba(231,238,252,0.95)"
-  //               : "rgba(231,238,252,0.65)"
-  //           ),
-  //       (exit) => exit.remove()
-  //     )
+    const rMax = d3.max(newData, (d) => d.count)
+    this.rScale = d3.scaleSqrt().domain([1, rMax]).range([2.5, 12])
 
-  //   this.rendercityResults()
-  // }
+    this.update(newData)
+  }
 
-  // rendercityResults() {
-  //   if (!this.selectedCity) {
-  //     cityResultsTitle.textContent = "City results"
-  //     cityResultsBody.textContent =
-  //       "Select a city on the map to list the interventions."
-  //     return
-  //   }
+  update(data) {
+    this.pointsG
+      .selectAll("circle")
+      .data(data, (d) => d.city)
+      .join(
+        (enter) =>
+          enter
+            .append("circle")
+            .attr(
+              "class",
+              (d) =>
+                `mapPoint${
+                  window.selectedCities.some((s) => s == d.city)
+                    ? " selected"
+                    : ""
+                }`
+            )
+            .attr("cx", (d) => d.coordinates.x)
+            .attr("cy", (d) => d.coordinates.y)
+            .on("click", (event, d) => {
+              window.selectedCities = window.selectedCities.some(
+                (s) => s == d.city
+              )
+                ? window.selectedCities.filter((s) => s != d.city)
+                : [...window.selectedCities, d.city]
+              d3.select(event.target).attr(
+                "class",
+                (d) =>
+                  `mapPoint${
+                    window.selectedCities.some((s) => s == d.city)
+                      ? " selected"
+                      : ""
+                  }`
+              )
+            })
+            .on("mouseover", (event, d) =>
+              this.tooltip
+                .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
+                .style("left", event.pageX + 10 + "px")
+                .style("top", event.pageY - 10 + "px")
+                .transition()
+                .duration(200)
+                .style("display", "block")
+            )
+            .on("mousemove", (event) =>
+              this.tooltip
+                .style("left", event.pageX + 10 + "px")
+                .style("top", event.pageY - 10 + "px")
+            )
+            .on("mouseout", () =>
+              this.tooltip.transition().duration(200).style("display", "none")
+            )
+            .call((sel) =>
+              sel
+                .transition()
+                .duration(200)
+                .attr("r", (d) => this.rScale(d.count))
+            ),
+        (update) =>
+          update
+            .transition()
+            .duration(200)
+            .attr("r", (d) => this.rScale(d.count)),
+        (exit) => exit.remove()
+      )
+  }
 
-  //   const rows = data.filter(
-  //     (r) => cityKey(r.city, r.country) === selectedCity.key
-  //   )
+  transformData(data) {
+    return Array.from(
+      d3.rollup(
+        data,
+        (leaves) => leaves,
+        (d) => d.coordinates
+      )
+    )
+      .filter((d) => d[0] != null)
+      .map((d) => ({
+        coordinates: this.parseCoordinate(d[0]),
+        count: d[1].length,
+        city: d[1][0].city,
+        country: d[1][0].country,
+      }))
+  }
 
-  //   cityResultsTitle.textContent = `${selectedCity.city}${
-  //     selectedCity.country ? ", " + selectedCity.country : ""
-  //   } (${rows.length})`
+  parseCoordinate(pointRaw) {
+    const point = pointRaw.substring(1, pointRaw.length - 1).split(",")
+    const projection = this.projection([point[1], point[0]])
 
-  //   if (rows.length === 0) {
-  //     cityResultsBody.textContent =
-  //       "No results for this city under the current filters."
-  //     return
-  //   }
-
-  //   const ul = document.createElement("ul")
-
-  //   for (const r of rows) {
-  //     const li = document.createElement("li")
-  //     const title =
-  //       r.name_of_the_nbs_intervention_short_english_title ??
-  //       r.native_title_of_the_nbs_intervention ??
-  //       "Untitled"
-
-  //     const url = (r.link ?? "").toString().trim()
-  //     if (url) {
-  //       const a = document.createElement("a")
-  //       a.href = url
-  //       a.target = "_blank"
-  //       a.rel = "noopener noreferrer"
-  //       a.textContent = title
-  //       li.appendChild(a)
-  //     } else {
-  //       li.textContent = title
-  //     }
-
-  //     ul.appendChild(li)
-  //   }
-
-  //   cityResultsBody.innerHTML = ""
-  //   cityResultsBody.appendChild(ul)
-  // }
+    return {
+      x: projection[0],
+      y: projection[1],
+    }
+  }
 }
