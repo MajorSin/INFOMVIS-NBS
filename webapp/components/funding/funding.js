@@ -95,7 +95,11 @@ class Funding {
         (enter) =>
           enter
             .append("rect")
-            .attr("class", "funding-source-bar")
+            .attr("class", (d) =>
+              window.selectedFundingSource.includes(d.source)
+                ? "funding-source-bar active"
+                : "funding-source-bar"
+            )
             .attr("id", (d) => d.source)
             .attr("x", 0)
             .attr("y", (d) => this.yScale(d.source))
@@ -119,27 +123,7 @@ class Funding {
                 .style("top", event.pageY - 10 + "px")
             )
             .on("mouseout", () => this.tooltip.style("display", "none"))
-            .on("click", (event, d) => {
-              if (window.selectedFundingSource.includes(d.source)) {
-                d3.select(event.target).attr("class", "funding-source-bar")
-                window.selectedFundingSource =
-                  window.selectedFundingSource.filter(
-                    (source) => source != d.source
-                  )
-              } else {
-                d3.select(event.target).attr(
-                  "class",
-                  "funding-source-bar active"
-                )
-                window.selectedFundingSource = [
-                  ...window.selectedFundingSource,
-                  d.source,
-                ]
-              }
-              d3.select("#fundingsMeta").text(
-                `${window.selectedFundingSource.length} selected`
-              )
-            }),
+            .on("click", (_, d) => clickFundingOption(d.source)),
         (update) => {
           d3.select("#funding-xAxis-label").text(
             this.currentOption == "totalProjects"
@@ -149,6 +133,11 @@ class Funding {
           return update
             .transition()
             .duration(200)
+            .attr("class", (d) =>
+              window.selectedFundingSource.includes(d.source)
+                ? "funding-source-bar active"
+                : "funding-source-bar"
+            )
             .attr("y", (d) => this.yScale(d.source))
             .attr("height", this.yScale.bandwidth())
             .attr("width", (d) => this.xScale(d[row]))
@@ -193,6 +182,10 @@ class Funding {
             .call((text) => labelPosition(row, text)),
         (exit) => exit.remove()
       )
+
+    this.svg
+      .selectAll(".fundAxis .tick")
+      .on("click", (_, d) => clickFundingOption(d))
   }
 
   transformData(data) {
@@ -227,6 +220,15 @@ class Funding {
           : b.averageArea - a.averageArea
       )
   }
+}
+
+function clickFundingOption(option) {
+  window.selectedFundingSource = window.selectedFundingSource.includes(option)
+    ? window.selectedFundingSource.filter((source) => source != option)
+    : [...window.selectedFundingSource, option]
+  d3.select("#fundingsMeta").text(
+    `${window.selectedFundingSource.length} selected`
+  )
 }
 
 const findLabelPosition = (scale) => (row, text) => {
