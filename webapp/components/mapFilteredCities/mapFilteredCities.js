@@ -15,7 +15,10 @@ class MapFilteredCities {
       .zoom()
       .scaleExtent([0.5, 8])
       .on("zoom", (event) => this.mapG.attr("transform", event.transform))
-    this.projection = d3.geoMercator()
+    this.projection = d3
+      .geoMercator()
+      .scale(this.w / 2.5 / Math.PI)
+      .translate([this.w / 2, this.h / 2])
     this.geoPath = d3.geoPath().projection(this.projection)
 
     this.mapSvg.call(this.zoom)
@@ -34,15 +37,6 @@ class MapFilteredCities {
       .attr("fill", "rgba(255,255,255,0.03)")
       .attr("stroke", "rgba(255,255,255,0.10)")
       .attr("stroke-width", 0.7)
-
-    this.mapG.attr(
-      "transform",
-      `translate(${
-        (this.mapSvg.node().getBoundingClientRect().width -
-          this.countriesG.node().getBoundingClientRect().width) /
-        2
-      }, ${100})`
-    )
 
     this.wrangleData(data)
   }
