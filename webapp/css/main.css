@@ -24,7 +24,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+}
+
+.card-meta {
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .header h1 {
@@ -147,4 +151,32 @@ tbody tr:hover td {
   border-radius: 4px;
   font-size: 12px;
   color: var(--text);
+}
+
+.toggle-group {
+  display: inline-flex;
+  border-radius: 10px;
+  font-weight: 500;
+  background-color: var(--soft);
+  border: 1px solid var(--border);
+  color: var(--txt);
+}
+
+.toggle-group input {
+  display: none;
+}
+
+.toggle-group label {
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-group label:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.toggle-group input:checked + label {
+  background-color: #1096a4;
 }

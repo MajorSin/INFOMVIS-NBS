@@ -29,18 +29,6 @@ text {
   fill: #1096a4;
 }
 
-.toggle-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.toggle-btn {
-  padding: 8px 25px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .labelInside {
   text-anchor: end;
   fill: black;

@@ -23,7 +23,7 @@ class Funding {
 
     this.tooltip = d3.select("#fundingTooltip")
 
-    this.fundingOptionsButtons = d3.selectAll(".fundingOption")
+    this.fundingOptionsInput = d3.selectAll(".toggle-group input")
 
     this.currentOption = "totalProjects"
 
@@ -122,18 +122,23 @@ class Funding {
             .on("click", (event, d) => {
               if (window.selectedFundingSource.includes(d.source)) {
                 d3.select(event.target).attr("class", "funding-source-bar")
-
                 window.selectedFundingSource =
                   window.selectedFundingSource.filter(
                     (source) => source != d.source
                   )
-                return
+              } else {
+                d3.select(event.target).attr(
+                  "class",
+                  "funding-source-bar active"
+                )
+                window.selectedFundingSource = [
+                  ...window.selectedFundingSource,
+                  d.source,
+                ]
               }
-              d3.select(event.target).attr("class", "funding-source-bar active")
-              window.selectedFundingSource = [
-                ...window.selectedFundingSource,
-                d.source,
-              ]
+              d3.select("#fundingsMeta").text(
+                `${window.selectedFundingSource.length} selected`
+              )
             }),
         (update) => {
           d3.select("#funding-xAxis-label").text(
@@ -226,7 +231,7 @@ class Funding {
 
 const findLabelPosition = (scale) => (row, text) => {
   return text
-    .filter((d) => scale(d[row]) - scale(0) < 200)
+    .filter((d) => scale(d[row]) - scale(0) < 100)
     .attr("dx", +4)
     .attr("class", "fundingRectLabels labelOutside")
 }
