@@ -32,3 +32,13 @@ text {
   font-weight: 600;
   white-space: nowrap;
 }
+
+.labelInside {
+  text-anchor: end;
+  fill: black;
+}
+
+.labelOutside {
+  text-anchor: start;
+  fill: white;
+}

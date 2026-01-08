@@ -17,6 +17,10 @@ class Funding {
 
     this.svg.attr("transform", `translate(${this.margin.left}, ${0})`)
 
+    this.rectGroup = this.svg.append("g").attr("id", "fundingBarRectangles")
+
+    this.labelsGroup = this.svg.append("g").attr("id", "fundingLabelsGroup")
+
     this.tooltip = d3.select("#fundingTooltip")
 
     this.fundingOptionsButtons = d3.selectAll(".fundingOption")
@@ -78,7 +82,7 @@ class Funding {
         .text("Projects")
     }
 
-    this.svg
+    this.rectGroup
       .selectAll(".funding-source-bar")
       .data(data, (d) => d.source)
       .join(
@@ -130,6 +134,41 @@ class Funding {
         },
         (exit) => exit.remove()
       )
+
+    const labelPosition = findLabelPosition(this.xScale)
+    this.labelsGroup
+      .selectAll(".fundingRectLabels")
+      .data(data, (d) => d.source)
+      .join(
+        (enter) =>
+          enter
+            .append("text")
+            .attr("class", "fundingRectLabels labelInside")
+            .attr("dy", "0.35em")
+            .attr("dx", -4)
+            .attr("x", (d) => this.xScale(d[row]))
+            .attr(
+              "y",
+              (d) => this.yScale(d.source) + this.yScale.bandwidth() / 2
+            )
+            .text((d) => d[row])
+            .call((text) => labelPosition(row, text)),
+        (update) =>
+          update
+            .transition()
+            .duration(200)
+            .attr("class", "fundingRectLabels labelInside")
+            .attr("dy", "0.35em")
+            .attr("dx", -4)
+            .attr("x", (d) => this.xScale(d[row]))
+            .attr(
+              "y",
+              (d) => this.yScale(d.source) + this.yScale.bandwidth() / 2
+            )
+            .text((d) => d[row])
+            .call((text) => labelPosition(row, text)),
+        (exit) => exit.remove()
+      )
   }
 
   transformData(data) {
@@ -161,4 +200,11 @@ class Funding {
           : b.averageArea - a.averageArea
       )
   }
+}
+
+const findLabelPosition = (scale) => (row, text) => {
+  return text
+    .filter((d) => scale(d[row]) - scale(0) < 200)
+    .attr("dx", +4)
+    .attr("class", "fundingRectLabels labelOutside")
 }
