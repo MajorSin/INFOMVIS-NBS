@@ -1,17 +1,3 @@
-// Todo: This has to be fetched from the csv file
-const ATOMIC_IMPACTS = [
-  "Attraction of business and investment",
-  "Generation of income from NBS",
-  "Increase in agricultural production (for profit or not)",
-  "Increase of green  jobs (e.g. paid employment positions)",
-  "Increased market share for green economies",
-  "Increased property prices",
-  "More sustainable tourism",
-  "Reduce financial cost for urban management",
-  "Stimulate development in deprived areas",
-  "Other",
-]
-
 class Filters {
   constructor(data) {
     this.startYearBounds = null
@@ -43,6 +29,10 @@ class Filters {
       "input",
       (e) => (window.searchQuery = e.target.value)
     )
+
+    this.economicImpactValues = [
+      ...new Set(data.map((r) => r.__economicImpacts).flat()),
+    ].sort((a, b) => a.localeCompare(b))
 
     this.wrangleData(this.transformData(data))
   }
@@ -81,7 +71,7 @@ class Filters {
   }
 
   buildEconomicImpactCheckboxes() {
-    for (const label of ATOMIC_IMPACTS) {
+    for (const label of this.economicImpactValues) {
       const id = `imp_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
 
       const item = document.createElement("label")
