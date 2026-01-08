@@ -17,8 +17,16 @@ text {
   font-weight: 500;
 }
 
-.bar:hover {
-  fill: #ff7f0e;
+.funding-source-bar {
+  fill: #17becf;
+}
+
+.funding-source-bar:hover {
+  fill: #2ed8e6;
+}
+
+.funding-source-bar.active {
+  fill: #1096a4;
 }
 
 .toggle-buttons {

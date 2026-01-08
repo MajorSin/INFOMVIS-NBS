@@ -42,6 +42,15 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "selectedFundingSource", {
+      get: () => _selectedFundingSource,
+      set: (value) => {
+        _selectedFundingSource = value
+        this.filterData()
+        this.update()
+      },
+    })
   }
 
   async init() {
@@ -146,6 +155,13 @@ class ExplorationMode {
           r.__economicImpacts.includes(impact)
         )
         if (!passImpacts) return false
+      }
+
+      if (window.selectedFundingSource.length > 0) {
+        const passFundingSource = window.selectedFundingSource.every((fund) =>
+          r.__sources_of_funding.includes(fund)
+        )
+        if (!passFundingSource) return false
       }
 
       const searchFields = [

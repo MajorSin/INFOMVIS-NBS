@@ -27,6 +27,12 @@ class Funding {
 
     this.currentOption = "totalProjects"
 
+    this.fundingOptions = [
+      ...new Set(data.map((row) => row.__sources_of_funding).flat()),
+    ]
+
+    window._selectedFundingSource = []
+
     this.init(data)
   }
 
@@ -95,11 +101,10 @@ class Funding {
             .attr("y", (d) => this.yScale(d.source))
             .attr("width", (d) => this.xScale(d[row]))
             .attr("height", this.yScale.bandwidth())
-            .attr("fill", (d) => "#17BECF")
             .style("display", (d) =>
               this.xScale(d[row]) == 0 ? "none" : "block"
             )
-            .on("mouseover", (event, d) => {
+            .on("mouseover", (event, d) =>
               this.tooltip
                 .style("display", "block")
                 .style("left", event.pageX + 10 + "px")
@@ -107,14 +112,28 @@ class Funding {
                 .html(
                   `Projects: ${d[row]}<br/>NBS average area: ${d.averageArea} m<sup>2</sup>`
                 )
-            })
-            .on("mousemove", (event) => {
+            )
+            .on("mousemove", (event) =>
               this.tooltip
                 .style("left", event.pageX + 10 + "px")
                 .style("top", event.pageY - 10 + "px")
-            })
-            .on("mouseout", () => {
-              this.tooltip.style("display", "none")
+            )
+            .on("mouseout", () => this.tooltip.style("display", "none"))
+            .on("click", (event, d) => {
+              if (window.selectedFundingSource.includes(d.source)) {
+                d3.select(event.target).attr("class", "funding-source-bar")
+
+                window.selectedFundingSource =
+                  window.selectedFundingSource.filter(
+                    (source) => source != d.source
+                  )
+                return
+              }
+              d3.select(event.target).attr("class", "funding-source-bar active")
+              window.selectedFundingSource = [
+                ...window.selectedFundingSource,
+                d.source,
+              ]
             }),
         (update) => {
           d3.select("#funding-xAxis-label").text(
@@ -172,12 +191,12 @@ class Funding {
   }
 
   transformData(data) {
-    const flattenData = data.map((row) => row.__sources_of_funding).flat()
-    return [...new Set(flattenData)]
+    return this.fundingOptions
       .map((key) => ({
         source: key,
-        count: flattenData.reduce(
-          (acc, curr) => (curr == key ? acc + 1 : acc),
+        count: data.reduce(
+          (acc, curr) =>
+            curr.__sources_of_funding.includes(key) ? acc + 1 : acc,
           0
         ),
         totalArea: data.reduce(
@@ -191,7 +210,10 @@ class Funding {
       .map((row) => ({
         ...row,
         averageArea:
-          Math.round((row.totalArea / row.count + Number.EPSILON) * 100) / 100,
+          row.totalArea > 0
+            ? Math.round((row.totalArea / row.count + Number.EPSILON) * 100) /
+              100
+            : 0,
       }))
       .sort((a, b) => a.source.localeCompare(b.source))
       .sort((a, b) =>
