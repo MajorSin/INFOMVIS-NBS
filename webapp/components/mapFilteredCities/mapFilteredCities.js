@@ -96,8 +96,6 @@ class MapFilteredCities {
                 .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
                 .style("left", event.pageX + 10 + "px")
                 .style("top", event.pageY - 10 + "px")
-                .transition()
-                .duration(200)
                 .style("display", "block")
             )
             .on("mousemove", (event) =>
@@ -105,9 +103,7 @@ class MapFilteredCities {
                 .style("left", event.pageX + 10 + "px")
                 .style("top", event.pageY - 10 + "px")
             )
-            .on("mouseout", () =>
-              this.tooltip.transition().duration(200).style("display", "none")
-            )
+            .on("mouseout", () => this.tooltip.style("display", "none"))
             .call((sel) =>
               sel
                 .transition()

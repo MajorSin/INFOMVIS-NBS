@@ -58,6 +58,12 @@ async function boot(jsFile) {
       styleSheet: "./components/results/results.css",
       jsFile: "./components/results/results.js",
     },
+    {
+      element: "#fundingMount",
+      url: "./components/funding/funding.html",
+      styleSheet: "./components/funding/funding.css",
+      jsFile: "./components/funding/funding.js",
+    },
   ])
 
   const script = document.createElement("script")
