@@ -141,7 +141,7 @@ class MapFilteredCities {
   }
 
   parseCoordinate(pointRaw) {
-    const point = pointRaw.split(",")
+    const point = pointRaw.substring(1, pointRaw.length - 1).split(",")
     const projection = this.projection([point[1], point[0]])
 
     return {
