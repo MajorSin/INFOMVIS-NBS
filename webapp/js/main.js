@@ -84,6 +84,24 @@ class ExplorationMode {
       }),
       funding: new Funding(this.filteredData),
     }
+
+    const fundingComponent = this.components.funding
+    fundingComponent.fundingOptionsButtons.on("click", (element) => {
+      const newSelected = d3.select(element.target)
+      if (!newSelected.attr("class").includes("active")) {
+        fundingComponent.fundingOptionsButtons
+          .filter(".active")
+          .classed("active", false)
+        newSelected.classed("active", true)
+        fundingComponent.currentOption = newSelected
+          .attr("id")
+          .replace("Btn", "")
+
+        fundingComponent.update(
+          fundingComponent.transformData(this.filteredData)
+        )
+      }
+    })
   }
 
   update() {

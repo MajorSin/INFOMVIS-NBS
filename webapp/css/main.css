@@ -20,6 +20,13 @@ body {
   font-size: 13px;
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
 .header h1 {
   margin: 0;
   font-size: 20px;
@@ -80,7 +87,8 @@ button {
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 10px;
+  padding: 8px 12px;
+  font-family: "Poppins";
 }
 
 input[type="range"] {
@@ -94,6 +102,15 @@ button {
 
 button:hover {
   background: rgba(255, 255, 255, 0.07);
+}
+
+button.active:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+button.active {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 table {

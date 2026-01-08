@@ -19,6 +19,10 @@ class Funding {
 
     this.tooltip = d3.select("#fundingTooltip")
 
+    this.fundingOptionsButtons = d3.selectAll(".fundingOption")
+
+    this.currentOption = "totalProjects"
+
     this.init(data)
   }
 
@@ -31,7 +35,7 @@ class Funding {
   }
 
   render(data) {
-    this.xScale = d3.scaleLinear().range([0, this.width])
+    this.xScale = d3.scaleSqrt().range([0, this.width])
     this.yScale = d3.scaleBand().range([0, this.height]).padding(0.3)
 
     this.xAxis = this.svg
@@ -44,10 +48,10 @@ class Funding {
   }
 
   update(data) {
-    this.xScale.domain([0, d3.max(data, (d) => d.count)])
-    this.yScale.domain(data.map((d) => d.source))
+    const row = this.currentOption == "totalProjects" ? "count" : "averageArea"
 
-    const spacedTicks = this.xScale.ticks(10).filter((d) => Number.isInteger(d))
+    this.xScale.domain([0, d3.max(data, (d) => d[row])])
+    this.yScale.domain(data.map((d) => d.source))
 
     this.xAxis
       .transition()
@@ -55,15 +59,18 @@ class Funding {
       .call(
         d3
           .axisBottom(this.xScale)
-          .tickValues(spacedTicks)
-          .tickFormat(d3.format("d"))
+          .tickValues(this.xScale.ticks().filter((d) => Number.isInteger(d)))
+          .tickFormat((d) =>
+            Math.abs(d) < 1000 ? d3.format("d")(d) : d3.format(".0s")(d)
+          )
+          .ticks(20)
       )
     this.yAxis.transition().duration(200).call(d3.axisLeft(this.yScale))
 
-    // Add x-axis label in bottom right corner, above tick line
     if (!this.xAxisLabel) {
       this.xAxisLabel = this.xAxis
         .append("text")
+        .attr("id", "funding-xAxis-label")
         .attr("class", "axis-label-corner")
         .attr("x", this.width - 5)
         .attr("y", -10)
@@ -82,18 +89,20 @@ class Funding {
             .attr("id", (d) => d.source)
             .attr("x", 0)
             .attr("y", (d) => this.yScale(d.source))
-            .attr("width", (d) => this.xScale(d.count))
+            .attr("width", (d) => this.xScale(d[row]))
             .attr("height", this.yScale.bandwidth())
             .attr("fill", (d) => "#17BECF")
             .style("display", (d) =>
-              this.xScale(d.count) == 0 ? "none" : "block"
+              this.xScale(d[row]) == 0 ? "none" : "block"
             )
             .on("mouseover", (event, d) => {
               this.tooltip
                 .style("display", "block")
                 .style("left", event.pageX + 10 + "px")
                 .style("top", event.pageY - 10 + "px")
-                .text(`Projects: ${d.count}`)
+                .html(
+                  `Projects: ${d[row]}<br/>NBS average area: ${d.averageArea} m<sup>2</sup>`
+                )
             })
             .on("mousemove", (event) => {
               this.tooltip
@@ -103,16 +112,22 @@ class Funding {
             .on("mouseout", () => {
               this.tooltip.style("display", "none")
             }),
-        (update) =>
-          update
+        (update) => {
+          d3.select("#funding-xAxis-label").text(
+            this.currentOption == "totalProjects"
+              ? "Projects"
+              : "Average square meters"
+          )
+          return update
             .transition()
             .duration(200)
             .attr("y", (d) => this.yScale(d.source))
             .attr("height", this.yScale.bandwidth())
-            .attr("width", (d) => this.xScale(d.count))
+            .attr("width", (d) => this.xScale(d[row]))
             .style("display", (d) =>
-              this.xScale(d.count) == 0 ? "none" : "block"
-            ),
+              this.xScale(d[row]) == 0 ? "none" : "block"
+            )
+        },
         (exit) => exit.remove()
       )
   }
@@ -126,7 +141,24 @@ class Funding {
           (acc, curr) => (curr == key ? acc + 1 : acc),
           0
         ),
+        totalArea: data.reduce(
+          (acc, row) =>
+            row.__sources_of_funding.includes(key)
+              ? acc + (row.nbs_area_m2 || 0)
+              : acc,
+          0
+        ),
       }))
-      .sort((a, b) => b.count - a.count)
+      .map((row) => ({
+        ...row,
+        averageArea:
+          Math.round((row.totalArea / row.count + Number.EPSILON) * 100) / 100,
+      }))
+      .sort((a, b) => a.source.localeCompare(b.source))
+      .sort((a, b) =>
+        this.currentOption == "totalProjects"
+          ? b.count - a.count
+          : b.averageArea - a.averageArea
+      )
   }
 }
