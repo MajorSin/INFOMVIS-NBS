@@ -25,10 +25,9 @@ class Filters {
       this.updateStartYearUI()
     })
 
-    d3.select("#searchInput").on(
-      "input",
-      (e) => (window.searchQuery = e.target.value)
-    )
+    d3.select("#searchInput").on("input", (e) => {
+      window.searchQuery = (e.target.value || "").toLowerCase()
+    })
 
     this.economicImpactValues = [
       ...new Set(data.map((r) => r.__economicImpacts).flat()),
@@ -67,7 +66,6 @@ class Filters {
 
     this.buildEconomicImpactCheckboxes()
 
-    this.renderKPI(data)
   }
 
   buildEconomicImpactCheckboxes() {
@@ -97,17 +95,7 @@ class Filters {
     }
   }
 
-  renderKPI(data) {
-    d3.select("#rowCount").text(data.rows)
-    d3.select("#cityCount").text(data.cities)
-    d3.select("#countryCount").text(data.countries)
-    d3.select("#tableMeta").text(
-      `Showing ${Math.min(data.rows, 250)} of ${data.rows}`
-    )
-  }
-
   update(data) {
-    this.renderKPI(data)
   }
 
   getEconomicImpactCheckboxes() {
