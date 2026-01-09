@@ -32,7 +32,16 @@ class Filters {
       this.updateStartYearUI()
     })
 
-    this.components = [new Results(), new MapFilteredCities()]
+    const path = new URL(window.location.href).pathname;
+    const filename = path === '/' ? null : path.split('/').pop();
+    
+    if (filename === 'filters.html') {
+      this.components = [new Results(), new MapFilteredCities()]
+    }
+    else if (filename === 'similarity_band.html') {
+      this.components = [new Results(), new MapSimilarityBands()]
+    }
+
 
     this.init()
   }
