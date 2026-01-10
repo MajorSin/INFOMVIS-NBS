@@ -1,0 +1,28 @@
+<section class="card">
+  <div class="card-header">
+    <h2>Source of funding</h2>
+
+    <div class="toggle-group">
+      <input
+        type="radio"
+        id="totalProjectsCheckbox"
+        name="view"
+        value="totalProjects"
+        checked
+      />
+      <label for="totalProjectsCheckbox">Total Projects</label>
+
+      <input
+        type="radio"
+        id="squareMeterCheckbox"
+        name="view"
+        value="squareMeter"
+      />
+      <label for="squareMeterCheckbox">Average square meters</label>
+    </div>
+  </div>
+  <span id="fundingsMeta" class="card-meta">0 selected</span>
+
+  <div id="fundingChart"></div>
+  <div id="fundingTooltip" class="tooltip"></div>
+</section>

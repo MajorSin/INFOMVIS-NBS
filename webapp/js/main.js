@@ -42,6 +42,15 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "selectedFundingSource", {
+      get: () => _selectedFundingSource,
+      set: (value) => {
+        _selectedFundingSource = value
+        this.filterData()
+        this.update()
+      },
+    })
   }
 
   async init() {
@@ -63,6 +72,7 @@ class ExplorationMode {
       .then((rows) =>
         rows.map((row) => ({
           ...row,
+          __sources_of_funding: row.sources_of_funding.trim().split(";"),
           __economicImpacts: row.economic_impacts
             ? row.economic_impacts.trim().split(";")
             : [],
@@ -81,7 +91,14 @@ class ExplorationMode {
         rows: this.filteredData,
         geo: this.worldmapData,
       }),
+      funding: new Funding(this.filteredData),
     }
+
+    const fundingComponent = this.components.funding
+    fundingComponent.fundingOptionsInput.on("change", (element) => {
+      fundingComponent.currentOption = element.target.value
+      fundingComponent.update(fundingComponent.transformData(this.filteredData))
+    })
   }
 
   update() {
@@ -93,6 +110,9 @@ class ExplorationMode {
     )
     this.components.mapFilteredCities.update(
       this.components.mapFilteredCities.transformData(this.filteredDataForMap)
+    )
+    this.components.funding.update(
+      this.components.funding.transformData(this.filteredData)
     )
   }
 
@@ -123,6 +143,13 @@ class ExplorationMode {
           r.__economicImpacts.includes(impact)
         )
         if (!passImpacts) return false
+      }
+
+      if (window.selectedFundingSource.length > 0) {
+        const passFundingSource = window.selectedFundingSource.every((fund) =>
+          r.__sources_of_funding.includes(fund)
+        )
+        if (!passFundingSource) return false
       }
 
       const searchFields = [
