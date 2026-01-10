@@ -47,6 +47,12 @@ async function boot(jsFile) {
       jsFile: "./components/filters/filters.js",
     },
     {
+      element: "#kpisMount",
+      url: "./components/kpis/kpis.html",
+      styleSheet: "./components/kpis/kpis.css",
+      jsFile: "./components/kpis/kpis.js",
+    },
+    {
       element: "#mapMount",
       url: "./components/mapFilteredCities/mapFilteredCities.html",
       styleSheet: "./components/mapFilteredCities/mapFilteredCities.css",
@@ -65,6 +71,7 @@ async function boot(jsFile) {
       jsFile: "./components/funding/funding.js",
     },
   ])
+
 
   const script = document.createElement("script")
   script.src = jsFile
