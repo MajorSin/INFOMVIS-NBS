@@ -1,8 +1,8 @@
 class ExplorationMode {
   constructor() {
-    this.startYearBounds = null
     this.data = []
     this.filteredData = []
+    this.filteredDataForMap = []
     this.worldmapData = null
 
     this.components = null
@@ -20,6 +20,15 @@ class ExplorationMode {
       get: () => _yearRange,
       set: (value) => {
         _yearRange = value
+        this.filterData()
+        this.update()
+      },
+    })
+
+    Object.defineProperty(window, "nbsAreaRange", {
+      get: () => _nbsAreaRange,
+      set: (value) => {
+        _nbsAreaRange = value
         this.filterData()
         this.update()
       },
@@ -45,9 +54,7 @@ class ExplorationMode {
   }
 
   async init() {
-    Promise.all([this.loadRows(), this.loadWorldMap()]).then(() =>
-      this.render()
-    )
+    Promise.all([this.loadRows(), this.loadWorldMap()]).then(() => this.render())
   }
 
   async loadWorldMap() {
@@ -57,16 +64,36 @@ class ExplorationMode {
     this.worldmapData = topojson.feature(topo, topo.objects.countries)
   }
 
+  parseAreaToM2(v) {
+    if (v == null) return null
+    const s = String(v).trim()
+
+    const cleaned = s
+      .replaceAll(",", "")
+      .replaceAll(/\s/g, "")
+      .replaceAll(/m\^?2|m²/gi, "")
+
+    const num = Number(cleaned)
+    return Number.isFinite(num) ? num : null
+  }
+
   async loadRows() {
     this.data = await d3
       .csv("./data/cleaned_nbs_data.csv", d3.autoType)
       .then((rows) =>
-        rows.map((row) => ({
-          ...row,
-          __economicImpacts: row.economic_impacts
-            ? row.economic_impacts.trim().split(";")
-            : [],
-        }))
+        rows.map((row) => {
+          const areaFromM2 = Number.isFinite(row.nbs_area_m2)
+            ? row.nbs_area_m2
+            : this.parseAreaToM2(row.nbs_area)
+
+          return {
+            ...row,
+            __economicImpacts: row.economic_impacts
+              ? row.economic_impacts.trim().split(";")
+              : [],
+            __nbsAreaM2: areaFromM2,
+          }
+        })
       )
 
     this.filteredData = this.data
@@ -100,7 +127,7 @@ class ExplorationMode {
   }
 
   filterData() {
-    let tempFiltered = this.data.filter((r) => {
+    const tempFiltered = this.data.filter((r) => {
       if (r.start_year != null && r.end_year != null) {
         if (
           r.start_year < window.yearRange.min ||
@@ -121,6 +148,12 @@ class ExplorationMode {
           return false
       }
 
+      const a = r.__nbsAreaM2
+      if (Number.isFinite(a)) {
+        if (a < window.nbsAreaRange.min || a > window.nbsAreaRange.max)
+          return false
+      }
+
       if (window.selectedEconomicImpacts.length > 0) {
         const passImpacts = window.selectedEconomicImpacts.every((impact) =>
           r.__economicImpacts.includes(impact)
@@ -137,6 +170,7 @@ class ExplorationMode {
       ]
         .map((x) => x?.toLowerCase())
         .join(",")
+
       return searchFields.includes(window.searchQuery)
     })
 

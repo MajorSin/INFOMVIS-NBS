@@ -38,6 +38,23 @@
         Bounds come from dataset min/max <code>start_year</code>.
       </small>
     </div>
+    
+    <div>
+      <div id="nbsAreaHeader">
+        <span>NBS area range (m²)</span>
+        <span class="nbsAreaMeta" id="nbsAreaLabel">—</span>
+      </div>
+
+      <div id="nbsAreaBox">
+        <div class="nbsAreaRow">
+          <span class="nbsAreaVal" id="nbsAreaMinVal">—</span>
+          <div id="nbsAreaSlider"></div>
+          <span class="nbsAreaVal" id="nbsAreaMaxVal">—</span>
+        </div>
+
+        <button id="resetNbsAreaBtn" type="button">Reset area</button>
+      </div>
+    </div>
 
     <label>
       <span>Search title/city/country</span>
@@ -49,5 +66,4 @@
       />
     </label>
   </div>
-
 </section>
