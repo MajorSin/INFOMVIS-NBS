@@ -18,6 +18,22 @@
       </small>
     </div>
 
+    <div class="filterControl">
+      <div id="areaTypeHeader">
+        <span>Type of area (before implementation)</span>
+        <span id="areaTypeMeta"></span>
+      </div>
+
+      <div id="areaTypeCheckboxes"></div>
+
+      <button id="clearAreaTypes" type="button">Clear</button>
+
+      <small class="helpText">
+        Tick area types to filter (AND across selected types). If none are
+        ticked, all options are shown.
+      </small>
+    </div>
+
     <div>
       <div id="yearRangeHeader">
         <span>Start year range</span>
@@ -38,7 +54,7 @@
         Bounds come from dataset min/max <code>start_year</code>.
       </small>
     </div>
-    
+
     <div>
       <div id="nbsAreaHeader">
         <span>NBS area range (m²)</span>

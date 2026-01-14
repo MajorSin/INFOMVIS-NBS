@@ -7,6 +7,7 @@ class Filters {
     this.nbsAreaSlider = null
 
     this.economicImpactValues = []
+    this.areaTypeValues = []
 
     this.init(data)
   }
@@ -16,6 +17,12 @@ class Filters {
       this.getEconomicImpactCheckboxes().forEach((cb) => (cb.checked = false))
       window.selectedEconomicImpacts = []
       this.setEconomicImpactsText()
+    })
+
+    d3.select("#clearAreaTypes").on("click", () => {
+      this.getAreaTypeCheckboxes().forEach((cb) => (cb.checked = false))
+      window.selectedAreaTypes = []
+      this.setAreaTypesText()
     })
 
     d3.select("#resetYearBtn").on("click", () => {
@@ -46,7 +53,14 @@ class Filters {
     // derive economic impact values from rows
     this.economicImpactValues = [
       ...new Set(data.map((r) => r.__economicImpacts).flat()),
-    ].sort((a, b) => a.localeCompare(b))
+    ]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b))
+
+    // derive area type values from rows
+    this.areaTypeValues = [...new Set(data.map((r) => r.__areaTypes).flat())]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b))
 
     // compute bounds/meta from the dataset
     this.wrangleData(this.transformData(data))
@@ -83,6 +97,7 @@ class Filters {
     // initialize other backing globals (keep your existing model)
     window._searchQuery = ""
     window._selectedEconomicImpacts = []
+    window._selectedAreaTypes = []
 
     this.render(meta)
   }
@@ -103,6 +118,9 @@ class Filters {
 
     this.buildEconomicImpactCheckboxes()
     this.setEconomicImpactsText()
+
+    this.buildAreaTypeCheckboxes()
+    this.setAreaTypesText()
   }
 
   update(meta) {
@@ -110,6 +128,9 @@ class Filters {
     // Right now, leave as-is.
   }
 
+  // -------------------------
+  // Economic impacts
+  // -------------------------
   buildEconomicImpactCheckboxes() {
     const container = document.getElementById("economicImpactCheckboxes")
     container.innerHTML = ""
@@ -161,6 +182,62 @@ class Filters {
     )
   }
 
+  // -------------------------
+  // Area types (before implementation)
+  // -------------------------
+  buildAreaTypeCheckboxes() {
+    const container = document.getElementById("areaTypeCheckboxes")
+    container.innerHTML = ""
+
+    for (const label of this.areaTypeValues) {
+      const id = `area_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
+
+      // Reuse the SAME class used by economic impacts to guarantee identical layout
+      const item = document.createElement("label")
+      item.className = "impactItem"
+      item.setAttribute("for", id)
+
+      const checkbox = document.createElement("input")
+      checkbox.type = "checkbox"
+      checkbox.value = label
+      checkbox.id = id
+
+      checkbox.addEventListener("change", () => {
+        window.selectedAreaTypes = this.getSelectedAreaTypes()
+        this.setAreaTypesText()
+      })
+
+      const text = document.createElement("span")
+      text.textContent = label
+
+      item.appendChild(checkbox)
+      item.appendChild(text)
+      container.appendChild(item)
+    }
+  }
+
+  getAreaTypeCheckboxes() {
+    return [
+      ...d3
+        .select("#areaTypeCheckboxes")
+        .node()
+        .querySelectorAll('input[type="checkbox"]'),
+    ]
+  }
+
+  getSelectedAreaTypes() {
+    return this.getAreaTypeCheckboxes()
+      .filter((cb) => cb.checked)
+      .map((cb) => cb.value)
+  }
+
+  setAreaTypesText() {
+    d3.select("#areaTypeMeta").text(`${window.selectedAreaTypes.length} selected`)
+  }
+
+  // -------------------------
+  // Sliders + helpers
+  // -------------------------
   updateStartYearUI() {
     d3.select("#startYearMinVal").text(window.yearRange.min)
     d3.select("#startYearMaxVal").text(window.yearRange.max)
