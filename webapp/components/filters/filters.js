@@ -8,6 +8,8 @@ class Filters {
 
     this.economicImpactValues = []
     this.areaTypeValues = []
+    this.totalCostValues = []
+    this.fundingSourceValues = []
 
     this.init(data)
   }
@@ -23,6 +25,18 @@ class Filters {
       this.getAreaTypeCheckboxes().forEach((cb) => (cb.checked = false))
       window.selectedAreaTypes = []
       this.setAreaTypesText()
+    })
+
+    d3.select("#clearTotalCosts").on("click", () => {
+      this.getTotalCostCheckboxes().forEach((cb) => (cb.checked = false))
+      window.selectedTotalCosts = []
+      this.setTotalCostsText()
+    })
+
+    d3.select("#clearFundingSources").on("click", () => {
+      this.getFundingSourceCheckboxes().forEach((cb) => (cb.checked = false))
+      window.selectedFundingSources = []
+      this.setFundingSourcesText()
     })
 
     d3.select("#resetYearBtn").on("click", () => {
@@ -60,6 +74,16 @@ class Filters {
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
 
+    this.totalCostValues = [...new Set(data.map((r) => r.total_cost))]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b))
+
+    this.fundingSourceValues = [
+      ...new Set(data.map((r) => (r.__fundingSources || [])).flat()),
+    ]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b))
+
     this.wrangleData(this.transformData(data))
   }
 
@@ -93,6 +117,8 @@ class Filters {
     window._searchQuery = ""
     window._selectedEconomicImpacts = []
     window._selectedAreaTypes = []
+    window._selectedTotalCosts = []
+    window._selectedFundingSources = []
 
     this.render(meta)
   }
@@ -116,16 +142,17 @@ class Filters {
 
     this.buildAreaTypeCheckboxes()
     this.setAreaTypesText()
+
+    this.buildTotalCostCheckboxes()
+    this.setTotalCostsText()
+
+    this.buildFundingSourceCheckboxes()
+    this.setFundingSourcesText()
   }
 
   update(meta) {
-    // Optional hook if you later want the labels to reflect filtered bounds.
-    // Right now, leave as-is.
   }
 
-  // -------------------------
-  // Economic impacts
-  // -------------------------
   buildEconomicImpactCheckboxes() {
     const container = document.getElementById("economicImpactCheckboxes")
     container.innerHTML = ""
@@ -183,6 +210,7 @@ class Filters {
 
     for (const label of this.areaTypeValues) {
       const id = `area_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
+
       const item = document.createElement("label")
       item.className = "impactItem"
       item.setAttribute("for", id)
@@ -225,6 +253,108 @@ class Filters {
     d3.select("#areaTypeMeta").text(`${window.selectedAreaTypes.length} selected`)
   }
 
+  buildTotalCostCheckboxes() {
+    const container = document.getElementById("totalCostCheckboxes")
+    container.innerHTML = ""
+
+    for (const label of this.totalCostValues) {
+      const id = `cost_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
+
+      const item = document.createElement("label")
+      item.className = "impactItem"
+      item.setAttribute("for", id)
+
+      const checkbox = document.createElement("input")
+      checkbox.type = "checkbox"
+      checkbox.value = label
+      checkbox.id = id
+
+      checkbox.addEventListener("change", () => {
+        window.selectedTotalCosts = this.getSelectedTotalCosts()
+        this.setTotalCostsText()
+      })
+
+      const text = document.createElement("span")
+      text.textContent = label
+
+      item.appendChild(checkbox)
+      item.appendChild(text)
+      container.appendChild(item)
+    }
+  }
+
+  getTotalCostCheckboxes() {
+    return [
+      ...d3
+        .select("#totalCostCheckboxes")
+        .node()
+        .querySelectorAll('input[type="checkbox"]'),
+    ]
+  }
+
+  getSelectedTotalCosts() {
+    return this.getTotalCostCheckboxes()
+      .filter((cb) => cb.checked)
+      .map((cb) => cb.value)
+  }
+
+  setTotalCostsText() {
+    d3.select("#totalCostMeta").text(
+      `${window.selectedTotalCosts.length} selected`
+    )
+  }
+
+  buildFundingSourceCheckboxes() {
+    const container = document.getElementById("fundingSourceCheckboxes")
+    container.innerHTML = ""
+
+    for (const label of this.fundingSourceValues) {
+      const id = `fund_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
+
+      const item = document.createElement("label")
+      item.className = "impactItem"
+      item.setAttribute("for", id)
+
+      const checkbox = document.createElement("input")
+      checkbox.type = "checkbox"
+      checkbox.value = label
+      checkbox.id = id
+
+      checkbox.addEventListener("change", () => {
+        window.selectedFundingSources = this.getSelectedFundingSources()
+        this.setFundingSourcesText()
+      })
+
+      const text = document.createElement("span")
+      text.textContent = label
+
+      item.appendChild(checkbox)
+      item.appendChild(text)
+      container.appendChild(item)
+    }
+  }
+
+  getFundingSourceCheckboxes() {
+    return [
+      ...d3
+        .select("#fundingSourceCheckboxes")
+        .node()
+        .querySelectorAll('input[type="checkbox"]'),
+    ]
+  }
+
+  getSelectedFundingSources() {
+    return this.getFundingSourceCheckboxes()
+      .filter((cb) => cb.checked)
+      .map((cb) => cb.value)
+  }
+
+  setFundingSourcesText() {
+    d3.select("#fundingSourceMeta").text(
+      `${window.selectedFundingSources.length} selected`
+    )
+  }
+
   updateStartYearUI() {
     d3.select("#startYearMinVal").text(window.yearRange.min)
     d3.select("#startYearMaxVal").text(window.yearRange.max)
@@ -250,6 +380,8 @@ class Filters {
       rows: data.length,
       cities: new Set(data.map((d) => d.city)).size,
       countries: new Set(data.map((d) => d.country)).size,
+
+      fundingSources: data.flatMap((d) => d.__fundingSources || []),
     }
   }
 }

@@ -3,7 +3,6 @@ async function injectHtml(selectors) {
   const body = document.getElementsByTagName("body")[0]
   await Promise.all(
     selectors.map(async (selector) => {
-      // Mount stylesheet
       if (selector.styleSheet != null) {
         let link = document.createElement("link")
         link.rel = "stylesheet"
@@ -13,7 +12,6 @@ async function injectHtml(selectors) {
         head.appendChild(link)
       }
 
-      // Mount javascript file
       if (selector.jsFile != null) {
         let script = document.createElement("script")
         script.src = selector.jsFile
@@ -21,7 +19,6 @@ async function injectHtml(selectors) {
         body.appendChild(script)
       }
 
-      // Mount HTML file
       const mount = document.querySelector(selector.element)
       if (!mount) throw new Error(`Mount not found: ${selector.element}`)
 

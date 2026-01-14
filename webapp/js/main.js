@@ -25,6 +25,24 @@ class ExplorationMode {
       },
     })
 
+    Object.defineProperty(window, "selectedTotalCosts", {
+      get: () => _selectedTotalCosts,
+      set: (value) => {
+        _selectedTotalCosts = value
+        this.filterData()
+        this.update()
+      },
+    })
+
+    Object.defineProperty(window, "selectedFundingSources", {
+      get: () => _selectedFundingSources,
+      set: (value) => {
+        _selectedFundingSources = value
+        this.filterData()
+        this.update()
+      },
+    })
+
     Object.defineProperty(window, "yearRange", {
       get: () => _yearRange,
       set: (value) => {
@@ -86,6 +104,16 @@ class ExplorationMode {
     return Number.isFinite(num) ? num : null
   }
 
+  splitMultiValueField(v) {
+    if (v == null) return []
+    const s = String(v).trim()
+    if (!s) return []
+    return s
+      .split(/[;,]+/)
+      .map((x) => x.trim())
+      .filter(Boolean)
+  }
+
   async loadRows() {
     this.data = await d3
       .csv("./data/cleaned_nbs_data.csv", d3.autoType)
@@ -98,15 +126,20 @@ class ExplorationMode {
           return {
             ...row,
             __economicImpacts: row.economic_impacts
-              ? row.economic_impacts.trim().split(";").map((s) => s.trim()).filter(Boolean)
+              ? row.economic_impacts
+                  .trim()
+                  .split(";")
+                  .map((s) => s.trim())
+                  .filter(Boolean)
               : [],
             __nbsAreaM2: areaFromM2,
             __areaTypes: row.type_of_area_before_implementation_of_the_nbs
               ? row.type_of_area_before_implementation_of_the_nbs
-                  .split(/[,;]+/) 
+                  .split(/[,;]+/)
                   .map((s) => s.trim())
                   .filter(Boolean)
               : [],
+            __fundingSources: this.splitMultiValueField(row.sources_of_funding),
           }
         })
       )
@@ -125,7 +158,10 @@ class ExplorationMode {
         geo: this.worldmapData,
       }),
     }
+
+    this.update()
   }
+
 
   update() {
     const meta = this.components.filters.transformData(this.filteredData)
@@ -183,6 +219,20 @@ class ExplorationMode {
         if (!passAreaTypes) return false
       }
 
+      if (window.selectedTotalCosts && window.selectedTotalCosts.length > 0) {
+        if (!window.selectedTotalCosts.includes(r.total_cost)) return false
+      }
+
+      if (
+        window.selectedFundingSources &&
+        window.selectedFundingSources.length > 0
+      ) {
+        const passFunding = window.selectedFundingSources.every((src) =>
+          (r.__fundingSources || []).includes(src)
+        )
+        if (!passFunding) return false
+      }
+
       const searchFields = [
         r.name_of_the_nbs_intervention_short_english_title,
         r.native_title_of_the_nbs_intervention,
@@ -190,6 +240,8 @@ class ExplorationMode {
         r.country,
         r.economic_impacts,
         r.type_of_area_before_implementation_of_the_nbs,
+        r.total_cost,
+        r.sources_of_funding,
       ]
         .map((x) => x?.toLowerCase())
         .join(",")
