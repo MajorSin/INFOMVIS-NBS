@@ -103,7 +103,7 @@ class ExplorationMode {
             __nbsAreaM2: areaFromM2,
             __areaTypes: row.type_of_area_before_implementation_of_the_nbs
               ? row.type_of_area_before_implementation_of_the_nbs
-                  .split(/[,;]+/) // supports comma or semicolon lists
+                  .split(/[,;]+/) 
                   .map((s) => s.trim())
                   .filter(Boolean)
               : [],
@@ -143,7 +143,6 @@ class ExplorationMode {
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
-      // Year range filter
       if (r.start_year != null && r.end_year != null) {
         if (
           r.start_year < window.yearRange.min ||
@@ -164,14 +163,12 @@ class ExplorationMode {
           return false
       }
 
-      // NBS area filter
       const a = r.__nbsAreaM2
       if (Number.isFinite(a)) {
         if (a < window.nbsAreaRange.min || a > window.nbsAreaRange.max)
           return false
       }
 
-      // Economic impacts filter — AND semantics
       if (window.selectedEconomicImpacts.length > 0) {
         const passImpacts = window.selectedEconomicImpacts.every((impact) =>
           r.__economicImpacts.includes(impact)
@@ -179,7 +176,6 @@ class ExplorationMode {
         if (!passImpacts) return false
       }
 
-      // Area types filter — AND semantics (same rule as economic impacts)
       if (window.selectedAreaTypes.length > 0) {
         const passAreaTypes = window.selectedAreaTypes.every((t) =>
           r.__areaTypes.includes(t)
@@ -187,7 +183,6 @@ class ExplorationMode {
         if (!passAreaTypes) return false
       }
 
-      // Search filter
       const searchFields = [
         r.name_of_the_nbs_intervention_short_english_title,
         r.native_title_of_the_nbs_intervention,

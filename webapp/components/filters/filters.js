@@ -50,24 +50,20 @@ class Filters {
       window.searchQuery = (e.target.value || "").toLowerCase()
     })
 
-    // derive economic impact values from rows
     this.economicImpactValues = [
       ...new Set(data.map((r) => r.__economicImpacts).flat()),
     ]
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
 
-    // derive area type values from rows
     this.areaTypeValues = [...new Set(data.map((r) => r.__areaTypes).flat())]
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
 
-    // compute bounds/meta from the dataset
     this.wrangleData(this.transformData(data))
   }
 
   wrangleData(meta) {
-    // initialize backing globals so first reads are safe
     this.startYearBounds = meta.yearRange
     window._yearRange = meta.yearRange
 
@@ -94,7 +90,6 @@ class Filters {
       },
     })
 
-    // initialize other backing globals (keep your existing model)
     window._searchQuery = ""
     window._selectedEconomicImpacts = []
     window._selectedAreaTypes = []
@@ -182,17 +177,12 @@ class Filters {
     )
   }
 
-  // -------------------------
-  // Area types (before implementation)
-  // -------------------------
   buildAreaTypeCheckboxes() {
     const container = document.getElementById("areaTypeCheckboxes")
     container.innerHTML = ""
 
     for (const label of this.areaTypeValues) {
       const id = `area_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
-
-      // Reuse the SAME class used by economic impacts to guarantee identical layout
       const item = document.createElement("label")
       item.className = "impactItem"
       item.setAttribute("for", id)
@@ -235,9 +225,6 @@ class Filters {
     d3.select("#areaTypeMeta").text(`${window.selectedAreaTypes.length} selected`)
   }
 
-  // -------------------------
-  // Sliders + helpers
-  // -------------------------
   updateStartYearUI() {
     d3.select("#startYearMinVal").text(window.yearRange.min)
     d3.select("#startYearMaxVal").text(window.yearRange.max)

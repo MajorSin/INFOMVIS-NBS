@@ -8,10 +8,6 @@
   margin-top: 8px;
 }
 
-/* -------------------------
-   Economic impacts
-   ------------------------- */
-
 #economicImpactCheckboxes {
   display: block;
   color: var(--muted);
@@ -41,7 +37,6 @@
   overflow: auto;
 }
 
-/* This class is used by BOTH economic impacts and area types for identical layout */
 .impactItem {
   display: flex;
   gap: 10px;
@@ -57,9 +52,6 @@
   line-height: 1.2rem;
 }
 
-/* -------------------------
-   Area types (before implementation) — same pattern as Economic impacts
-   ------------------------- */
 
 #areaTypeHeader {
   display: flex;
@@ -122,10 +114,6 @@
   font-size: 12px;
   text-align: center;
 }
-
-/* -------------------------
-   NBS area range
-   ------------------------- */
 
 #nbsAreaHeader {
   display: flex;
