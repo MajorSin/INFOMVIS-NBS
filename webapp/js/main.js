@@ -34,15 +34,6 @@ class ExplorationMode {
       },
     })
 
-    Object.defineProperty(window, "selectedFundingSources", {
-      get: () => _selectedFundingSources,
-      set: (value) => {
-        _selectedFundingSources = value
-        this.filterData()
-        this.update()
-      },
-    })
-
     Object.defineProperty(window, "yearRange", {
       get: () => _yearRange,
       set: (value) => {
@@ -78,10 +69,21 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "selectedFundingSource", {
+      get: () => _selectedFundingSource,
+      set: (value) => {
+        _selectedFundingSource = value
+        this.filterData()
+        this.update()
+      },
+    })
   }
 
   async init() {
-    Promise.all([this.loadRows(), this.loadWorldMap()]).then(() => this.render())
+    Promise.all([this.loadRows(), this.loadWorldMap()]).then(() =>
+      this.render()
+    )
   }
 
   async loadWorldMap() {
@@ -89,19 +91,6 @@ class ExplorationMode {
       "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
     ).then((r) => r.json())
     this.worldmapData = topojson.feature(topo, topo.objects.countries)
-  }
-
-  parseAreaToM2(v) {
-    if (v == null) return null
-    const s = String(v).trim()
-
-    const cleaned = s
-      .replaceAll(",", "")
-      .replaceAll(/\s/g, "")
-      .replaceAll(/m\^?2|m²/gi, "")
-
-    const num = Number(cleaned)
-    return Number.isFinite(num) ? num : null
   }
 
   splitMultiValueField(v) {
@@ -118,30 +107,25 @@ class ExplorationMode {
     this.data = await d3
       .csv("./data/cleaned_nbs_data.csv", d3.autoType)
       .then((rows) =>
-        rows.map((row) => {
-          const areaFromM2 = Number.isFinite(row.nbs_area_m2)
-            ? row.nbs_area_m2
-            : this.parseAreaToM2(row.nbs_area)
-
-          return {
-            ...row,
-            __economicImpacts: row.economic_impacts
-              ? row.economic_impacts
-                  .trim()
-                  .split(";")
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              : [],
-            __nbsAreaM2: areaFromM2,
-            __areaTypes: row.type_of_area_before_implementation_of_the_nbs
-              ? row.type_of_area_before_implementation_of_the_nbs
-                  .split(/[,;]+/)
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-              : [],
-            __fundingSources: this.splitMultiValueField(row.sources_of_funding),
-          }
-        })
+        rows.map((row) => ({
+          ...row,
+          cost: parseCostD3(row.total_cost),
+          __sources_of_funding: row.sources_of_funding.trim().split(";"),
+          __economicImpacts: row.economic_impacts
+            ? row.economic_impacts
+                .trim()
+                .split(";")
+                .map((s) => s.trim())
+                .filter(Boolean)
+            : [],
+          __areaTypes: row.type_of_area_before_implementation_of_the_nbs
+            ? row.type_of_area_before_implementation_of_the_nbs
+                .split(/[,;]+/)
+                .map((s) => s.trim())
+                .filter(Boolean)
+            : [],
+          __fundingSources: this.splitMultiValueField(row.sources_of_funding),
+        }))
       )
 
     this.filteredData = this.data
@@ -151,29 +135,39 @@ class ExplorationMode {
   render() {
     this.components = {
       filters: new Filters(this.filteredData),
-      kpis: new KPIs(),
+      kpis: new KPIs(this.filteredData),
       results: new Results(this.filteredData),
       mapFilteredCities: new MapFilteredCities({
         rows: this.filteredData,
         geo: this.worldmapData,
       }),
+      funding: new Funding(this.filteredData),
     }
 
-    this.update()
+    const fundingComponent = this.components.funding
+    fundingComponent.fundingOptionsInput.on("change", (element) => {
+      fundingComponent.currentOption = element.target.value
+      fundingComponent.update(fundingComponent.transformData(this.filteredData))
+    })
   }
 
-
   update() {
-    const meta = this.components.filters.transformData(this.filteredData)
+    this.components.filters.update(
+      this.components.filters.transformData(this.filteredData)
+    )
 
-    this.components.filters.update(meta)
-    this.components.kpis.update(meta)
+    this.components.kpis.update(
+      this.components.kpis.transformData(this.filteredData)
+    )
 
     this.components.results.update(
       this.components.results.transformData(this.filteredData)
     )
     this.components.mapFilteredCities.update(
       this.components.mapFilteredCities.transformData(this.filteredDataForMap)
+    )
+    this.components.funding.update(
+      this.components.funding.transformData(this.filteredData)
     )
   }
 
@@ -199,7 +193,7 @@ class ExplorationMode {
           return false
       }
 
-      const a = r.__nbsAreaM2
+      const a = r.nbs_area_m2
       if (Number.isFinite(a)) {
         if (a < window.nbsAreaRange.min || a > window.nbsAreaRange.max)
           return false
@@ -212,6 +206,13 @@ class ExplorationMode {
         if (!passImpacts) return false
       }
 
+      if (window.selectedFundingSource.length > 0) {
+        const passFundingSource = window.selectedFundingSource.every((fund) =>
+          r.__sources_of_funding.includes(fund)
+        )
+        if (!passFundingSource) return false
+      }
+
       if (window.selectedAreaTypes.length > 0) {
         const passAreaTypes = window.selectedAreaTypes.every((t) =>
           r.__areaTypes.includes(t)
@@ -221,16 +222,6 @@ class ExplorationMode {
 
       if (window.selectedTotalCosts && window.selectedTotalCosts.length > 0) {
         if (!window.selectedTotalCosts.includes(r.total_cost)) return false
-      }
-
-      if (
-        window.selectedFundingSources &&
-        window.selectedFundingSources.length > 0
-      ) {
-        const passFunding = window.selectedFundingSources.every((src) =>
-          (r.__fundingSources || []).includes(src)
-        )
-        if (!passFunding) return false
       }
 
       const searchFields = [
@@ -261,3 +252,24 @@ class ExplorationMode {
 }
 
 new ExplorationMode().init()
+
+function parseCostD3(value) {
+  if (!value || value.toLowerCase() === "unknown") {
+    return null
+  }
+
+  const normalized = value
+    .toLowerCase()
+    .replace(/€/g, "")
+    .replace(/\./g, "")
+    .replace(/,/g, "")
+    .trim()
+
+  const numbers = normalized.match(/\d+/g)?.map(Number) ?? []
+
+  return numbers.length == 2
+    ? d3.mean(numbers)
+    : numbers.length == 1
+    ? numbers[0]
+    : null
+}

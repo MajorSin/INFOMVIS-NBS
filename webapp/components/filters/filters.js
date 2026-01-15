@@ -11,6 +11,12 @@ class Filters {
     this.totalCostValues = []
     this.fundingSourceValues = []
 
+    window._searchQuery = ""
+    window._selectedEconomicImpacts = []
+    window._selectedAreaTypes = []
+    window._selectedTotalCosts = []
+    window._selectedFundingSource = []
+
     this.init(data)
   }
 
@@ -35,7 +41,7 @@ class Filters {
 
     d3.select("#clearFundingSources").on("click", () => {
       this.getFundingSourceCheckboxes().forEach((cb) => (cb.checked = false))
-      window.selectedFundingSources = []
+      window.selectedFundingSource = []
       this.setFundingSourcesText()
     })
 
@@ -79,7 +85,7 @@ class Filters {
       .sort((a, b) => a.localeCompare(b))
 
     this.fundingSourceValues = [
-      ...new Set(data.map((r) => (r.__fundingSources || [])).flat()),
+      ...new Set(data.map((r) => r.__fundingSources || []).flat()),
     ]
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
@@ -114,12 +120,6 @@ class Filters {
       },
     })
 
-    window._searchQuery = ""
-    window._selectedEconomicImpacts = []
-    window._selectedAreaTypes = []
-    window._selectedTotalCosts = []
-    window._selectedFundingSources = []
-
     this.render(meta)
   }
 
@@ -150,8 +150,7 @@ class Filters {
     this.setFundingSourcesText()
   }
 
-  update(meta) {
-  }
+  update(meta) {}
 
   buildEconomicImpactCheckboxes() {
     const container = document.getElementById("economicImpactCheckboxes")
@@ -250,7 +249,9 @@ class Filters {
   }
 
   setAreaTypesText() {
-    d3.select("#areaTypeMeta").text(`${window.selectedAreaTypes.length} selected`)
+    d3.select("#areaTypeMeta").text(
+      `${window.selectedAreaTypes.length} selected`
+    )
   }
 
   buildTotalCostCheckboxes() {
@@ -321,7 +322,7 @@ class Filters {
       checkbox.id = id
 
       checkbox.addEventListener("change", () => {
-        window.selectedFundingSources = this.getSelectedFundingSources()
+        window.selectedFundingSource = this.getSelectedFundingSources()
         this.setFundingSourcesText()
       })
 
@@ -351,7 +352,7 @@ class Filters {
 
   setFundingSourcesText() {
     d3.select("#fundingSourceMeta").text(
-      `${window.selectedFundingSources.length} selected`
+      `${window.selectedFundingSource.length} selected`
     )
   }
 
@@ -372,7 +373,7 @@ class Filters {
 
   transformData(data) {
     const years = data.map((r) => r.start_year).filter(Number.isFinite)
-    const areas = data.map((r) => r.__nbsAreaM2).filter(Number.isFinite)
+    const areas = data.map((r) => r.nbs_area_m2).filter(Number.isFinite)
 
     return {
       yearRange: { min: d3.min(years), max: d3.max(years) },
@@ -380,7 +381,6 @@ class Filters {
       rows: data.length,
       cities: new Set(data.map((d) => d.city)).size,
       countries: new Set(data.map((d) => d.country)).size,
-
       fundingSources: data.flatMap((d) => d.__fundingSources || []),
     }
   }

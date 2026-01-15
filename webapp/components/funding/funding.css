@@ -1,0 +1,40 @@
+#fundingChart svg {
+  width: 100%;
+}
+
+.bar {
+  transition: fill 0.2s ease;
+}
+
+text {
+  font-family: "Poppins";
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.axis-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.funding-source-bar {
+  fill: #17becf;
+}
+
+.funding-source-bar:hover {
+  fill: #2ed8e6;
+}
+
+.funding-source-bar.active {
+  fill: #1096a4;
+}
+
+.labelInside {
+  text-anchor: end;
+  fill: black;
+}
+
+.labelOutside {
+  text-anchor: start;
+  fill: white;
+}
