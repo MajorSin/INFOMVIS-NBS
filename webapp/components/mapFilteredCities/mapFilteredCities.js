@@ -1,11 +1,10 @@
 class MapFilteredCities {
   constructor(data) {
     window._selectedCities = []
+    this.countriesData = []
 
     this.mapSvg = d3.select("#mapVis")
     this.mapG = this.mapSvg.append("g")
-    this.countriesG = this.mapG.append("g").attr("id", "countries")
-    this.pointsG = this.mapG.append("g").attr("id", "points")
     this.tooltip = d3.select("#mapTooltip")
 
     this.w = this.mapSvg.attr("width")
@@ -23,71 +22,53 @@ class MapFilteredCities {
 
     this.mapSvg.call(this.zoom)
 
-    this.fullRows = data.rows
-
     this.init(data)
   }
 
   init(data) {
-    this.countriesG
-      .selectAll("path")
-      .data(data.geo.features)
-      .join("path")
-      .attr("d", this.geoPath)
-      .attr("fill", "rgba(255,255,255,0.03)")
-      .attr("stroke", "rgba(255,255,255,0.10)")
-      .attr("stroke-width", 0.7)
-
     this.wrangleData(data)
   }
 
   wrangleData(data) {
-    const newData = this.transformData(data.rows)
+    this.countriesData = data.geo.features
 
-    const rMax = d3.max(newData, (d) => d.count)
-    this.rScale = d3.scaleSqrt().domain([1, rMax]).range([2.5, 12])
+    this.colorScale = d3
+      .scaleLog()
+      .range(["rgb(201, 229, 238)", "rgb(0, 29, 191)"])
 
-    this.update(newData)
+    this.update(this.transformData(data.rows))
   }
 
   update(data) {
-    this.pointsG
-      .selectAll("circle")
-      .data(data, (d) => d.city)
+    const countriesCountData = data
+      .filter((d) => d.values != null)
+      .map((d) => d.values.count)
+
+    this.colorScale.domain([
+      d3.min(countriesCountData),
+      d3.max(countriesCountData),
+    ])
+
+    this.mapG
+      .selectAll("path")
+      .data(data, (d) => d.count)
       .join(
         (enter) =>
           enter
-            .append("circle")
+            .append("path")
+            .attr("d", this.geoPath)
             .attr(
-              "class",
-              (d) =>
-                `mapPoint${
-                  window.selectedCities.some((s) => s == d.city)
-                    ? " selected"
-                    : ""
-                }`
+              "fill",
+              (d) => this.colorScale(d.values?.count ?? null) ?? "red"
             )
-            .attr("cx", (d) => d.coordinates.x)
-            .attr("cy", (d) => d.coordinates.y)
-            .on("click", (event, d) => {
-              window.selectedCities = window.selectedCities.some(
-                (s) => s == d.city
-              )
-                ? window.selectedCities.filter((s) => s != d.city)
-                : [...window.selectedCities, d.city]
-              d3.select(event.target).attr(
-                "class",
-                (d) =>
-                  `mapPoint${
-                    window.selectedCities.some((s) => s == d.city)
-                      ? " selected"
-                      : ""
-                  }`
-              )
-            })
+            .attr("stroke", "black")
+            .attr("class", "countryPath")
+
             .on("mouseover", (event, d) =>
               this.tooltip
-                .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
+                .html(
+                  `${d.properties.name}<br/>Projects: ${d.values?.count ?? 0}`
+                )
                 .style("left", event.pageX + 10 + "px")
                 .style("top", event.pageY - 10 + "px")
                 .style("display", "block")
@@ -97,46 +78,47 @@ class MapFilteredCities {
                 .style("left", event.pageX + 10 + "px")
                 .style("top", event.pageY - 10 + "px")
             )
-            .on("mouseout", () => this.tooltip.style("display", "none"))
-            .call((sel) =>
-              sel
-                .transition()
-                .duration(200)
-                .attr("r", (d) => this.rScale(d.count))
-            ),
+            .on("mouseout", () => this.tooltip.style("display", "none")),
+
         (update) =>
-          update
-            .transition()
-            .duration(200)
-            .attr("r", (d) => this.rScale(d.count)),
-        (exit) => exit.remove()
+          update.attr(
+            "fill",
+            (d) => this.colorScale(d.values?.count ?? null) ?? "red"
+          )
       )
   }
 
   transformData(data) {
-    return Array.from(
+    const countriesData = Array.from(
       d3.rollup(
         data,
         (leaves) => leaves,
-        (d) => d.coordinates
+        (d) => d.country
       )
     )
       .filter((d) => d[0] != null)
       .map((d) => ({
-        coordinates: this.parseCoordinate(d[0]),
+        coordinates: this.parseCoordinate(d[1][0].coordinates),
         count: d[1].length,
-        city: d[1][0].city,
-        country: d[1][0].country,
+        country: d[0],
       }))
+      .sort((a, b) => b.count - a.count)
+
+    return this.countriesData.map((row) => ({
+      ...row,
+      values:
+        countriesData.find(
+          (element) =>
+            element.country.includes(row.properties.name) ||
+            row.properties.name.includes(element.country)
+        ) ?? null,
+    }))
   }
 
   parseCoordinate(pointRaw) {
     const point = pointRaw.substring(1, pointRaw.length - 1).split(",")
     const projection = this.projection([point[1], point[0]])
 
-    return {
-      x: projection[0],
-      y: projection[1],
-    }
+    return [projection[0], projection[1]]
   }
 }
