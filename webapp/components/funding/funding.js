@@ -186,6 +186,9 @@ class Funding {
     this.svg
       .selectAll(".fundAxis .tick")
       .on("click", (_, d) => clickFundingOption(d))
+    d3.select("#fundingsMeta").text(
+      `${window.selectedFundingSource.length} selected`
+    )
   }
 
   transformData(data) {
@@ -239,9 +242,6 @@ function clickFundingOption(option) {
   window.selectedFundingSource = window.selectedFundingSource.includes(option)
     ? window.selectedFundingSource.filter((source) => source != option)
     : [...window.selectedFundingSource, option]
-  d3.select("#fundingsMeta").text(
-    `${window.selectedFundingSource.length} selected`
-  )
 }
 
 const findLabelPosition = (scale) => (row, text) => {

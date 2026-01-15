@@ -134,6 +134,10 @@ class Filters {
       )}`
     )
 
+    this.update()
+  }
+
+  update(meta) {
     this.updateStartYearUI()
     this.updateNbsAreaUI()
 
@@ -149,8 +153,6 @@ class Filters {
     this.buildFundingSourceCheckboxes()
     this.setFundingSourcesText()
   }
-
-  update(meta) {}
 
   buildEconomicImpactCheckboxes() {
     const container = document.getElementById("economicImpactCheckboxes")
@@ -320,6 +322,7 @@ class Filters {
       checkbox.type = "checkbox"
       checkbox.value = label
       checkbox.id = id
+      checkbox.checked = window.selectedFundingSource.includes(label)
 
       checkbox.addEventListener("change", () => {
         window.selectedFundingSource = this.getSelectedFundingSources()
