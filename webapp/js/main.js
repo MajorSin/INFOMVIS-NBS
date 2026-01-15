@@ -86,7 +86,7 @@ class ExplorationMode {
   render() {
     this.components = {
       filters: new Filters(this.filteredData),
-      kpis: new KPIs(),
+      kpis: new KPIs(this.filteredData),
       results: new Results(this.filteredData),
       mapFilteredCities: new MapFilteredCities({
         rows: this.filteredData,
@@ -103,10 +103,13 @@ class ExplorationMode {
   }
 
   update() {
-    const meta = this.components.filters.transformData(this.filteredData)
+    this.components.filters.update(
+      this.components.filters.transformData(this.filteredData)
+    )
 
-    this.components.filters.update(meta)
-    this.components.kpis.update(meta)
+    this.components.kpis.update(
+      this.components.kpis.transformData(this.filteredData)
+    )
 
     this.components.results.update(
       this.components.results.transformData(this.filteredData)
