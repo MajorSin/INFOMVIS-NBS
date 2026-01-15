@@ -42,6 +42,15 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "selectedFundingSource", {
+      get: () => _selectedFundingSource,
+      set: (value) => {
+        _selectedFundingSource = value
+        this.filterData()
+        this.update()
+      },
+    })
   }
 
   async init() {
@@ -63,6 +72,8 @@ class ExplorationMode {
       .then((rows) =>
         rows.map((row) => ({
           ...row,
+          cost: parseCostD3(row.total_cost),
+          __sources_of_funding: row.sources_of_funding.trim().split(";"),
           __economicImpacts: row.economic_impacts
             ? row.economic_impacts.trim().split(";")
             : [],
@@ -76,23 +87,39 @@ class ExplorationMode {
   render() {
     this.components = {
       filters: new Filters(this.filteredData),
+      kpis: new KPIs(this.filteredData),
       results: new Results(this.filteredData),
       mapFilteredCities: new MapFilteredCities({
         rows: this.filteredData,
         geo: this.worldmapData,
       }),
+      funding: new Funding(this.filteredData),
     }
+
+    const fundingComponent = this.components.funding
+    fundingComponent.fundingOptionsInput.on("change", (element) => {
+      fundingComponent.currentOption = element.target.value
+      fundingComponent.update(fundingComponent.transformData(this.filteredData))
+    })
   }
 
   update() {
     this.components.filters.update(
       this.components.filters.transformData(this.filteredData)
     )
+
+    this.components.kpis.update(
+      this.components.kpis.transformData(this.filteredData)
+    )
+
     this.components.results.update(
       this.components.results.transformData(this.filteredData)
     )
     this.components.mapFilteredCities.update(
       this.components.mapFilteredCities.transformData(this.filteredDataForMap)
+    )
+    this.components.funding.update(
+      this.components.funding.transformData(this.filteredData)
     )
   }
 
@@ -125,6 +152,13 @@ class ExplorationMode {
         if (!passImpacts) return false
       }
 
+      if (window.selectedFundingSource.length > 0) {
+        const passFundingSource = window.selectedFundingSource.every((fund) =>
+          r.__sources_of_funding.includes(fund)
+        )
+        if (!passFundingSource) return false
+      }
+
       const searchFields = [
         r.name_of_the_nbs_intervention_short_english_title,
         r.native_title_of_the_nbs_intervention,
@@ -149,3 +183,24 @@ class ExplorationMode {
 }
 
 new ExplorationMode().init()
+
+function parseCostD3(value) {
+  if (!value || value.toLowerCase() === "unknown") {
+    return null
+  }
+
+  const normalized = value
+    .toLowerCase()
+    .replace(/€/g, "")
+    .replace(/\./g, "")
+    .replace(/,/g, "")
+    .trim()
+
+  const numbers = normalized.match(/\d+/g)?.map(Number) ?? []
+
+  return numbers.length == 2
+    ? d3.mean(numbers)
+    : numbers.length == 1
+    ? numbers[0]
+    : null
+}

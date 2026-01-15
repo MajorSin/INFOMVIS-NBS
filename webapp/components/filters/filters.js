@@ -1,17 +1,3 @@
-// Todo: This has to be fetched from the csv file
-const ATOMIC_IMPACTS = [
-  "Attraction of business and investment",
-  "Generation of income from NBS",
-  "Increase in agricultural production (for profit or not)",
-  "Increase of green  jobs (e.g. paid employment positions)",
-  "Increased market share for green economies",
-  "Increased property prices",
-  "More sustainable tourism",
-  "Reduce financial cost for urban management",
-  "Stimulate development in deprived areas",
-  "Other",
-]
-
 class Filters {
   constructor(data) {
     this.startYearBounds = null
@@ -39,10 +25,13 @@ class Filters {
       this.updateStartYearUI()
     })
 
-    d3.select("#searchInput").on(
-      "input",
-      (e) => (window.searchQuery = e.target.value)
-    )
+    d3.select("#searchInput").on("input", (e) => {
+      window.searchQuery = (e.target.value || "").toLowerCase()
+    })
+
+    this.economicImpactValues = [
+      ...new Set(data.map((r) => r.__economicImpacts).flat()),
+    ].sort((a, b) => a.localeCompare(b))
 
     this.wrangleData(this.transformData(data))
   }
@@ -77,11 +66,10 @@ class Filters {
 
     this.buildEconomicImpactCheckboxes()
 
-    this.renderKPI(data)
   }
 
   buildEconomicImpactCheckboxes() {
-    for (const label of ATOMIC_IMPACTS) {
+    for (const label of this.economicImpactValues) {
       const id = `imp_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
 
       const item = document.createElement("label")
@@ -107,17 +95,7 @@ class Filters {
     }
   }
 
-  renderKPI(data) {
-    d3.select("#rowCount").text(data.rows)
-    d3.select("#cityCount").text(data.cities)
-    d3.select("#countryCount").text(data.countries)
-    d3.select("#tableMeta").text(
-      `Showing ${Math.min(data.rows, 250)} of ${data.rows}`
-    )
-  }
-
   update(data) {
-    this.renderKPI(data)
   }
 
   getEconomicImpactCheckboxes() {
