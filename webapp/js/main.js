@@ -152,9 +152,7 @@ class ExplorationMode {
   }
 
   update() {
-    this.components.filters.update(
-      this.components.filters.transformData(this.filteredData)
-    )
+    this.components.filters.update()
 
     this.components.kpis.update(
       this.components.kpis.transformData(this.filteredData)
