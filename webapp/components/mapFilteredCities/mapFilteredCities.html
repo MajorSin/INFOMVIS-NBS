@@ -1,7 +1,25 @@
 <section id="map" class="card">
-  <h2>Map of filtered cities</h2>
+  <div class="card-header">
+    <h2>Map of filtered cities</h2>
 
-  <svg id="mapVis" width="920" height="460" role="img"></svg>
+    <div id="mapOptions" class="toggle-group">
+      <input
+        type="radio"
+        id="countryCheckbox"
+        name="map"
+        value="country"
+        checked
+      />
+      <label for="countryCheckbox">Per country</label>
+
+      <input type="radio" id="cityCheckbox" name="map" value="city" />
+      <label for="cityCheckbox">Per city</label>
+    </div>
+  </div>
+
+  <div>
+    <svg id="mapVis" width="920" height="460" role="img"></svg>
+  </div>
 
   <div id="mapHelp">
     Circles represent cities in the filtered results (size = number of

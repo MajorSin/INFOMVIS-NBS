@@ -78,6 +78,15 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "selectedCountries", {
+      get: () => _selectedCountries,
+      set: (value) => {
+        _selectedCountries = value
+        this.filterData()
+        this.update()
+      },
+    })
   }
 
   async init() {
@@ -88,7 +97,7 @@ class ExplorationMode {
 
   async loadWorldMap() {
     const topo = await fetch(
-      "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
+      "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
     ).then((r) => r.json())
     this.worldmapData = topojson.feature(topo, topo.objects.countries)
   }
@@ -145,9 +154,16 @@ class ExplorationMode {
     }
 
     const fundingComponent = this.components.funding
+    // todo: put this in funding  component and everything else in a list
     fundingComponent.fundingOptionsInput.on("change", (element) => {
       fundingComponent.currentOption = element.target.value
       fundingComponent.update(fundingComponent.transformData(this.filteredData))
+    })
+
+    const mapComponent = this.components.mapFilteredCities
+    mapComponent.mapOptions.on("change", (element) => {
+      mapComponent.currentOption = element.target.value
+      mapComponent.update(mapComponent.transformData(this.filteredData))
     })
   }
 
@@ -171,6 +187,7 @@ class ExplorationMode {
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
+      // todo: fix this and make cost a range slider
       if (r.start_year != null && r.end_year != null) {
         if (
           r.start_year < window.yearRange.min ||
