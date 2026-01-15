@@ -169,6 +169,7 @@ class Filters {
       checkbox.type = "checkbox"
       checkbox.value = label
       checkbox.id = id
+      checkbox.checked = window.selectedEconomicImpacts.includes(label)
 
       checkbox.addEventListener("change", () => {
         window.selectedEconomicImpacts = this.getSelectedEconomicImpacts()
@@ -220,6 +221,7 @@ class Filters {
       checkbox.type = "checkbox"
       checkbox.value = label
       checkbox.id = id
+      checkbox.checked = window.selectedAreaTypes.includes(label)
 
       checkbox.addEventListener("change", () => {
         window.selectedAreaTypes = this.getSelectedAreaTypes()
