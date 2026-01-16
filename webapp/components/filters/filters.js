@@ -1,5 +1,8 @@
 class Filters {
   constructor(data) {
+    this.countriesDropdown = null
+    this.citiesDropdown = null
+
     this.startYearBounds = null
     this.yearRangeSlider = null
 
@@ -18,6 +21,9 @@ class Filters {
     window._selectedAreaTypes = []
     window._selectedFundingSource = []
     window._selectedCountries = []
+    window._selectedCities = []
+
+    this.dropdownCalled = false
 
     this.init(data)
   }
@@ -134,6 +140,46 @@ class Filters {
       },
     })
 
+    this.countriesDropdown = new TomSelect("#countriesInput", {
+      options: meta.countries.map((v) => ({
+        value: v,
+        text: v,
+      })),
+      create: false,
+      maxItems: null,
+      plugins: {
+        remove_button: {
+          title: "Remove this item",
+        },
+      },
+      placeholder: "e.g. Netherlands",
+      onChange: (e) => {
+        this.dropdownCalled = true
+        window.selectedCountries = this.countriesDropdown.items
+        this.dropdownCalled = false
+      },
+    })
+
+    this.citiesDropdown = new TomSelect("#cityInput", {
+      options: meta.cities.map((v) => ({
+        value: v,
+        text: v,
+      })),
+      create: false,
+      maxItems: null,
+      plugins: {
+        remove_button: {
+          title: "Remove this item",
+        },
+      },
+      placeholder: "e.g. Rotterdam",
+      onChange: (e) => {
+        this.dropdownCalled = true
+        window.selectedCities = this.citiesDropdown.items
+        this.dropdownCalled = false
+      },
+    })
+
     this.render(meta)
   }
 
@@ -156,6 +202,11 @@ class Filters {
   }
 
   update(meta) {
+    if (!this.dropdownCalled) {
+      this.countriesDropdown.setValue(window.selectedCountries, true)
+      this.citiesDropdown.setValue(window.selectedCities, true)
+    }
+
     this.updateStartYearUI()
     this.updateNbsAreaUI()
     this.updateCostUI()
@@ -358,8 +409,12 @@ class Filters {
       nbsAreaRange: { min: d3.min(areas), max: d3.max(areas) },
       costRange: { min: 0, max: d3.max(cost) },
       rows: data.length,
-      cities: new Set(data.map((d) => d.city)).size,
-      countries: new Set(data.map((d) => d.country)).size,
+      cities: [...new Set(data.map((d) => d.city))]
+        .filter((r) => r != null)
+        .sort((a, b) => a.localeCompare(b)),
+      countries: [...new Set(data.map((d) => d.country))]
+        .filter((r) => r != null)
+        .sort((a, b) => a.localeCompare(b)),
       fundingSources: data.flatMap((d) => d.__fundingSources || []),
     }
   }

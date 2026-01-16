@@ -57,3 +57,35 @@
   font-size: 12px;
   text-align: center;
 }
+
+.ts-control {
+  background-color: var(--soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.ts-control input {
+  color: var(--text);
+  padding: 1px 4px !important;
+}
+
+.ts-dropdown {
+  background-color: #1b212f;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0px 0px 10px 10px;
+  overflow: hidden;
+  box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
+.ts-dropdown .active {
+  background-color: #2ed8e6;
+  color: black;
+}
+
+.ts-wrapper .item {
+  border-radius: 3px;
+  background-color: #1096a4 !important;
+  color: black !important;
+}
