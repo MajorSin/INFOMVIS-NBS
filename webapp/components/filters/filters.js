@@ -16,6 +16,7 @@ class Filters {
     window._selectedAreaTypes = []
     window._selectedTotalCosts = []
     window._selectedFundingSource = []
+    window._selectedCountries = []
 
     this.init(data)
   }

@@ -3,7 +3,7 @@ class ExplorationMode {
     this.data = []
     this.filteredData = []
     this.filteredDataForMap = []
-    this.worldmapData = null
+    this.topo = null
 
     this.components = null
 
@@ -78,6 +78,16 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "selectedCountries", {
+      get: () => _selectedCountries,
+      set: (value) => {
+        console.log(value)
+        _selectedCountries = value
+        this.filterData()
+        this.update()
+      },
+    })
   }
 
   async init() {
@@ -87,10 +97,9 @@ class ExplorationMode {
   }
 
   async loadWorldMap() {
-    const topo = await fetch(
+    this.topo = await fetch(
       "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
     ).then((r) => r.json())
-    this.worldmapData = topojson.feature(topo, topo.objects.countries)
   }
 
   splitMultiValueField(v) {
@@ -139,15 +148,23 @@ class ExplorationMode {
       results: new Results(this.filteredData),
       mapFilteredCities: new MapFilteredCities({
         rows: this.filteredData,
-        geo: this.worldmapData,
+        topo: this.topo,
+        geo: topojson.feature(this.topo, this.topo.objects.countries),
       }),
       funding: new Funding(this.filteredData),
     }
 
     const fundingComponent = this.components.funding
+    // todo: put this in funding  component and everything else in a list
     fundingComponent.fundingOptionsInput.on("change", (element) => {
       fundingComponent.currentOption = element.target.value
       fundingComponent.update(fundingComponent.transformData(this.filteredData))
+    })
+
+    const mapComponent = this.components.mapFilteredCities
+    mapComponent.mapOptions.on("change", (element) => {
+      mapComponent.currentOption = element.target.value
+      mapComponent.update(mapComponent.transformData(this.filteredDataForMap))
     })
   }
 
@@ -171,6 +188,7 @@ class ExplorationMode {
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
+      // todo: fix this and make cost a range slider
       if (r.start_year != null && r.end_year != null) {
         if (
           r.start_year < window.yearRange.min ||
@@ -240,12 +258,14 @@ class ExplorationMode {
 
     this.filteredDataForMap = tempFiltered
 
-    this.filteredData =
-      window.selectedCities.length > 0
-        ? tempFiltered.filter((r) =>
-            window.selectedCities.some((c) => r.city == c)
-          )
-        : tempFiltered
+    // Todo: Decide on filtering all data or only selected for map
+    this.filteredData = tempFiltered.filter(
+      (r) =>
+        (window.selectedCities.length <= 0 ||
+          window.selectedCities.some((c) => r.city == c)) &&
+        (window.selectedCountries.length <= 0 ||
+          window.selectedCountries.some((c) => r.country == c))
+    )
   }
 }
 

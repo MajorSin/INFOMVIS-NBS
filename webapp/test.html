@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Leaflet + TopoJSON (Fixed + Click)</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
+
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      #map {
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <script>
+      const map = L.map("map").setView([20, 0], 2)
+
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map)
+
+      const countryStyle = {
+        color: "#000000",
+        weight: 1,
+        fillColor: "#1f78b4",
+        fillOpacity: 0.8,
+      }
+
+      // --- FIX FUNCTION: normalize longitudes to avoid 180° jumps ---
+      function normalizeCoords(coords) {
+        return coords.map((ring) => {
+          let lastLng = ring[0][0]
+
+          return ring.map(([lng, lat]) => {
+            while (lng - lastLng > 180) lng -= 360
+            while (lng - lastLng < -180) lng += 360
+            lastLng = lng
+            return [lng, lat]
+          })
+        })
+      }
+
+      fetch("https://unpkg.com/world-atlas@2/countries-110m.json")
+        .then((res) => res.json())
+        .then((topoData) => {
+          let countries = topojson.feature(topoData, topoData.objects.countries)
+
+          // Fix antimeridian artifacts
+          countries.features.forEach((f) => {
+            if (f.geometry.type === "Polygon") {
+              f.geometry.coordinates = normalizeCoords(f.geometry.coordinates)
+            }
+            if (f.geometry.type === "MultiPolygon") {
+              f.geometry.coordinates =
+                f.geometry.coordinates.map(normalizeCoords)
+            }
+          })
+
+          L.geoJSON(countries, {
+            style: countryStyle,
+
+            // 👉 THIS PART ADDS THE CLICK LISTENER
+            onEachFeature: function (feature, layer) {
+              layer.on("click", function () {
+                console.log(feature.properties.name)
+              })
+            },
+          }).addTo(map)
+        })
+    </script>
+  </body>
+</html>
