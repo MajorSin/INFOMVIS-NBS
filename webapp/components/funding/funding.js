@@ -23,7 +23,7 @@ class Funding {
 
     this.tooltip = d3.select("#fundingTooltip")
 
-    this.fundingOptionsInput = d3.selectAll(".toggle-group input")
+    this.fundingOptionsInput = d3.selectAll("#fundingOptions input")
 
     this.currentOption = "totalProjects"
 
