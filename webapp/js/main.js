@@ -82,7 +82,6 @@ class ExplorationMode {
     Object.defineProperty(window, "selectedCountries", {
       get: () => _selectedCountries,
       set: (value) => {
-        console.log(value)
         _selectedCountries = value
         this.filterData()
         this.update()
