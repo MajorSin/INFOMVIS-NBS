@@ -48,10 +48,10 @@ class MapFilteredCities {
   wrangleData(data) {
     this.allCountries = data.geo.features
 
-    this.radiusScale = d3.scaleSqrt().range([2, 20])
+    this.radiusScale = d3.scaleSqrt().range([4, 24])
     this.colorScale = d3
       .scaleSymlog()
-      .range(["rgb(201, 229, 238)", "rgb(0, 29, 191)"])
+      .range(["rgb(238, 247, 250)", "rgb(15, 43, 204)"])
 
     this.update(this.transformData(data.rows))
   }
@@ -70,28 +70,46 @@ class MapFilteredCities {
 
     this.cityPath = L.geoJSON(data.features, {
       pointToLayer: (d, latlng) =>
-        new L.circleMarker(latlng, {
-          radius: this.radiusScale(d.count),
-          fillColor: "rgb(255, 255, 255)",
-          fillOpacity: 0.8,
-          color: "rgb(255, 255, 255)",
-        }),
+        new L.circleMarker(latlng, this.cityPointStyle(d)),
       onEachFeature: (d, layer) => {
-        layer.on("mouseover", (event) =>
+        layer.on("mouseover", (event) => {
+          layer.setStyle(this.cityPointStyle(d, true))
           this.tooltip
             .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
             .style("left", event.originalEvent.pageX + 10 + "px")
             .style("top", event.originalEvent.pageY - 10 + "px")
             .style("display", "block")
-        )
+        })
         layer.on("mousemove", (event) =>
           this.tooltip
             .style("left", event.originalEvent.pageX + 10 + "px")
             .style("top", event.originalEvent.pageY - 10 + "px")
         )
-        layer.on("mouseout", () => this.tooltip.style("display", "none"))
+        layer.on(
+          "click",
+          () =>
+            (window.selectedCities = window.selectedCities.some(
+              (s) => s == d.city
+            )
+              ? window.selectedCities.filter((s) => s != d.city)
+              : [...window.selectedCities, d.city])
+        )
+        layer.on("mouseout", () => {
+          layer.setStyle(this.cityPointStyle(d))
+          this.tooltip.style("display", "none")
+        })
       },
     }).addTo(this.map)
+  }
+
+  cityPointStyle(d, hover = false) {
+    const included = window.selectedCities.includes(d.city)
+    return {
+      radius: this.radiusScale(d.count),
+      fillOpacity: hover ? 1 : 0.7,
+      fillColor: included ? "white" : "#17becf",
+      color: included ? "white" : "#17becf",
+    }
   }
 
   updateCountries(data) {
@@ -101,11 +119,13 @@ class MapFilteredCities {
     this.colorScale.domain([0, max])
 
     this.countryPath = L.geoJSON(data.features, {
-      style: (country) => ({
+      style: (d) => ({
         color: "black",
         weight: 1,
-        fillColor: this.colorScale(country.values.count),
-        fillOpacity: 0.8,
+        fillColor: this.colorScale(d.values.count),
+        fillOpacity: window.selectedCountries.includes(d.values.country)
+          ? 0.9
+          : 0.7,
       }),
       onEachFeature: (d, layer) => {
         layer.on("click", () =>

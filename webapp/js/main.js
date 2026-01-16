@@ -82,6 +82,7 @@ class ExplorationMode {
     Object.defineProperty(window, "selectedCountries", {
       get: () => _selectedCountries,
       set: (value) => {
+        console.log(value)
         _selectedCountries = value
         this.filterData()
         this.update()
@@ -163,7 +164,7 @@ class ExplorationMode {
     const mapComponent = this.components.mapFilteredCities
     mapComponent.mapOptions.on("change", (element) => {
       mapComponent.currentOption = element.target.value
-      mapComponent.update(mapComponent.transformData(this.filteredData))
+      mapComponent.update(mapComponent.transformData(this.filteredDataForMap))
     })
   }
 
@@ -257,12 +258,14 @@ class ExplorationMode {
 
     this.filteredDataForMap = tempFiltered
 
-    this.filteredData =
-      window.selectedCities.length > 0
-        ? tempFiltered.filter((r) =>
-            window.selectedCities.some((c) => r.city == c)
-          )
-        : tempFiltered
+    // Todo: Decide on filtering all data or only selected for map
+    this.filteredData = tempFiltered.filter(
+      (r) =>
+        (window.selectedCities.length <= 0 ||
+          window.selectedCities.some((c) => r.city == c)) &&
+        (window.selectedCountries.length <= 0 ||
+          window.selectedCountries.some((c) => r.country == c))
+    )
   }
 }
 
