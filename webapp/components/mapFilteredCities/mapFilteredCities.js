@@ -69,16 +69,36 @@ class MapFilteredCities {
   }
 
   updateCities(data) {
-    const max = d3.max(data.map((d) => d.count))
+    // console.log(data)
+    const max = d3.max(data.features.map((d) => d.count))
     this.rScale.domain([1, max])
-    var circle = data.map((d) =>
-      L.circle(d.coordinates, {
-        style: {fillColor: "rgb(255, 255, 255)",
+    L.geoJSON(data.features, {
+      style: {
+        fillColor: "rgb(255, 255, 255)",
         fillOpacity: 0.8,
-        radius: this.rScale(d.count),
-        color: "rgb(255, 255, 255)",}
-      }).addTo(this.map).on("click", (d, e) => console.log(d))
-    )
+        // radius: this.rScale(d.count),
+        color: "rgb(255, 255, 255)",
+      },
+      pointToLayer: (feature, latlng) => {
+          return new L.circleMarker(latlng, {
+            radius: 20,
+          })
+        
+      },
+    }).addTo(this.map)
+
+    // var circle = data.map((d) =>
+    //   L.circle(d.coordinates, {
+    //     style: {
+    //       fillColor: "rgb(255, 255, 255)",
+    //       fillOpacity: 0.8,
+    //       radius: this.rScale(d.count),
+    //       color: "rgb(255, 255, 255)",
+    //     },
+    //   })
+    //     .addTo(this.map)
+    //     .on("click", (d, e) => console.log(d))
+    // )
     // data.map((d) =>
     // L.circleMarker(d.coordinates, {
     //   style: this.cityStyle,
@@ -229,20 +249,27 @@ class MapFilteredCities {
       }
     }
 
-    return Array.from(
-      d3.rollup(
-        data,
-        (leaves) => leaves,
-        (d) => d.coordinates
+    return {
+      type: "FeatureCollection",
+      features: Array.from(
+        d3.rollup(
+          data,
+          (leaves) => leaves,
+          (d) => d.coordinates
+        )
       )
-    )
-      .filter((d) => d[0] != null)
-      .map((d) => ({
-        coordinates: this.parseCoordinate(d[0]),
-        count: d[1].length,
-        city: d[1][0].city,
-        country: d[1][0].country,
-      }))
+        .filter((d) => d[0] != null)
+        .map((d) => ({
+          type: "Feature",
+          geometry: {
+            type: "Point",
+            coordinates: this.parseCoordinate(d[0]),
+          },
+          count: d[1].length,
+          city: d[1][0].city,
+          country: d[1][0].country,
+        })),
+    }
   }
 
   parseCoordinate(pointRaw) {
@@ -250,6 +277,7 @@ class MapFilteredCities {
       .substring(1, pointRaw.length - 1)
       .split(",")
       .map(Number)
+      .reverse()
   }
 
   normalizeCoords(coords) {
