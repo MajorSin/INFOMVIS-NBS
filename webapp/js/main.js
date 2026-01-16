@@ -61,15 +61,6 @@ class ExplorationMode {
       },
     })
 
-    Object.defineProperty(window, "searchQuery", {
-      get: () => _searchQuery,
-      set: (value) => {
-        _searchQuery = value
-        this.filterData()
-        this.update()
-      },
-    })
-
     Object.defineProperty(window, "selectedCities", {
       get: () => _selectedCities,
       set: (value) => {
@@ -236,20 +227,7 @@ class ExplorationMode {
         }
       }
 
-      const searchFields = [
-        r.name_of_the_nbs_intervention_short_english_title,
-        r.native_title_of_the_nbs_intervention,
-        r.city,
-        r.country,
-        r.economic_impacts,
-        r.type_of_area_before_implementation_of_the_nbs,
-        r.total_cost,
-        r.sources_of_funding,
-      ]
-        .map((x) => x?.toLowerCase())
-        .join(",")
-
-      return searchFields.includes(window.searchQuery)
+      return true
     })
 
     this.filteredDataForMap = tempFiltered

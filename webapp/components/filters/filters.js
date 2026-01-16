@@ -16,7 +16,6 @@ class Filters {
     this.areaTypeValues = []
     this.fundingSourceValues = []
 
-    window._searchQuery = ""
     window._selectedEconomicImpacts = []
     window._selectedAreaTypes = []
     window._selectedFundingSource = []
