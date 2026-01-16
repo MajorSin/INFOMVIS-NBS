@@ -1,7 +1,7 @@
 class MapFilteredCities {
   constructor(data) {
     window._selectedCities = []
-    this.countriesData = []
+    this.allCountries = []
 
     this.map = L.map("mapArea").setView([20, 0], 2)
 
@@ -9,26 +9,7 @@ class MapFilteredCities {
       attribution: "© OpenStreetMap contributors",
     }).addTo(this.map)
 
-    // this.svg = d3.select("#mapVis")
-    // this.svgGroup = this.svg.append("g")
-    // this.countriesPath = this.svgGroup.append("g").attr("id", "countries")
-    // this.pointsGroup = this.svgGroup.append("g").attr("id", "points")
     this.tooltip = d3.select("#mapTooltip")
-
-    // this.w = this.svg.attr("width")
-    // this.h = this.svg.attr("height")
-
-    // this.zoom = d3
-    //   .zoom()
-    //   .scaleExtent([0.5, 8])
-    //   .on("zoom", (event) => this.svgGroup.attr("transform", event.transform))
-    // this.projection = d3
-    //   .geoMercator()
-    //   .scale(this.w / 2.5 / Math.PI)
-    //   .translate([this.w / 2, this.h / 2])
-    // this.geoPath = d3.geoPath().projection(this.projection)
-
-    // this.svg.call(this.zoom)
 
     this.currentOption = "country"
     this.mapOptions = d3.selectAll("#mapOptions input")
@@ -37,24 +18,28 @@ class MapFilteredCities {
   }
 
   init(data) {
-    data.geo.features.forEach((f) => {
-      if (f.geometry.type === "Polygon") {
-        f.geometry.coordinates = this.normalizeCoords(f.geometry.coordinates)
-      }
-      if (f.geometry.type === "MultiPolygon") {
-        f.geometry.coordinates = f.geometry.coordinates.map(
-          this.normalizeCoords
-        )
-      }
+    this.wrangleData({
+      ...data,
+      geo: {
+        ...data.geo,
+        features: data.geo.features.map((f) => ({
+          ...f,
+          geometry: {
+            ...f.geometry,
+            coordinates:
+              f.geometry.type == "Polygon"
+                ? this.normalizeCoords(f.geometry.coordinates)
+                : f.geometry.coordinates.map(this.normalizeCoords),
+          },
+        })),
+      },
     })
-
-    this.wrangleData(data)
   }
 
   wrangleData(data) {
-    this.countriesData = data.geo.features
+    this.allCountries = data.geo.features
 
-    this.rScale = d3.scaleSqrt().range([2.5, 12])
+    this.radiusScale = d3.scaleSqrt().range([2, 20])
     this.colorScale = d3
       .scaleSymlog()
       .range(["rgb(201, 229, 238)", "rgb(0, 29, 191)"])
@@ -69,102 +54,33 @@ class MapFilteredCities {
   }
 
   updateCities(data) {
-    // console.log(data)
     const max = d3.max(data.features.map((d) => d.count))
-    this.rScale.domain([1, max])
+    this.radiusScale.domain([1, max])
+
     L.geoJSON(data.features, {
-      style: {
-        fillColor: "rgb(255, 255, 255)",
-        fillOpacity: 0.8,
-        // radius: this.rScale(d.count),
-        color: "rgb(255, 255, 255)",
-      },
-      pointToLayer: (feature, latlng) => {
-          return new L.circleMarker(latlng, {
-            radius: 20,
-          })
-        
+      pointToLayer: (d, latlng) =>
+        new L.circleMarker(latlng, {
+          radius: this.radiusScale(d.count),
+          fillColor: "rgb(255, 255, 255)",
+          fillOpacity: 0.8,
+          color: "rgb(255, 255, 255)",
+        }),
+      onEachFeature: (d, layer) => {
+        layer.on("mouseover", (event) =>
+          this.tooltip
+            .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
+            .style("left", event.pageX + 10 + "px")
+            .style("top", event.pageY - 10 + "px")
+            .style("display", "block")
+        )
+        layer.on("mousemove", (event) =>
+          this.tooltip
+            .style("left", event.pageX + 10 + "px")
+            .style("top", event.pageY - 10 + "px")
+        )
+        layer.on("mouseout", () => this.tooltip.style("display", "none"))
       },
     }).addTo(this.map)
-
-    // var circle = data.map((d) =>
-    //   L.circle(d.coordinates, {
-    //     style: {
-    //       fillColor: "rgb(255, 255, 255)",
-    //       fillOpacity: 0.8,
-    //       radius: this.rScale(d.count),
-    //       color: "rgb(255, 255, 255)",
-    //     },
-    //   })
-    //     .addTo(this.map)
-    //     .on("click", (d, e) => console.log(d))
-    // )
-    // data.map((d) =>
-    // L.circleMarker(d.coordinates, {
-    //   style: this.cityStyle,
-    // }).addTo(this.map)
-    // )
-    // console.log(data)
-    // this.pointsGroup
-    //   .selectAll("circle")
-    //   .data(data, (d) => d.city)
-    //   .join(
-    //     (enter) =>
-    //       enter
-    //         .append("circle")
-    //         .attr(
-    //           "class",
-    //           (d) =>
-    //             `mapPoint${
-    //               window.selectedCities.some((s) => s == d.city)
-    //                 ? " selected"
-    //                 : ""
-    //             }`
-    //         )
-    //         .attr("cx", (d) => d.coordinates.x)
-    //         .attr("cy", (d) => d.coordinates.y)
-    //         .on("click", (event, d) => {
-    //           window.selectedCities = window.selectedCities.some(
-    //             (s) => s == d.city
-    //           )
-    //             ? window.selectedCities.filter((s) => s != d.city)
-    //             : [...window.selectedCities, d.city]
-    //           d3.select(event.target).attr(
-    //             "class",
-    //             (d) =>
-    //               `mapPoint${
-    //                 window.selectedCities.some((s) => s == d.city)
-    //                   ? " selected"
-    //                   : ""
-    //               }`
-    //           )
-    //         })
-    //         .on("mouseover", (event, d) =>
-    //           this.tooltip
-    //             .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
-    //             .style("left", event.pageX + 10 + "px")
-    //             .style("top", event.pageY - 10 + "px")
-    //             .style("display", "block")
-    //         )
-    //         .on("mousemove", (event) =>
-    //           this.tooltip
-    //             .style("left", event.pageX + 10 + "px")
-    //             .style("top", event.pageY - 10 + "px")
-    //         )
-    //         .on("mouseout", () => this.tooltip.style("display", "none"))
-    //         .call((sel) =>
-    //           sel
-    //             .transition()
-    //             .duration(200)
-    //             .attr("r", (d) => this.rScale(d.count))
-    //         ),
-    //     (update) =>
-    //       update
-    //         .transition()
-    //         .duration(200)
-    //         .attr("r", (d) => this.rScale(d.count)),
-    //     (exit) => exit.remove()
-    //   )
   }
 
   updateCountries(data) {
@@ -172,8 +88,12 @@ class MapFilteredCities {
     this.colorScale.domain([0, max])
 
     L.geoJSON(data.features, {
-      style: this.countryStyle,
-
+      style: (country) => ({
+        color: "black",
+        weight: 1,
+        fillColor: this.colorScale(country.values.count),
+        fillOpacity: 0.8,
+      }),
       onEachFeature: (d, layer) => {
         layer.on("click", () =>
           d.values?.country != null
@@ -203,23 +123,8 @@ class MapFilteredCities {
     }).addTo(this.map)
   }
 
-  countryStyle = (country) => ({
-    color: "black",
-    weight: 1,
-    fillColor: this.colorScale(country.values.count),
-    fillOpacity: 0.8,
-  })
-
-  cityStyle = (city) => ({
-    // color: "black",
-    // radius: this.rScale(city.values.count),
-    // fillOpacity: 0.8,
-    color: "red",
-    fillColor: "#f03",
-    fillOpacity: 0.5,
-  })
-
   transformData(data) {
+    // todo: possible bug when updating
     if (this.currentOption == "country") {
       const countriesData = Array.from(
         d3.rollup(
@@ -230,7 +135,6 @@ class MapFilteredCities {
       )
         .filter((d) => d[0] != null)
         .map((d) => ({
-          // coordinates: this.parseCoordinate(d[1][0].coordinates),
           count: d[1].length,
           country: d[0],
         }))
@@ -238,7 +142,7 @@ class MapFilteredCities {
 
       return {
         ...data.geo,
-        features: this.countriesData.map((row) => ({
+        features: this.allCountries.map((row) => ({
           ...row,
           values: countriesData.find(
             (element) =>
