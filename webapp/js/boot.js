@@ -1,6 +1,6 @@
 async function injectHtml(selectors) {
-  const head = document.head
-  const body = document.body
+  const head = document.getElementsByTagName("head")[0]
+  const body = document.getElementsByTagName("body")[0]
 
   await Promise.all(
     selectors.map(async (selector) => {
