@@ -22,8 +22,6 @@ class Filters {
     window._selectedCountries = []
     window._selectedCities = []
 
-    this.dropdownCalled = false
-
     this.init(data)
   }
 
@@ -152,11 +150,8 @@ class Filters {
         },
       },
       placeholder: "e.g. Netherlands",
-      onChange: (e) => {
-        this.dropdownCalled = true
-        window.selectedCountries = this.countriesDropdown.items
-        this.dropdownCalled = false
-      },
+      onChange: (e) =>
+        (window.selectedCountries = this.countriesDropdown.items),
     })
 
     this.citiesDropdown = new TomSelect("#cityInput", {
@@ -172,11 +167,7 @@ class Filters {
         },
       },
       placeholder: "e.g. Rotterdam",
-      onChange: (e) => {
-        this.dropdownCalled = true
-        window.selectedCities = this.citiesDropdown.items
-        this.dropdownCalled = false
-      },
+      onChange: () => (window.selectedCities = this.citiesDropdown.items),
     })
 
     this.render(meta)
@@ -201,10 +192,8 @@ class Filters {
   }
 
   update(meta) {
-    if (!this.dropdownCalled) {
-      this.countriesDropdown.setValue(window.selectedCountries, true)
-      this.citiesDropdown.setValue(window.selectedCities, true)
-    }
+    this.countriesDropdown.setValue([...window.selectedCountries], true)
+    this.citiesDropdown.setValue([...window.selectedCities], true)
 
     this.updateStartYearUI()
     this.updateNbsAreaUI()
