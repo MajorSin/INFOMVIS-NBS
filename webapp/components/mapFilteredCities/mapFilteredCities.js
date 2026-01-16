@@ -5,14 +5,23 @@ class MapFilteredCities {
 
     this.map = L.map("mapArea").setView([20, 0], 2)
 
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap contributors",
-    }).addTo(this.map)
+    L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: "abcd",
+        maxZoom: 20,
+      }
+    ).addTo(this.map)
 
     this.tooltip = d3.select("#mapTooltip")
 
     this.currentOption = "country"
     this.mapOptions = d3.selectAll("#mapOptions input")
+
+    this.cityPath = L.layerGroup()
+    this.countryPath = L.layerGroup()
 
     this.init(data)
   }
@@ -44,7 +53,7 @@ class MapFilteredCities {
       .scaleSymlog()
       .range(["rgb(201, 229, 238)", "rgb(0, 29, 191)"])
 
-    this.update(this.transformData(data))
+    this.update(this.transformData(data.rows))
   }
 
   update(data) {
@@ -54,10 +63,12 @@ class MapFilteredCities {
   }
 
   updateCities(data) {
+    this.removePaths()
+
     const max = d3.max(data.features.map((d) => d.count))
     this.radiusScale.domain([1, max])
 
-    L.geoJSON(data.features, {
+    this.cityPath = L.geoJSON(data.features, {
       pointToLayer: (d, latlng) =>
         new L.circleMarker(latlng, {
           radius: this.radiusScale(d.count),
@@ -69,14 +80,14 @@ class MapFilteredCities {
         layer.on("mouseover", (event) =>
           this.tooltip
             .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
-            .style("left", event.pageX + 10 + "px")
-            .style("top", event.pageY - 10 + "px")
+            .style("left", event.originalEvent.pageX + 10 + "px")
+            .style("top", event.originalEvent.pageY - 10 + "px")
             .style("display", "block")
         )
         layer.on("mousemove", (event) =>
           this.tooltip
-            .style("left", event.pageX + 10 + "px")
-            .style("top", event.pageY - 10 + "px")
+            .style("left", event.originalEvent.pageX + 10 + "px")
+            .style("top", event.originalEvent.pageY - 10 + "px")
         )
         layer.on("mouseout", () => this.tooltip.style("display", "none"))
       },
@@ -84,10 +95,12 @@ class MapFilteredCities {
   }
 
   updateCountries(data) {
+    this.removePaths()
+
     const max = d3.max(data.features.map((d) => d.values.count))
     this.colorScale.domain([0, max])
 
-    L.geoJSON(data.features, {
+    this.countryPath = L.geoJSON(data.features, {
       style: (country) => ({
         color: "black",
         weight: 1,
@@ -124,11 +137,10 @@ class MapFilteredCities {
   }
 
   transformData(data) {
-    // todo: possible bug when updating
     if (this.currentOption == "country") {
       const countriesData = Array.from(
         d3.rollup(
-          data.rows,
+          data,
           (leaves) => leaves,
           (d) => d.country
         )
@@ -195,5 +207,10 @@ class MapFilteredCities {
         return [lng, lat]
       })
     })
+  }
+
+  removePaths() {
+    this.map.removeLayer(this.cityPath)
+    this.map.removeLayer(this.countryPath)
   }
 }
