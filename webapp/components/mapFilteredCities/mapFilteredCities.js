@@ -69,8 +69,22 @@ class MapFilteredCities {
   }
 
   updateCities(data) {
-    // const max = d3.max(data.map((d) => d.count))
-    // this.rScale.domain([1, max])
+    const max = d3.max(data.map((d) => d.count))
+    this.rScale.domain([1, max])
+    var circle = data.map((d) =>
+      L.circle(d.coordinates, {
+        style: {fillColor: "rgb(255, 255, 255)",
+        fillOpacity: 0.8,
+        radius: this.rScale(d.count),
+        color: "rgb(255, 255, 255)",}
+      }).addTo(this.map).on("click", (d, e) => console.log(d))
+    )
+    // data.map((d) =>
+    // L.circleMarker(d.coordinates, {
+    //   style: this.cityStyle,
+    // }).addTo(this.map)
+    // )
+    // console.log(data)
     // this.pointsGroup
     //   .selectAll("circle")
     //   .data(data, (d) => d.city)
@@ -141,7 +155,7 @@ class MapFilteredCities {
       style: this.countryStyle,
 
       onEachFeature: (d, layer) => {
-        layer.on("click", () => 
+        layer.on("click", () =>
           d.values?.country != null
             ? (window.selectedCountries = window.selectedCountries.includes(
                 d.values.country
@@ -167,55 +181,6 @@ class MapFilteredCities {
         layer.on("mouseout", () => this.tooltip.style("display", "none"))
       },
     }).addTo(this.map)
-    // this.rScale.domain([1, max])
-
-    // this.pointsGroup.html("")
-    // this.countriesPath
-    //   .selectAll("path")
-    //   .data(data, (d) => d.count)
-    //   .join(
-    //     (enter) =>
-    //       enter
-    //         .append("path")
-    //         .attr("d", this.geoPath)
-    //         .attr("fill", (d) => this.colorScale(d.values.count))
-    //         .attr("stroke", "black")
-    //         .attr("class", "countryPath")
-    //         .attr("class", (d) =>
-    //           d.values.count != 0 ? "selectableCountry" : ""
-    //         )
-    //         .on("click", (_, d) => {
-    //           return d.values?.country != null
-    //             ? (window.selectedCountries = window.selectedCountries.includes(
-    //                 d.values.country
-    //               )
-    //                 ? window.selectedCountries.filter(
-    //                     (source) => source != d.values.country
-    //                   )
-    //                 : [...window.selectedCountries, d.values.country])
-    //             : null
-    //         })
-    //         .on("mouseover", (event, d) =>
-    //           this.tooltip
-    //             .html(
-    //               `${d.properties.name}<br/>Projects: ${d.values?.count ?? 0}`
-    //             )
-    //             .style("left", event.pageX + 10 + "px")
-    //             .style("top", event.pageY - 10 + "px")
-    //             .style("display", "block")
-    //         )
-    //         .on("mousemove", (event) =>
-    //           this.tooltip
-    //             .style("left", event.pageX + 10 + "px")
-    //             .style("top", event.pageY - 10 + "px")
-    //         )
-    //         .on("mouseout", () => this.tooltip.style("display", "none")),
-    //     (update) =>
-    //       update.attr(
-    //         "fill",
-    //         (d) => this.colorScale(d.values?.count ?? null) ?? "red"
-    //       )
-    //   )
   }
 
   countryStyle = (country) => ({
@@ -223,6 +188,15 @@ class MapFilteredCities {
     weight: 1,
     fillColor: this.colorScale(country.values.count),
     fillOpacity: 0.8,
+  })
+
+  cityStyle = (city) => ({
+    // color: "black",
+    // radius: this.rScale(city.values.count),
+    // fillOpacity: 0.8,
+    color: "red",
+    fillColor: "#f03",
+    fillOpacity: 0.5,
   })
 
   transformData(data) {
@@ -264,19 +238,19 @@ class MapFilteredCities {
     )
       .filter((d) => d[0] != null)
       .map((d) => ({
-        // coordinates: this.parseCoordinate(d[0]),
+        coordinates: this.parseCoordinate(d[0]),
         count: d[1].length,
         city: d[1][0].city,
         country: d[1][0].country,
       }))
   }
 
-  // parseCoordinate(pointRaw) {
-  //   const point = pointRaw.substring(1, pointRaw.length - 1).split(",")
-  //   const projection = this.projection([point[1], point[0]])
-
-  //   return { x: projection[0], y: projection[1] }
-  // }
+  parseCoordinate(pointRaw) {
+    return pointRaw
+      .substring(1, pointRaw.length - 1)
+      .split(",")
+      .map(Number)
+  }
 
   normalizeCoords(coords) {
     return coords.map((ring) => {
