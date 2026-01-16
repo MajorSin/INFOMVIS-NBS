@@ -52,6 +52,15 @@ class ExplorationMode {
       },
     })
 
+    Object.defineProperty(window, "costRange", {
+      get: () => _costRange,
+      set: (value) => {
+        _costRange = value
+        this.filterData()
+        this.update()
+      },
+    })
+
     Object.defineProperty(window, "searchQuery", {
       get: () => _searchQuery,
       set: (value) => {
@@ -187,26 +196,11 @@ class ExplorationMode {
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
-      // todo: fix this and make cost a range slider
-      if (r.start_year != null && r.end_year != null) {
-        if (
-          r.start_year < window.yearRange.min ||
-          r.end_year > window.yearRange.max
-        )
-          return false
-      } else if (r.start_year != null && r.end_year == null) {
-        if (
-          r.start_year < window.yearRange.min ||
-          r.start_year > window.yearRange.max
-        )
-          return false
-      } else if (r.start_year == null && r.end_year != null) {
-        if (
-          r.end_year < window.yearRange.min ||
-          r.end_year > window.yearRange.max
-        )
-          return false
-      }
+      if (
+        (r.start_year != null && r.start_year < window.yearRange.min) ||
+        (r.end_year != null && r.end_year > window.yearRange.max)
+      )
+        return false
 
       const a = r.nbs_area_m2
       if (Number.isFinite(a)) {
@@ -235,8 +229,11 @@ class ExplorationMode {
         if (!passAreaTypes) return false
       }
 
-      if (window.selectedTotalCosts && window.selectedTotalCosts.length > 0) {
-        if (!window.selectedTotalCosts.includes(r.total_cost)) return false
+      const cost = r.cost
+      if (Number.isFinite(cost)) {
+        if (cost < window.costRange.min || cost > window.costRange.max) {
+          return false
+        }
       }
 
       const searchFields = [

@@ -6,15 +6,16 @@ class Filters {
     this.nbsAreaBounds = null
     this.nbsAreaSlider = null
 
+    this.costBounds = null
+    this.costRangeSlider = null
+
     this.economicImpactValues = []
     this.areaTypeValues = []
-    this.totalCostValues = []
     this.fundingSourceValues = []
 
     window._searchQuery = ""
     window._selectedEconomicImpacts = []
     window._selectedAreaTypes = []
-    window._selectedTotalCosts = []
     window._selectedFundingSource = []
     window._selectedCountries = []
 
@@ -34,10 +35,13 @@ class Filters {
       this.setAreaTypesText()
     })
 
-    d3.select("#clearTotalCosts").on("click", () => {
-      this.getTotalCostCheckboxes().forEach((cb) => (cb.checked = false))
-      window.selectedTotalCosts = []
-      this.setTotalCostsText()
+    d3.select("#resetCostBtn").on("click", () => {
+      window.costRange = {
+        min: this.costBounds.min,
+        max: this.costBounds.max,
+      }
+      this.costRangeSlider.value([this.costBounds.min, this.costBounds.max])
+      this.updateCostUI()
     })
 
     d3.select("#clearFundingSources").on("click", () => {
@@ -81,10 +85,6 @@ class Filters {
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
 
-    this.totalCostValues = [...new Set(data.map((r) => r.total_cost))]
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b))
-
     this.fundingSourceValues = [
       ...new Set(data.map((r) => r.__fundingSources || []).flat()),
     ]
@@ -100,6 +100,9 @@ class Filters {
 
     this.nbsAreaBounds = meta.nbsAreaRange
     window._nbsAreaRange = meta.nbsAreaRange
+
+    this.costBounds = meta.costRange
+    window._costRange = meta.costRange
 
     this.yearRangeSlider = rangeSlider(d3.select("#yearRangeSlider").node(), {
       min: this.startYearBounds.min,
@@ -121,6 +124,16 @@ class Filters {
       },
     })
 
+    this.costRangeSlider = rangeSlider(d3.select("#costRangeSlider").node(), {
+      min: this.costBounds.min,
+      max: this.costBounds.max,
+      value: [this.costBounds.min, this.costBounds.max],
+      onInput: (values) => {
+        window.costRange = { min: values[0], max: values[1] }
+        this.updateStartYearUI()
+      },
+    })
+
     this.render(meta)
   }
 
@@ -135,21 +148,23 @@ class Filters {
       )}`
     )
 
+    d3.select("#costRangeLabel").text(
+      `${meta.costRange.min}–${meta.costRange.max}`
+    )
+
     this.update()
   }
 
   update(meta) {
     this.updateStartYearUI()
     this.updateNbsAreaUI()
+    this.updateCostUI()
 
     this.buildEconomicImpactCheckboxes()
     this.setEconomicImpactsText()
 
     this.buildAreaTypeCheckboxes()
     this.setAreaTypesText()
-
-    this.buildTotalCostCheckboxes()
-    this.setTotalCostsText()
 
     this.buildFundingSourceCheckboxes()
     this.setFundingSourcesText()
@@ -259,57 +274,6 @@ class Filters {
     )
   }
 
-  buildTotalCostCheckboxes() {
-    const container = document.getElementById("totalCostCheckboxes")
-    container.innerHTML = ""
-
-    for (const label of this.totalCostValues) {
-      const id = `cost_${label.replaceAll(/[^a-zA-Z0-9]+/g, "_")}`
-
-      const item = document.createElement("label")
-      item.className = "impactItem"
-      item.setAttribute("for", id)
-
-      const checkbox = document.createElement("input")
-      checkbox.type = "checkbox"
-      checkbox.value = label
-      checkbox.id = id
-
-      checkbox.addEventListener("change", () => {
-        window.selectedTotalCosts = this.getSelectedTotalCosts()
-        this.setTotalCostsText()
-      })
-
-      const text = document.createElement("span")
-      text.textContent = label
-
-      item.appendChild(checkbox)
-      item.appendChild(text)
-      container.appendChild(item)
-    }
-  }
-
-  getTotalCostCheckboxes() {
-    return [
-      ...d3
-        .select("#totalCostCheckboxes")
-        .node()
-        .querySelectorAll('input[type="checkbox"]'),
-    ]
-  }
-
-  getSelectedTotalCosts() {
-    return this.getTotalCostCheckboxes()
-      .filter((cb) => cb.checked)
-      .map((cb) => cb.value)
-  }
-
-  setTotalCostsText() {
-    d3.select("#totalCostMeta").text(
-      `${window.selectedTotalCosts.length} selected`
-    )
-  }
-
   buildFundingSourceCheckboxes() {
     const container = document.getElementById("fundingSourceCheckboxes")
     container.innerHTML = ""
@@ -367,6 +331,11 @@ class Filters {
     d3.select("#startYearMaxVal").text(window.yearRange.max)
   }
 
+  updateCostUI() {
+    d3.select("#costMinVal").text(window.costRange.min)
+    d3.select("#costMaxVal").text(window.costRange.max)
+  }
+
   formatArea(v) {
     if (!Number.isFinite(v)) return "—"
     return `${Math.round(v).toLocaleString()}`
@@ -378,12 +347,16 @@ class Filters {
   }
 
   transformData(data) {
-    const years = data.map((r) => r.start_year).filter(Number.isFinite)
     const areas = data.map((r) => r.nbs_area_m2).filter(Number.isFinite)
+    const cost = data.map((r) => r.cost)
 
     return {
-      yearRange: { min: d3.min(years), max: d3.max(years) },
+      yearRange: {
+        min: d3.min(data.map((r) => r.start_year)),
+        max: d3.max(data.map((r) => r.end_year)),
+      },
       nbsAreaRange: { min: d3.min(areas), max: d3.max(areas) },
+      costRange: { min: 0, max: d3.max(cost) },
       rows: data.length,
       cities: new Set(data.map((d) => d.city)).size,
       countries: new Set(data.map((d) => d.country)).size,
