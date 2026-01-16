@@ -150,6 +150,7 @@ tbody tr:hover td {
   border-radius: 4px;
   font-size: 12px;
   color: var(--text);
+  z-index: 400;
 }
 
 .toggle-group {

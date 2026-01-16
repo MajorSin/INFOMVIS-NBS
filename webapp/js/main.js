@@ -3,7 +3,7 @@ class ExplorationMode {
     this.data = []
     this.filteredData = []
     this.filteredDataForMap = []
-    this.worldmapData = null
+    this.topo = null
 
     this.components = null
 
@@ -96,10 +96,9 @@ class ExplorationMode {
   }
 
   async loadWorldMap() {
-    const topo = await fetch(
+    this.topo = await fetch(
       "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
     ).then((r) => r.json())
-    this.worldmapData = topojson.feature(topo, topo.objects.countries)
   }
 
   splitMultiValueField(v) {
@@ -148,7 +147,8 @@ class ExplorationMode {
       results: new Results(this.filteredData),
       mapFilteredCities: new MapFilteredCities({
         rows: this.filteredData,
-        geo: this.worldmapData,
+        topo: this.topo,
+        geo: topojson.feature(this.topo, this.topo.objects.countries),
       }),
       funding: new Funding(this.filteredData),
     }

@@ -2,9 +2,8 @@ class MapFilteredCities {
   constructor(data) {
     window._selectedCities = []
     this.countriesData = []
-    this.geo = data.geo
 
-    this.map = L.map("map").setView([20, 0], 2)
+    this.map = L.map("mapArea").setView([20, 0], 2)
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: "© OpenStreetMap contributors",
@@ -14,7 +13,7 @@ class MapFilteredCities {
     // this.svgGroup = this.svg.append("g")
     // this.countriesPath = this.svgGroup.append("g").attr("id", "countries")
     // this.pointsGroup = this.svgGroup.append("g").attr("id", "points")
-    // this.tooltip = d3.select("#mapTooltip")
+    this.tooltip = d3.select("#mapTooltip")
 
     // this.w = this.svg.attr("width")
     // this.h = this.svg.attr("height")
@@ -60,7 +59,7 @@ class MapFilteredCities {
       .scaleSymlog()
       .range(["rgb(201, 229, 238)", "rgb(0, 29, 191)"])
 
-    this.update(this.transformData(data.rows))
+    this.update(this.transformData(data))
   }
 
   update(data) {
@@ -135,19 +134,39 @@ class MapFilteredCities {
   }
 
   updateCountries(data) {
-    const countryStyle = this.countryStyle(data)
+    const max = d3.max(data.features.map((d) => d.values.count))
+    this.colorScale.domain([0, max])
 
-    L.geoJSON(this.geo, {
-      style: countryStyle,
+    L.geoJSON(data.features, {
+      style: this.countryStyle,
 
-      onEachFeature: function (feature, layer) {
-        layer.on("click", function () {
-          console.log(feature.properties.name)
-        })
+      onEachFeature: (d, layer) => {
+        layer.on("click", () => 
+          d.values?.country != null
+            ? (window.selectedCountries = window.selectedCountries.includes(
+                d.values.country
+              )
+                ? window.selectedCountries.filter(
+                    (source) => source != d.values.country
+                  )
+                : [...window.selectedCountries, d.values.country])
+            : null
+        )
+        layer.on("mouseover", (event) =>
+          this.tooltip
+            .html(`${d.properties.name}<br/>Projects: ${d.values.count}`)
+            .style("left", event.originalEvent.pageX + 10 + "px")
+            .style("top", event.originalEvent.pageY - 10 + "px")
+            .style("display", "block")
+        )
+        layer.on("mousemove", (event) =>
+          this.tooltip
+            .style("left", event.originalEvent.pageX + 10 + "px")
+            .style("top", event.originalEvent.pageY - 10 + "px")
+        )
+        layer.on("mouseout", () => this.tooltip.style("display", "none"))
       },
     }).addTo(this.map)
-    // const max = d3.max(data.map((d) => d.values.count))
-    // this.colorScale.domain([0, max])
     // this.rScale.domain([1, max])
 
     // this.pointsGroup.html("")
@@ -199,22 +218,18 @@ class MapFilteredCities {
     //   )
   }
 
-  countryStyle(data) {
-    return (country) => {
-      return ({
-        color: "#000000",
-        weight: 1,
-        fillColor: "#1f78b4",
-        fillOpacity: 0.8,
-      })
-    }
-  }
+  countryStyle = (country) => ({
+    color: "black",
+    weight: 1,
+    fillColor: this.colorScale(country.values.count),
+    fillOpacity: 0.8,
+  })
 
   transformData(data) {
     if (this.currentOption == "country") {
       const countriesData = Array.from(
         d3.rollup(
-          data,
+          data.rows,
           (leaves) => leaves,
           (d) => d.country
         )
@@ -227,14 +242,17 @@ class MapFilteredCities {
         }))
         .sort((a, b) => b.count - a.count)
 
-      return this.countriesData.map((row) => ({
-        ...row,
-        values: countriesData.find(
-          (element) =>
-            element.country.includes(row.properties.name) ||
-            row.properties.name.includes(element.country)
-        ) ?? { count: 0 },
-      }))
+      return {
+        ...data.geo,
+        features: this.countriesData.map((row) => ({
+          ...row,
+          values: countriesData.find(
+            (element) =>
+              element.country.includes(row.properties.name) ||
+              row.properties.name.includes(element.country)
+          ) ?? { count: 0 },
+        })),
+      }
     }
 
     return Array.from(
