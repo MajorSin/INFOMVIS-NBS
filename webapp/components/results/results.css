@@ -6,6 +6,10 @@
   margin: 0px 5px;
 }
 
+.tableHeader h2 {
+  margin-bottom: 0px;
+}
+
 #tableMeta {
   color: var(--muted);
   font-size: 12px;

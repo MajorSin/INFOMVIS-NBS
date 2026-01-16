@@ -4,51 +4,70 @@ async function injectHtml(selectors) {
 
   await Promise.all(
     selectors.map(async (selector) => {
-      const {
-        element,
-        url,
-        styleSheet = null,
-        jsFile = null,
-        required = false, // default: optional
-      } = selector
-
-      const mount = document.querySelector(element)
-      if (!mount) {
-        if (required) throw new Error(`Mount not found: ${element}`)
-        return // just skip on pages that don't have it
+      if (selector.styleSheet != null) {
+        let link = document.createElement("link")
+        link.rel = "stylesheet"
+        link.type = "text/css"
+        link.href = selector.styleSheet
+        link.media = "all"
+        head.appendChild(link)
       }
 
-      // Mount stylesheet (avoid duplicates)
-      if (styleSheet) {
-        const already = head.querySelector(`link[rel="stylesheet"][href="${styleSheet}"]`)
-        if (!already) {
-          const link = document.createElement("link")
-          link.rel = "stylesheet"
-          link.href = styleSheet
-          head.appendChild(link)
-        }
+      if (selector.jsFile != null) {
+        let script = document.createElement("script")
+        script.src = selector.jsFile
+        script.type = "text/javascript"
+        body.appendChild(script)
       }
 
-      // Mount javascript file (avoid duplicates)
-      if (jsFile) {
-        const already = body.querySelector(`script[src="${jsFile}"]`)
-        if (!already) {
-          const script = document.createElement("script")
-          script.src = jsFile
-          script.type = "text/javascript"
-          script.defer = true
-          body.appendChild(script)
-        }
-      }
+      const mount = document.querySelector(selector.element)
+      if (!mount) throw new Error(`Mount not found: ${selector.element}`)
 
-      // Mount HTML file
-      const res = await fetch(url, { cache: "no-cache" })
+      const res = await fetch(selector.url, { cache: "no-cache" })
       if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`)
       mount.innerHTML = await res.text()
     })
   )
 }
 
+async function boot_similarity(jsFile) {
+  await injectHtml([
+    {
+      element: "#filtersMount",
+      url: "./components/filters/filters.html",
+      styleSheet: "./components/filters/filters.css",
+      jsFile: "./components/filters/filters.js",
+    },
+    {
+      element: "#navMount",
+      url: "./components/navbar/navbar.html",
+      styleSheet: "./components/navbar/navbar.css",
+    },
+    {
+      element: "#mapSimilarityBandsMount",
+      url: "./components/mapSimilarityBands/mapSimilarityBands.html",
+      styleSheet: "./components/mapSimilarityBands/mapSimilarityBands.css",
+      jsFile: "./components/mapSimilarityBands/mapSimilarityBands.js",
+    },
+    {
+      element: "#resultsMount",
+      url: "./components/results/results.html",
+      styleSheet: "./components/results/results.css",
+      jsFile: "./components/results/results.js",
+    },
+    {
+      element: "#kpisMount",
+      url: "./components/kpis/kpis.html",
+      styleSheet: "./components/kpis/kpis.css",
+      jsFile: "./components/kpis/kpis.js",
+    },
+  ])
+
+
+  const script = document.createElement("script")
+  script.src = jsFile
+  document.body.appendChild(script)
+}
 
 async function boot(jsFile) {
   await injectHtml([
@@ -64,16 +83,16 @@ async function boot(jsFile) {
       jsFile: "./components/filters/filters.js",
     },
     {
+      element: "#kpisMount",
+      url: "./components/kpis/kpis.html",
+      styleSheet: "./components/kpis/kpis.css",
+      jsFile: "./components/kpis/kpis.js",
+    },
+    {
       element: "#mapMount",
       url: "./components/mapFilteredCities/mapFilteredCities.html",
       styleSheet: "./components/mapFilteredCities/mapFilteredCities.css",
       jsFile: "./components/mapFilteredCities/mapFilteredCities.js",
-    },
-    {
-      element: "#mapSimilarityBandsMount",
-      url: "./components/mapSimilarityBands/mapSimilarityBands.html",
-      styleSheet: "./components/mapSimilarityBands/mapSimilarityBands.css",
-      jsFile: "./components/mapSimilarityBands/mapSimilarityBands.js",
     },
     {
       element: "#resultsMount",
@@ -81,7 +100,14 @@ async function boot(jsFile) {
       styleSheet: "./components/results/results.css",
       jsFile: "./components/results/results.js",
     },
+    {
+      element: "#fundingMount",
+      url: "./components/funding/funding.html",
+      styleSheet: "./components/funding/funding.css",
+      jsFile: "./components/funding/funding.js",
+    },
   ])
+
 
   const script = document.createElement("script")
   script.src = jsFile
@@ -89,12 +115,24 @@ async function boot(jsFile) {
 }
 
 async function callBoot(jsFile, currentPage) {
-  await boot(jsFile).catch((err) => {
-    console.error(err)
-    document.body.insertAdjacentHTML(
-      "beforeend",
-      `<pre style="padding:12px; border:1px solid #ccc; white-space:pre-wrap;">Failed to boot app:${err.message}</pre>`
-    )
-  })
+  if (currentPage === 'similarity_band') {
+    await boot_similarity(jsFile).catch((err) => {
+      console.error(err)
+      document.body.insertAdjacentHTML(
+        "beforeend",
+        `<pre style="padding:12px; border:1px solid #ccc; white-space:pre-wrap;">Failed to boot app:${err.message}</pre>`
+      )
+    })
+
+  } else {
+    await boot(jsFile).catch((err) => {
+      console.error(err)
+      document.body.insertAdjacentHTML(
+        "beforeend",
+        `<pre style="padding:12px; border:1px solid #ccc; white-space:pre-wrap;">Failed to boot app:${err.message}</pre>`
+      )
+    })
+  }
+
   document.getElementById(`${currentPage}Link`).style["font-weight"] = "700"
 }

@@ -137,18 +137,11 @@ class ExplorationMode {
       filters: new Filters(this.filteredData),
       kpis: new KPIs(this.filteredData),
       results: new Results(this.filteredData),
-      mapFilteredCities: new MapFilteredCities({
+      mapSimilarityBands: new MapSimilarityBands({
         rows: this.filteredData,
         geo: this.worldmapData,
-      }),
-      funding: new Funding(this.filteredData),
+      })
     }
-
-    const fundingComponent = this.components.funding
-    fundingComponent.fundingOptionsInput.on("change", (element) => {
-      fundingComponent.currentOption = element.target.value
-      fundingComponent.update(fundingComponent.transformData(this.filteredData))
-    })
   }
 
   update() {
@@ -161,8 +154,8 @@ class ExplorationMode {
     this.components.results.update(
       this.components.results.transformData(this.filteredData)
     )
-    this.components.mapFilteredCities.update(
-      this.components.mapFilteredCities.transformData(this.filteredDataForMap)
+    this.components.mapSimilarityBands.update(
+      this.components.mapSimilarityBands.transformData(this.filteredDataForMap)
     )
     this.components.funding.update(
       this.components.funding.transformData(this.filteredData)
