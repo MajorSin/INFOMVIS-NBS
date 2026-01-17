@@ -1,6 +1,5 @@
 class MapFilteredCities {
   constructor(data) {
-    window._selectedCities = []
     this.allCountries = []
 
     this.map = L.map("mapArea").setView([20, 0], 2)
@@ -204,7 +203,8 @@ class MapFilteredCities {
           count: d[1].length,
           city: d[1][0].city,
           country: d[1][0].country,
-        })),
+        }))
+        .sort((a, b) => b.count - a.count),
     }
   }
 

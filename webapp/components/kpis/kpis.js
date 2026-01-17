@@ -7,9 +7,7 @@ class KPIs {
     d3.select("#rowCount").text(data.rows)
     d3.select("#cityCount").text(data.cities)
     d3.select("#countryCount").text(data.countries)
-    d3.select("#topFundingSource").text(
-      this.getTopFundingSource(data.fundingSources) ?? "—"
-    )
+    d3.select("#topFundingSource").text(data.topFundingSource)
   }
 
   transformData(data) {
@@ -19,22 +17,20 @@ class KPIs {
       rows: data.length,
       cities: new Set(data.map((d) => d.city)).size,
       countries: new Set(data.map((d) => d.country)).size,
+      topFundingSource: this.mostFrequent(data),
     }
     return wrangledData
   }
 
-  getTopFundingSource(fundingSources) {
-    if (!fundingSources || fundingSources.length === 0) return null
+  mostFrequent(arr) {
+    const counts = arr
+      .map((r) => r.__sources_of_funding)
+      .flat()
+      .reduce((acc, val) => {
+        acc[val] = (acc[val] || 0) + 1
+        return acc
+      }, {})
 
-    const counts = new Map()
-
-    for (const src of fundingSources) {
-      if (!src || src.toLowerCase() === "unknown") continue
-      counts.set(src, (counts.get(src) || 0) + 1)
-    }
-
-    if (counts.size === 0) return null
-
-    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0]
+    return Object.keys(counts).reduce((a, b) => (counts[a] > counts[b] ? a : b))
   }
 }
