@@ -1,37 +1,5 @@
-#mapMeta {
-  color: var(--muted);
-  font-size: 12px;
-}
-
-#mapVis {
-  width: 100%;
-  display: block;
-  border: 1px solid var(--border);
+#mapArea {
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.01);
-}
-
-#mapHelp {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-.mapPoint {
-  cursor: pointer;
-}
-
-#mapVis:active {
-  cursor: grabbing;
-}
-
-.mapPoint {
-  stroke: rgba(255, 255, 255, 0.7);
-  stroke-width: 0.7;
-  fill: rgba(231, 238, 252, 0.65);
-}
-
-.mapPoint.selected {
-  stroke-width: 0px;
-  fill: rgba(231, 238, 252, 0.95);
+  height: 600px;
+  margin: 10px 0px;
 }
