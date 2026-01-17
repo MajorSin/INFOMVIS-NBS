@@ -203,7 +203,8 @@ class MapFilteredCities {
           count: d[1].length,
           city: d[1][0].city,
           country: d[1][0].country,
-        })),
+        }))
+        .sort((a, b) => b.count - a.count),
     }
   }
 
