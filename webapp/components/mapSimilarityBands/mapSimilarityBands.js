@@ -52,7 +52,7 @@ class MapSimilarityBands {
       }
     }
 
-    this.sim = new SimilarityMatrixCSV("../data/similarity_matrix.csv")
+    this.sim = new SimilarityMatrixCSV("data/similarity_matrix.csv")
 
     this.mapSvg = d3.select("#mapVis")
     this.w = +this.mapSvg.attr("width")
