@@ -4,6 +4,24 @@
   <div class="filterControls">
     <div class="filterControl">
       <div class="card-header">
+        <span>Country</span>
+      </div>
+      <div id="countriesInputWrapper">
+        <input type="text" id="countriesInput" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="filterControl">
+      <div class="card-header">
+        <span>City</span>
+      </div>
+      <div id="citiesInputWrapper">
+        <input type="text" id="cityInput" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="filterControl">
+      <div class="card-header">
         <span>Economic impacts</span>
         <span class="card-meta" id="economicImpactMeta"></span>
       </div>
@@ -79,24 +97,21 @@
     <div class="filterControl">
       <div class="card-header">
         <span>Total cost</span>
-        <span class="card-meta" id="totalCostMeta"></span>
+        <span class="card-meta" class="yearRangeMeta" id="costRangeLabel"
+          >—</span
+        >
       </div>
-      <div class="filterCheckbox" id="totalCostCheckboxes"></div>
-      <button id="clearTotalCosts" type="button">Clear</button>
+      <div class="rangeBox">
+        <label class="rangeRow">
+          <span class="rangeVal" id="costMinVal">—</span>
+          <div id="costRangeSlider"></div>
+          <span class="rangeVal" id="costMaxVal">—</span>
+        </label>
+        <button id="resetCostBtn" type="button">Reset cost</button>
+      </div>
       <small class="helpText">
-        Tick cost bands to filter (OR across selected bands). If none are
-        ticked, all options are shown.
+        Bounds come from dataset min/max <code>total_cost</code>.
       </small>
     </div>
   </div>
-
-  <label>
-    <span>Search title/city/country</span>
-    <input
-      id="searchInput"
-      type="text"
-      placeholder="e.g. Rotterdam"
-      autocomplete="off"
-    />
-  </label>
 </section>
