@@ -13,7 +13,13 @@
 
 body {
   margin: 0;
-  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial,
+  font-family:
+    "Poppins",
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial,
     sans-serif;
   background: var(--bg);
   color: var(--text);
@@ -179,4 +185,20 @@ tbody tr:hover td {
 
 .toggle-group input:checked + label {
   background-color: #1096a4;
+}
+
+select {
+  color: var(--text);
+  background-color: var(--soft);
+  border-radius: 10px;
+  padding: 3px 10px;
+  font-family: "Poppins";
+  font-size: 12px;
+  border: 1px solid var(--border);
+}
+
+select option {
+  background-color: #1b212f;
+  color: var(--text);
+  font-family: "Poppins";
 }
