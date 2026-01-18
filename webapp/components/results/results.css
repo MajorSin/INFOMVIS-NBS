@@ -3,7 +3,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
-  margin: 0px 5px;
+  margin: 0px 5px 10px 5px;
 }
 
 .tableHeader h2 {
@@ -13,12 +13,6 @@
 #tableMeta {
   color: var(--muted);
   font-size: 12px;
-}
-
-#resultsTableContainer {
-  margin-top: 10px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
 }
 
 #resultsPagination {
@@ -36,4 +30,21 @@
   font-size: 10px;
   padding: 0px;
   text-align: center;
+}
+
+#resultsTable thead tr th div {
+  display: flex;
+  justify-content: space-between;
+}
+
+#resultsTable thead tr i {
+  color: #7c87a1;
+}
+
+#resultsTable thead tr th .active {
+  color: #cad1e2;
+}
+
+#resultsTable thead tr .active {
+  background-color: #1b2438;
 }

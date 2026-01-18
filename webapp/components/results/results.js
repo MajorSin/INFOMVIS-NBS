@@ -1,7 +1,31 @@
 class Results {
   constructor(data) {
-    this.total = 0
     this.tableBody = d3.select("#resultsTable tbody")
+
+    this.tableColums = [
+      {
+        column: "Title",
+        sortStatus: null,
+      },
+      {
+        column: "Country",
+        sortStatus: null,
+      },
+      {
+        column: "City",
+        sortStatus: null,
+      },
+      {
+        column: "Start year",
+        sortStatus: null,
+      },
+      {
+        column: "End year",
+        sortStatus: null,
+      },
+    ]
+
+    this.total = 0
     this.data = []
 
     this.currentPage = 1
@@ -45,8 +69,40 @@ class Results {
     this.render(this.transformData(this.data))
   }
 
+  updateSortStatus(d) {
+    this.tableColums = this.tableColums.map((r) =>
+      r.column == d.column
+        ? { ...r, sortStatus: r.sortStatus == "asc" ? "desc" : "asc" }
+        : { ...r, sortStatus: null },
+    )
+    this.setCurrentPage(1)
+  }
+
   render(rows) {
     this.totalElement.text(`Showing ${rows.length} out of ${this.data.length}`)
+
+    d3.select("#resultsTable thead tr")
+      .selectAll("th")
+      .data(this.tableColums)
+      .join(
+        (enter) =>
+          enter
+            .append("th")
+            .attr("class", (d) => (d.sortStatus != null ? "active" : ""))
+            .html(
+              (d) =>
+                `<div>${d.column}<i class="bi bi-sort-${d.sortStatus == "desc" ? "down-alt" : "up"} ${d.sortStatus != null ? " active" : ""}"></i></div>`,
+            )
+            .on("click", (_, d) => this.updateSortStatus(d)),
+        (update) =>
+          update
+            .attr("class", (d) => (d.sortStatus != null ? "active" : ""))
+            .html(
+              (d) =>
+                `<div>${d.column}<i class="bi bi-sort-${d.sortStatus == "desc" ? "down-alt" : "up"} ${d.sortStatus != null ? " active" : ""}"></i></div>`,
+            ),
+        (exit) => exit.remove(),
+      )
 
     this.paginationWrappers
       .selectAll("button")
@@ -99,12 +155,39 @@ class Results {
     this.totalPages = Math.ceil(data.length / this.viewPerPage)
     const start = this.viewPerPage * (this.currentPage - 1)
 
+    const sortOn = this.tableColums.find((r) => r.sortStatus != null)
+
     return data
-      .sort((a, b) =>
-        a.name_of_the_nbs_intervention_short_english_title.localeCompare(
-          b.name_of_the_nbs_intervention_short_english_title,
-        ),
-      )
+      .sort((a, b) => {
+        if (sortOn == null) {
+          return a.name_of_the_nbs_intervention_short_english_title.localeCompare(
+            b.name_of_the_nbs_intervention_short_english_title,
+          )
+        } else if (sortOn.column == "Title") {
+          return sortOn.sortStatus == "asc"
+            ? a.name_of_the_nbs_intervention_short_english_title.localeCompare(
+                b.name_of_the_nbs_intervention_short_english_title,
+              )
+            : b.name_of_the_nbs_intervention_short_english_title.localeCompare(
+                a.name_of_the_nbs_intervention_short_english_title,
+              )
+        } else if (sortOn.column == "Country") {
+          return sortOn.sortStatus == "asc"
+            ? (a.country ?? "").localeCompare(b.country ?? "")
+            : (b.country ?? "").localeCompare(a.country ?? "")
+        } else if (sortOn.column == "City") {
+          return sortOn.sortStatus == "asc"
+            ? a.city.localeCompare(b.city)
+            : b.city.localeCompare(a.city)
+        } else if (sortOn.column == "Start year") {
+          return sortOn.sortStatus == "asc"
+            ? a.start_year - b.start_year
+            : b.start_year - a.start_year
+        }
+        return sortOn.sortStatus == "asc"
+          ? a.end_year - b.end_year
+          : b.end_year - a.end_year
+      })
       .slice(start, start + this.viewPerPage)
   }
 }

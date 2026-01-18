@@ -127,6 +127,8 @@ table {
   border-collapse: collapse;
   min-width: 980px;
   background: rgba(255, 255, 255, 0.01);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 th,
@@ -144,8 +146,21 @@ th {
   background: #101624;
 }
 
+th:hover {
+  background-color: rgba(36, 43, 61, 0.796);
+  cursor: pointer;
+}
+
 tbody tr:hover td {
   background: rgba(255, 255, 255, 0.03);
+}
+
+thead tr th:first-child {
+  border-top-left-radius: 12px;
+}
+
+thead tr th:last-child {
+  border-top-right-radius: 12px;
 }
 
 .tooltip {
