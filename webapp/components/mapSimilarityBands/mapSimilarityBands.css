@@ -1,0 +1,146 @@
+#mapHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+#mapMeta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#mapVis {
+  width: 100%;
+  height: auto;
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.01);
+}
+
+#mapHelp {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#cityResults {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  overflow: hidden;
+}
+
+#cityResultsHeader {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+#cityResultsTitle {
+  font-weight: 800;
+}
+
+#cityResultsBody {
+  padding: 10px;
+  color: var(--text); /* was var(--muted); table text should be readable */
+  max-height: 220px;
+  overflow: auto;
+}
+
+/* Keep list styling in case you still use it elsewhere */
+#cityResultsBody ul {
+  margin: 8px 0 0 18px;
+  padding: 0;
+}
+
+#cityResultsBody li {
+  margin: 6px 0;
+}
+
+#cityResultsBody a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+#cityResultsBody a:hover {
+  text-decoration: underline;
+}
+
+#clearCityBtn {
+  width: auto;
+}
+
+/* -----------------------------
+   Similarity table styles
+   ----------------------------- */
+
+#cityResultsBody .emptyTableHint {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+/* Table layout */
+#cityResultsBody table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+/* Sticky header for scroll container */
+#cityResultsBody thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(10, 12, 16, 0.92);
+  backdrop-filter: blur(6px);
+  color: var(--muted);
+  font-weight: 700;
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  z-index: 1;
+}
+
+#cityResultsBody tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: middle;
+}
+
+#cityResultsBody tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Column sizing */
+#cityResultsBody .colType {
+  width: 72px;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+#cityResultsBody .colSim {
+  width: 86px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+/* Target row highlight */
+#cityResultsBody tr.target td {
+  background: rgba(0, 170, 255, 0.12);
+  border-bottom-color: rgba(0, 170, 255, 0.25);
+}
+
+#cityResultsBody tr.target td.colType {
+  color: rgba(140, 220, 255, 0.95);
+}
+
+#cityResultsBody tr.target a {
+  color: rgba(230, 248, 255, 0.98);
+  font-weight: 800;
+}
