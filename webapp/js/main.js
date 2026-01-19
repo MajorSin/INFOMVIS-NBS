@@ -150,6 +150,7 @@ class ExplorationMode {
         topo: this.topo,
         geo: topojson.feature(this.topo, this.topo.objects.countries),
       }),
+      lineChartModal: new LineChartPopout(this.filteredData),
       funding: new Funding(this.filteredData),
     }
 
@@ -172,6 +173,10 @@ class ExplorationMode {
 
     this.components.kpis.update(
       this.components.kpis.transformData(this.filteredData)
+    )
+
+    this.components.lineChartModal.update(
+      this.components.lineChartModal.transformData(this.filteredData)
     )
 
     this.components.results.update(
