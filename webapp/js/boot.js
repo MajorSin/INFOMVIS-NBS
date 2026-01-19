@@ -89,6 +89,12 @@ async function boot(jsFile) {
       jsFile: "./components/kpis/kpis.js",
     },
     {
+      element: "#lineChartMount",
+      url: "./components/lineChartPopout/lineChartPopout.html",
+      styleSheet: "./components/lineChartPopout/lineChartPopout.css",
+      jsFile: "./components/lineChartPopout/lineChartPopout.js",
+    },
+    {
       element: "#mapMount",
       url: "./components/mapFilteredCities/mapFilteredCities.html",
       styleSheet: "./components/mapFilteredCities/mapFilteredCities.css",
