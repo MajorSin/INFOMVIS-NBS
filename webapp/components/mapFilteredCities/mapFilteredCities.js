@@ -224,7 +224,7 @@ class MapFilteredCities {
         d3.rollup(
           data,
           (leaves) => leaves,
-          (d) => d.coordinates,
+          (d) => d.city,
         ),
       )
         .filter((d) => d[0] != null)
@@ -232,22 +232,14 @@ class MapFilteredCities {
           type: "Feature",
           geometry: {
             type: "Point",
-            coordinates: this.parseCoordinate(d[0]),
+            coordinates: d[1][0].coordinates,
           },
           count: d[1].length,
-          city: d[1][0].city,
+          city: d[0],
           country: d[1][0].country,
         }))
         .sort((a, b) => b.count - a.count),
     }
-  }
-
-  parseCoordinate(pointRaw) {
-    return pointRaw
-      .substring(1, pointRaw.length - 1)
-      .split(",")
-      .map(Number)
-      .reverse()
   }
 
   normalizeCoords(coords) {
