@@ -3,7 +3,7 @@ class ExplorationMode {
     this.data = []
     this.filteredData = []
     this.filteredDataForMap = []
-    this.topo = null
+    this.worldmapData = null
 
     this.components = null
 
@@ -51,11 +51,20 @@ class ExplorationMode {
         this.update()
       },
     })
-
+  
     Object.defineProperty(window, "costRange", {
       get: () => _costRange,
       set: (value) => {
         _costRange = value
+        this.filterData()
+        this.update()
+      },
+    })
+
+    Object.defineProperty(window, "searchQuery", {
+      get: () => _searchQuery,
+      set: (value) => {
+        _searchQuery = value
         this.filterData()
         this.update()
       },
@@ -70,19 +79,27 @@ class ExplorationMode {
       },
     })
 
+    var _selectedCountries =
+        typeof _selectedCountries !== "undefined" && Array.isArray(_selectedCountries)
+          ? _selectedCountries
+          : []
+
+      window._selectedCountries = _selectedCountries
+      window.selectedCountries = _selectedCountries
+
+    var _costRange =
+        typeof _costRange !== "undefined" && _costRange && typeof _costRange === "object"
+          ? _costRange
+          : { min: -Infinity, max: Infinity }
+
+      window._costRange = _costRange
+      window.costRange = _costRange
+
+
     Object.defineProperty(window, "selectedFundingSource", {
       get: () => _selectedFundingSource,
       set: (value) => {
         _selectedFundingSource = value
-        this.filterData()
-        this.update()
-      },
-    })
-
-    Object.defineProperty(window, "selectedCountries", {
-      get: () => _selectedCountries,
-      set: (value) => {
-        _selectedCountries = value
         this.filterData()
         this.update()
       },
@@ -96,9 +113,10 @@ class ExplorationMode {
   }
 
   async loadWorldMap() {
-    this.topo = await fetch(
+    const topo = await fetch(
       "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
     ).then((r) => r.json())
+    this.worldmapData = topojson.feature(topo, topo.objects.countries)
   }
 
   splitMultiValueField(v) {
@@ -145,29 +163,16 @@ class ExplorationMode {
       filters: new Filters(this.filteredData),
       kpis: new KPIs(this.filteredData),
       results: new Results(this.filteredData),
-      mapFilteredCities: new MapFilteredCities({
+      mapSimilarityBands: new MapSimilarityBands({
         rows: this.filteredData,
-        topo: this.topo,
-        geo: topojson.feature(this.topo, this.topo.objects.countries),
-      }),
-      funding: new Funding(this.filteredData),
+        geo: this.worldmapData,
+      })
     }
-
-    const fundingComponent = this.components.funding
-    // todo: put this in funding  component and everything else in a list
-    fundingComponent.fundingOptionsInput.on("change", (element) => {
-      fundingComponent.currentOption = element.target.value
-      fundingComponent.update(fundingComponent.transformData(this.filteredData))
-    })
-
-    const mapComponent = this.components.mapFilteredCities
-    mapComponent.mapOptions.on("change", (element) => {
-      mapComponent.currentOption = element.target.value
-      mapComponent.update(mapComponent.transformData(this.filteredDataForMap))
-    })
   }
 
   update() {
+    if (!this.components) return
+
     this.components.filters.update()
 
     this.components.kpis.update(
@@ -177,21 +182,32 @@ class ExplorationMode {
     this.components.results.update(
       this.components.results.transformData(this.filteredData)
     )
-    this.components.mapFilteredCities.update(
-      this.components.mapFilteredCities.transformData(this.filteredDataForMap)
-    )
-    this.components.funding.update(
-      this.components.funding.transformData(this.filteredData)
+    this.components.mapSimilarityBands.update(
+      this.components.mapSimilarityBands.transformData(this.filteredDataForMap)
     )
   }
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
-      if (
-        (r.start_year != null && r.start_year < window.yearRange.min) ||
-        (r.end_year != null && r.end_year > window.yearRange.max)
-      )
-        return false
+      if (r.start_year != null && r.end_year != null) {
+        if (
+          r.start_year < window.yearRange.min ||
+          r.end_year > window.yearRange.max
+        )
+          return false
+      } else if (r.start_year != null && r.end_year == null) {
+        if (
+          r.start_year < window.yearRange.min ||
+          r.start_year > window.yearRange.max
+        )
+          return false
+      } else if (r.start_year == null && r.end_year != null) {
+        if (
+          r.end_year < window.yearRange.min ||
+          r.end_year > window.yearRange.max
+        )
+          return false
+      }
 
       const a = r.nbs_area_m2
       if (Number.isFinite(a)) {
@@ -220,26 +236,34 @@ class ExplorationMode {
         if (!passAreaTypes) return false
       }
 
-      const cost = r.cost
-      if (Number.isFinite(cost)) {
-        if (cost < window.costRange.min || cost > window.costRange.max) {
-          return false
-        }
+      if (window.selectedTotalCosts && window.selectedTotalCosts.length > 0) {
+        if (!window.selectedTotalCosts.includes(r.total_cost)) return false
       }
 
-      return true
+      const searchFields = [
+        r.name_of_the_nbs_intervention_short_english_title,
+        r.native_title_of_the_nbs_intervention,
+        r.city,
+        r.country,
+        r.economic_impacts,
+        r.type_of_area_before_implementation_of_the_nbs,
+        r.total_cost,
+        r.sources_of_funding,
+      ]
+        .map((x) => x?.toLowerCase())
+        .join(",")
+
+      return searchFields.includes(window.searchQuery)
     })
 
     this.filteredDataForMap = tempFiltered
 
-    // Todo: Decide on filtering all data or only selected for map
-    this.filteredData = tempFiltered.filter(
-      (r) =>
-        (window.selectedCities.length <= 0 ||
-          window.selectedCities.some((c) => r.city == c)) &&
-        (window.selectedCountries.length <= 0 ||
-          window.selectedCountries.some((c) => r.country == c))
-    )
+    this.filteredData =
+      window.selectedCities.length > 0
+        ? tempFiltered.filter((r) =>
+            window.selectedCities.some((c) => r.city == c)
+          )
+        : tempFiltered
   }
 }
 
