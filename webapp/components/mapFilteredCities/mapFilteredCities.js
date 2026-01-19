@@ -66,6 +66,9 @@ class MapFilteredCities {
   updateCities(data) {
     this.removePaths()
 
+    const legend = document.getElementsByClassName("mapLegend")[0]
+    if (legend != null) legend.remove()
+
     const max = d3.max(data.features.map((d) => d.count))
     this.radiusScale.domain([1, max])
 
