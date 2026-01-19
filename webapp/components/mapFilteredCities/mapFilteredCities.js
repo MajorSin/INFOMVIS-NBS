@@ -11,7 +11,7 @@ class MapFilteredCities {
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
         subdomains: "abcd",
         maxZoom: 20,
-      }
+      },
     ).addTo(this.map)
 
     this.tooltip = d3.select("#mapTooltip")
@@ -21,6 +21,8 @@ class MapFilteredCities {
 
     this.cityPath = L.layerGroup()
     this.countryPath = L.layerGroup()
+
+    this.legend = L.control({ position: "bottomleft" })
 
     this.init(data)
   }
@@ -82,16 +84,16 @@ class MapFilteredCities {
         layer.on("mousemove", (event) =>
           this.tooltip
             .style("left", event.originalEvent.pageX + 10 + "px")
-            .style("top", event.originalEvent.pageY - 10 + "px")
+            .style("top", event.originalEvent.pageY - 10 + "px"),
         )
         layer.on(
           "click",
           () =>
             (window.selectedCities = window.selectedCities.some(
-              (s) => s == d.city
+              (s) => s == d.city,
             )
               ? window.selectedCities.filter((s) => s != d.city)
-              : [...window.selectedCities, d.city])
+              : [...window.selectedCities, d.city]),
         )
         layer.on("mouseout", () => {
           layer.setStyle(this.cityPointStyle(d))
@@ -117,6 +119,35 @@ class MapFilteredCities {
     const max = d3.max(data.features.map((d) => d.values.count))
     this.colorScale.domain([0, max])
 
+    this.legend.onAdd = () => {
+      const div = L.DomUtil.create("div", "mapLegend")
+
+      const max = this.colorScale.domain()[1]
+      const grades =
+        max > 3
+          ? [0, max * 0.33, max * 0.67, max]
+          : max == 3
+            ? [0, max * 0.5, max]
+            : max == 2
+              ? [0, max]
+              : [max]
+
+      div.innerHTML = "<strong>Projects</strong>"
+      const legendContent = document.createElement("div")
+      legendContent.setAttribute("id", "legend")
+
+      for (let i = 0; i < grades.length; i++) {
+        const from = Math.round(grades[i])
+        legendContent.innerHTML += `<div><i style="background:${this.colorScale(from)}"></i><span>${from}</span></div>`
+      }
+
+      div.append(legendContent)
+
+      return div
+    }
+
+    this.legend.addTo(this.map)
+
     this.countryPath = L.geoJSON(data.features, {
       style: (d) => ({
         color: "black",
@@ -130,25 +161,25 @@ class MapFilteredCities {
         layer.on("click", () =>
           d.values?.country != null
             ? (window.selectedCountries = window.selectedCountries.includes(
-                d.values.country
+                d.values.country,
               )
                 ? window.selectedCountries.filter(
-                    (source) => source != d.values.country
+                    (source) => source != d.values.country,
                   )
                 : [...window.selectedCountries, d.values.country])
-            : null
+            : null,
         )
         layer.on("mouseover", (event) =>
           this.tooltip
             .html(`${d.properties.name}<br/>Projects: ${d.values.count}`)
             .style("left", event.originalEvent.pageX + 10 + "px")
             .style("top", event.originalEvent.pageY - 10 + "px")
-            .style("display", "block")
+            .style("display", "block"),
         )
         layer.on("mousemove", (event) =>
           this.tooltip
             .style("left", event.originalEvent.pageX + 10 + "px")
-            .style("top", event.originalEvent.pageY - 10 + "px")
+            .style("top", event.originalEvent.pageY - 10 + "px"),
         )
         layer.on("mouseout", () => this.tooltip.style("display", "none"))
       },
@@ -161,8 +192,8 @@ class MapFilteredCities {
         d3.rollup(
           data,
           (leaves) => leaves,
-          (d) => d.country
-        )
+          (d) => d.country,
+        ),
       )
         .filter((d) => d[0] != null)
         .map((d) => ({
@@ -178,7 +209,7 @@ class MapFilteredCities {
           values: countriesData.find(
             (element) =>
               element.country.includes(row.properties.name) ||
-              row.properties.name.includes(element.country)
+              row.properties.name.includes(element.country),
           ) ?? { count: 0 },
         })),
       }
@@ -190,8 +221,8 @@ class MapFilteredCities {
         d3.rollup(
           data,
           (leaves) => leaves,
-          (d) => d.coordinates
-        )
+          (d) => d.coordinates,
+        ),
       )
         .filter((d) => d[0] != null)
         .map((d) => ({

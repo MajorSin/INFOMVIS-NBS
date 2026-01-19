@@ -23,6 +23,8 @@ class KPIs {
   }
 
   mostFrequent(arr) {
+    if (arr.length <= 0) return ""
+
     const counts = arr
       .map((r) => r.__sources_of_funding)
       .flat()
