@@ -52,10 +52,10 @@ class ExplorationMode {
       },
     })
 
-    Object.defineProperty(window, "searchQuery", {
-      get: () => _searchQuery,
+    Object.defineProperty(window, "costRange", {
+      get: () => _costRange,
       set: (value) => {
-        _searchQuery = value
+        _costRange = value
         this.filterData()
         this.update()
       },
@@ -82,7 +82,6 @@ class ExplorationMode {
     Object.defineProperty(window, "selectedCountries", {
       get: () => _selectedCountries,
       set: (value) => {
-        console.log(value)
         _selectedCountries = value
         this.filterData()
         this.update()
@@ -188,26 +187,11 @@ class ExplorationMode {
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
-      // todo: fix this and make cost a range slider
-      if (r.start_year != null && r.end_year != null) {
-        if (
-          r.start_year < window.yearRange.min ||
-          r.end_year > window.yearRange.max
-        )
-          return false
-      } else if (r.start_year != null && r.end_year == null) {
-        if (
-          r.start_year < window.yearRange.min ||
-          r.start_year > window.yearRange.max
-        )
-          return false
-      } else if (r.start_year == null && r.end_year != null) {
-        if (
-          r.end_year < window.yearRange.min ||
-          r.end_year > window.yearRange.max
-        )
-          return false
-      }
+      if (
+        (r.start_year != null && r.start_year < window.yearRange.min) ||
+        (r.end_year != null && r.end_year > window.yearRange.max)
+      )
+        return false
 
       const a = r.nbs_area_m2
       if (Number.isFinite(a)) {
@@ -236,24 +220,14 @@ class ExplorationMode {
         if (!passAreaTypes) return false
       }
 
-      if (window.selectedTotalCosts && window.selectedTotalCosts.length > 0) {
-        if (!window.selectedTotalCosts.includes(r.total_cost)) return false
+      const cost = r.cost
+      if (Number.isFinite(cost)) {
+        if (cost < window.costRange.min || cost > window.costRange.max) {
+          return false
+        }
       }
 
-      const searchFields = [
-        r.name_of_the_nbs_intervention_short_english_title,
-        r.native_title_of_the_nbs_intervention,
-        r.city,
-        r.country,
-        r.economic_impacts,
-        r.type_of_area_before_implementation_of_the_nbs,
-        r.total_cost,
-        r.sources_of_funding,
-      ]
-        .map((x) => x?.toLowerCase())
-        .join(",")
-
-      return searchFields.includes(window.searchQuery)
+      return true
     })
 
     this.filteredDataForMap = tempFiltered
