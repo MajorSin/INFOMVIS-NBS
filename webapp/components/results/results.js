@@ -2,31 +2,44 @@ class Results {
   constructor(data) {
     this.tableBody = d3.select("#resultsTable tbody")
 
+    this.comparisonProjects = []
+
     this.tableColums = [
       {
         column: "Title",
         sortStatus: null,
+        dataColumn: true,
       },
       {
         column: "Country",
         sortStatus: null,
+        dataColumn: true,
       },
       {
         column: "City",
         sortStatus: null,
+        dataColumn: true,
       },
       {
         column: "Start year",
         sortStatus: null,
+        dataColumn: true,
       },
       {
         column: "End year",
         sortStatus: null,
+        dataColumn: true,
+      },
+      {
+        column: "Compare this project",
+        sortStatus: null,
+        dataColumn: false,
       },
     ]
 
     this.total = 0
     this.data = []
+    this.ids = []
 
     this.currentPage = 1
     this.totalPages = 0
@@ -56,6 +69,7 @@ class Results {
 
   update(rows) {
     this.data = rows
+    this.ids = rows.map((r) => r[""])
     this.setCurrentPage(1)
   }
 
@@ -78,7 +92,11 @@ class Results {
     this.setCurrentPage(1)
   }
 
+  // TODO: Fix semicolomns format
   render(rows) {
+    this.comparisonProjects = this.comparisonProjects.filter((d) =>
+      this.ids.includes(d),
+    )
     this.totalElement.text(`Showing ${rows.length} out of ${this.data.length}`)
 
     d3.select("#resultsTable thead tr")
@@ -88,18 +106,30 @@ class Results {
         (enter) =>
           enter
             .append("th")
-            .attr("class", (d) => (d.sortStatus != null ? "active" : ""))
+            .attr("class", (d) =>
+              d.sortStatus != null
+                ? "active"
+                : d.dataColumn
+                  ? ""
+                  : "staticColumn",
+            )
             .html(
               (d) =>
-                `<div>${d.column}<i class="bi bi-sort-${d.sortStatus == "desc" ? "down-alt" : "up"} ${d.sortStatus != null ? " active" : ""}"></i></div>`,
+                `<div>${d.column}${d.dataColumn ? `<i class="bi bi-sort-${d.sortStatus == "desc" ? "down-alt" : "up"} ${d.sortStatus != null ? " active" : ""}"></i></div>` : ""}`,
             )
-            .on("click", (_, d) => this.updateSortStatus(d)),
+            .on("click", (_, d) => d.dataColumn && this.updateSortStatus(d)),
         (update) =>
           update
-            .attr("class", (d) => (d.sortStatus != null ? "active" : ""))
+            .attr("class", (d) =>
+              d.sortStatus != null
+                ? "active"
+                : d.dataColumn
+                  ? ""
+                  : "staticColumn",
+            )
             .html(
               (d) =>
-                `<div>${d.column}<i class="bi bi-sort-${d.sortStatus == "desc" ? "down-alt" : "up"} ${d.sortStatus != null ? " active" : ""}"></i></div>`,
+                `<div>${d.column}${d.dataColumn ? `<i class="bi bi-sort-${d.sortStatus == "desc" ? "down-alt" : "up"} ${d.sortStatus != null ? " active" : ""}"></i></div>` : ""}`,
             ),
         (exit) => exit.remove(),
       )
@@ -141,10 +171,23 @@ class Results {
               d.native_title_of_the_nbs_intervention ??
               "",
           )
-          tr.append("td").text((d) => d.city)
           tr.append("td").text((d) => d.country)
+          tr.append("td").text((d) => d.city)
           tr.append("td").text((d) => d.start_year)
           tr.append("td").text((d) => d.end_year)
+          tr.append("td")
+            .append("input")
+            .on(
+              "change",
+              (_, d) =>
+                (this.comparisonProjects = this.comparisonProjects.includes(
+                  d[""],
+                )
+                  ? this.comparisonProjects.filter((r) => r != d[""])
+                  : [...this.comparisonProjects, d[""]]),
+            )
+            .attr("type", "checkbox")
+            .property("checked", (d) => this.comparisonProjects.includes(d[""]))
         },
         (update) => {},
         (exit) => exit.remove(),

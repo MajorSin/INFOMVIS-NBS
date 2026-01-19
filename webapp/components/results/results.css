@@ -48,3 +48,11 @@
 #resultsTable thead tr .active {
   background-color: #1b2438;
 }
+
+.staticColumn {
+  cursor: not-allowed !important;
+}
+
+.staticColumn div {
+  justify-content: center !important;
+}
