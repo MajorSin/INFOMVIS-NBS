@@ -21,17 +21,13 @@ class Results {
 
     trs.each(function (d) {
       const tr = d3.select(this)
-      const title =
-        d.name_of_the_nbs_intervention_short_english_title ??
-        d.native_title_of_the_nbs_intervention ??
-        ""
 
-      tr.append("td").text(title)
+      tr.append("td").text(d.title)
       tr.append("td").text(d.city)
       tr.append("td").text(d.country)
-      tr.append("td").text(d.__economicImpacts.join(", "))
-      tr.append("td").text(d.start_year)
-      tr.append("td").text(d.end_year)
+      tr.append("td").text(d.economicImpacts.join(", "))
+      tr.append("td").text(d.startYear)
+      tr.append("td").text(d.endYear)
     })
 
     if (rows.length > this.max) {
@@ -39,7 +35,7 @@ class Results {
       tr.append("td")
         .attr("colspan", 6)
         .text(
-          `Showing first ${this.max} of ${rows.length} rows. Add more filters to narrow results.`
+          `Showing first ${this.max} of ${rows.length} rows. Add more filters to narrow results.`,
         )
         .style("color", "#a8b3cf")
     }
@@ -47,11 +43,7 @@ class Results {
 
   transformData(data) {
     return data
-      .sort((a, b) =>
-        a.name_of_the_nbs_intervention_short_english_title.localeCompare(
-          b.name_of_the_nbs_intervention_short_english_title
-        )
-      )
+      .sort((a, b) => a.title.localeCompare(b.title))
       .slice(0, this.max)
   }
 }

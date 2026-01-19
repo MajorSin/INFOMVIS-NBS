@@ -91,24 +91,18 @@ class ExplorationMode {
 
   async init() {
     Promise.all([this.loadRows(), this.loadWorldMap()]).then(() =>
-      this.render()
+      this.render(),
     )
   }
 
   async loadWorldMap() {
     this.topo = await fetch(
-      "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
+      "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json",
     ).then((r) => r.json())
   }
 
   splitMultiValueField(v) {
-    if (v == null) return []
-    const s = String(v).trim()
-    if (!s) return []
-    return s
-      .split(/[;,]+/)
-      .map((x) => x.trim())
-      .filter(Boolean)
+    return v.trim().split(/[;,]+/) ?? []
   }
 
   async loadRows() {
@@ -116,24 +110,33 @@ class ExplorationMode {
       .csv("./data/cleaned_nbs_data.csv", d3.autoType)
       .then((rows) =>
         rows.map((row) => ({
-          ...row,
-          cost: parseCostD3(row.total_cost),
-          __sources_of_funding: row.sources_of_funding.trim().split(";"),
-          __economicImpacts: row.economic_impacts
+          city: row.city,
+          cityPopulation: row.city_population,
+          coordinates: row.coordinates
+            .substring(1, row.coordinates.length - 1)
+            .split(",")
+            .map(Number)
+            .reverse(),
+          country: row.country,
+          economicImpacts: row.economic_impacts
             ? row.economic_impacts
                 .trim()
                 .split(";")
                 .map((s) => s.trim())
-                .filter(Boolean)
             : [],
-          __areaTypes: row.type_of_area_before_implementation_of_the_nbs
-            ? row.type_of_area_before_implementation_of_the_nbs
-                .split(/[,;]+/)
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [],
-          __fundingSources: this.splitMultiValueField(row.sources_of_funding),
-        }))
+          cost: parseCost(row.total_cost),
+          startYear: row.start_year,
+          endYear: row.end_year,
+          lastUpdated: Date.parse(row.last_updated),
+          title: row.name_of_the_nbs_intervention_short_english_title,
+          titleNative: row.native_title_of_the_nbs_intervention,
+          area: row.nbs_area_m2,
+          currentStage: row.present_stage_of_the_intervention,
+          fundingSources: this.splitMultiValueField(row.sources_of_funding),
+          areaTypes: this.splitMultiValueField(
+            row.type_of_area_before_implementation_of_the_nbs,
+          ),
+        })),
       )
 
     this.filteredData = this.data
@@ -154,7 +157,7 @@ class ExplorationMode {
     }
 
     const fundingComponent = this.components.funding
-    // todo: put this in funding  component and everything else in a list
+    // TODO: put this in funding  component and everything else in a list
     fundingComponent.fundingOptionsInput.on("change", (element) => {
       fundingComponent.currentOption = element.target.value
       fundingComponent.update(fundingComponent.transformData(this.filteredData))
@@ -171,29 +174,29 @@ class ExplorationMode {
     this.components.filters.update()
 
     this.components.kpis.update(
-      this.components.kpis.transformData(this.filteredData)
+      this.components.kpis.transformData(this.filteredData),
     )
 
     this.components.results.update(
-      this.components.results.transformData(this.filteredData)
+      this.components.results.transformData(this.filteredData),
     )
     this.components.mapFilteredCities.update(
-      this.components.mapFilteredCities.transformData(this.filteredDataForMap)
+      this.components.mapFilteredCities.transformData(this.filteredDataForMap),
     )
     this.components.funding.update(
-      this.components.funding.transformData(this.filteredData)
+      this.components.funding.transformData(this.filteredData),
     )
   }
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
       if (
-        (r.start_year != null && r.start_year < window.yearRange.min) ||
-        (r.end_year != null && r.end_year > window.yearRange.max)
+        (r.startYear != null && r.startYear < window.yearRange.min) ||
+        (r.endYear != null && r.endYear > window.yearRange.max)
       )
         return false
 
-      const a = r.nbs_area_m2
+      const a = r.area
       if (Number.isFinite(a)) {
         if (a < window.nbsAreaRange.min || a > window.nbsAreaRange.max)
           return false
@@ -201,21 +204,21 @@ class ExplorationMode {
 
       if (window.selectedEconomicImpacts.length > 0) {
         const passImpacts = window.selectedEconomicImpacts.every((impact) =>
-          r.__economicImpacts.includes(impact)
+          r.economicImpacts.includes(impact),
         )
         if (!passImpacts) return false
       }
 
       if (window.selectedFundingSource.length > 0) {
         const passFundingSource = window.selectedFundingSource.every((fund) =>
-          r.__sources_of_funding.includes(fund)
+          r.fundingSources.includes(fund),
         )
         if (!passFundingSource) return false
       }
 
       if (window.selectedAreaTypes.length > 0) {
         const passAreaTypes = window.selectedAreaTypes.every((t) =>
-          r.__areaTypes.includes(t)
+          r.areaTypes.includes(t),
         )
         if (!passAreaTypes) return false
       }
@@ -232,20 +235,20 @@ class ExplorationMode {
 
     this.filteredDataForMap = tempFiltered
 
-    // Todo: Decide on filtering all data or only selected for map
+    // TODO: Decide on filtering all data or only selected for map
     this.filteredData = tempFiltered.filter(
       (r) =>
         (window.selectedCities.length <= 0 ||
           window.selectedCities.some((c) => r.city == c)) &&
         (window.selectedCountries.length <= 0 ||
-          window.selectedCountries.some((c) => r.country == c))
+          window.selectedCountries.some((c) => r.country == c)),
     )
   }
 }
 
 new ExplorationMode().init()
 
-function parseCostD3(value) {
+function parseCost(value) {
   if (!value || value.toLowerCase() === "unknown") {
     return null
   }
@@ -262,6 +265,6 @@ function parseCostD3(value) {
   return numbers.length == 2
     ? d3.mean(numbers)
     : numbers.length == 1
-    ? numbers[0]
-    : null
+      ? numbers[0]
+      : null
 }
