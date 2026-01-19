@@ -249,9 +249,7 @@ class ExplorationMode {
 new ExplorationMode().init()
 
 function parseCost(value) {
-  if (!value || value.toLowerCase() === "unknown") {
-    return null
-  }
+  if (!value || value.toLowerCase() === "unknown") return null
 
   const normalized = value
     .toLowerCase()
