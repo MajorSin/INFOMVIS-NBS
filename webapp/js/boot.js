@@ -118,6 +118,12 @@ async function boot(jsFile) {
       styleSheet: "./components/compareToolbar/compareToolbar.css",
       jsFile: "./components/compareToolbar/compareToolbar.js",
     },
+    {
+      element: "#compareMount",
+      url: "./components/compare/compare.html",
+      styleSheet: "./components/compare/compare.css",
+      jsFile: "./components/compare/compare.js",
+    },
   ])
 
   const script = document.createElement("script")

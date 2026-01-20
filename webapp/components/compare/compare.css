@@ -1,0 +1,20 @@
+#compareMount {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 14px;
+}
+
+#compareMode {
+  display: none;
+}
+
+#backToExplore {
+  width: auto;
+  padding: 11px 22px;
+  border: none;
+}
+
+#compareWrapper h1 {
+  margin-top: 10px;
+  margin-bottom: 12px;
+}

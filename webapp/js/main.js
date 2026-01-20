@@ -5,6 +5,9 @@ class ExplorationMode {
     this.filteredDataForMap = []
     this.topo = null
 
+    this.exploreWrapper = d3.select("#exploreMode")
+    this.compareWrapper = d3.select("#compareMode")
+
     this.components = null
 
     Object.defineProperty(window, "selectedEconomicImpacts", {
@@ -88,6 +91,14 @@ class ExplorationMode {
       },
     })
 
+    Object.defineProperty(window, "mode", {
+      get: () => _mode,
+      set: (value) => {
+        _mode = value
+        this.updateMode()
+      },
+    })
+
     Object.defineProperty(window, "selectedProjects", {
       get: () => _selectedProjects,
       set: (value) => {
@@ -101,6 +112,7 @@ class ExplorationMode {
     Promise.all([this.loadRows(), this.loadWorldMap()]).then(() =>
       this.render(),
     )
+    window._mode = "overview"
   }
 
   async loadWorldMap() {
@@ -161,6 +173,7 @@ class ExplorationMode {
       lineChartModal: new LineChartPopout(this.filteredData),
       funding: new Funding(this.filteredData),
       compareToolbar: new CompareToolbar(),
+      compare: new Compare(this.data),
     }
 
     const fundingComponent = this.components.funding
@@ -185,11 +198,11 @@ class ExplorationMode {
     )
 
     this.components.lineChartModal.update(
-      this.components.lineChartModal.transformData(this.filteredData)
+      this.components.lineChartModal.transformData(this.filteredData),
     )
 
     this.components.lineChartModal.update(
-      this.components.lineChartModal.transformData(this.filteredData)
+      this.components.lineChartModal.transformData(this.filteredData),
     )
 
     this.components.results.update(this.filteredData)
@@ -199,6 +212,8 @@ class ExplorationMode {
     this.components.funding.update(
       this.components.funding.transformData(this.filteredData),
     )
+
+    if (window.mode == "compare") this.components.compare.update()
   }
 
   filterData() {
@@ -256,6 +271,17 @@ class ExplorationMode {
         (window.selectedCountries.length <= 0 ||
           window.selectedCountries.some((c) => r.country == c)),
     )
+  }
+
+  updateMode() {
+    if (window.mode == "compare") {
+      this.compareWrapper.style("display", "block")
+      this.exploreWrapper.style("display", "none")
+    } else {
+      this.compareWrapper.style("display", "none")
+      this.exploreWrapper.style("display", "block")
+    }
+    this.update()
   }
 }
 
