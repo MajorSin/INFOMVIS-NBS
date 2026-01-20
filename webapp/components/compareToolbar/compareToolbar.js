@@ -15,7 +15,13 @@ class CompareToolbar {
       .selectAll("button")
       .data(number > 0 ? [number] : [])
       .join(
-        (enter) => transitionAction(enter.append("button"), number),
+        (enter) =>
+          transitionAction(
+            enter.append("button").on("click", () => {
+              if (this.number > 1) window.mode = "compare"
+            }),
+            number,
+          ),
         (update) => transitionAction(update, number),
         (exit) =>
           exit

@@ -1,0 +1,46 @@
+#compareMount {
+  max-width: 1600px;
+  margin: 10px auto 50px auto;
+  padding: 14px;
+}
+
+#compareMode {
+  display: none;
+}
+
+#backToExplore {
+  width: auto;
+  padding: 11px 22px;
+  border: none;
+}
+
+#compareWrapper h1 {
+  margin-bottom: 12px;
+}
+
+#compareHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#compareTable {
+  table-layout: fixed;
+}
+
+#compareTable tr:hover td {
+  background: #171c29;
+}
+
+#compareTable td:first-child {
+  font-weight: bold;
+  background-color: #171b26;
+  min-width: 10px;
+}
+
+#compareTable tr:first-child {
+  color: var(--muted);
+  font-weight: 800;
+  background-color: #101624;
+}
