@@ -87,17 +87,25 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "selectedProjects", {
+      get: () => _selectedProjects,
+      set: (value) => {
+        _selectedProjects = value
+        this.components?.compareToolbar?.update(value) ?? null
+      },
+    })
   }
 
   async init() {
     Promise.all([this.loadRows(), this.loadWorldMap()]).then(() =>
-      this.render()
+      this.render(),
     )
   }
 
   async loadWorldMap() {
     this.topo = await fetch(
-      "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json"
+      "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json",
     ).then((r) => r.json())
   }
 
@@ -133,7 +141,7 @@ class ExplorationMode {
                 .filter(Boolean)
             : [],
           __fundingSources: this.splitMultiValueField(row.sources_of_funding),
-        }))
+        })),
       )
 
     this.filteredData = this.data
@@ -152,6 +160,7 @@ class ExplorationMode {
       }),
       lineChartModal: new LineChartPopout(this.filteredData),
       funding: new Funding(this.filteredData),
+      compareToolbar: new CompareToolbar(),
     }
 
     const fundingComponent = this.components.funding
@@ -172,21 +181,23 @@ class ExplorationMode {
     this.components.filters.update()
 
     this.components.kpis.update(
-      this.components.kpis.transformData(this.filteredData)
+      this.components.kpis.transformData(this.filteredData),
     )
 
     this.components.lineChartModal.update(
       this.components.lineChartModal.transformData(this.filteredData)
     )
 
-    this.components.results.update(
-      this.components.results.transformData(this.filteredData)
+    this.components.lineChartModal.update(
+      this.components.lineChartModal.transformData(this.filteredData)
     )
+
+    this.components.results.update(this.filteredData)
     this.components.mapFilteredCities.update(
-      this.components.mapFilteredCities.transformData(this.filteredDataForMap)
+      this.components.mapFilteredCities.transformData(this.filteredDataForMap),
     )
     this.components.funding.update(
-      this.components.funding.transformData(this.filteredData)
+      this.components.funding.transformData(this.filteredData),
     )
   }
 
@@ -206,21 +217,21 @@ class ExplorationMode {
 
       if (window.selectedEconomicImpacts.length > 0) {
         const passImpacts = window.selectedEconomicImpacts.every((impact) =>
-          r.__economicImpacts.includes(impact)
+          r.__economicImpacts.includes(impact),
         )
         if (!passImpacts) return false
       }
 
       if (window.selectedFundingSource.length > 0) {
         const passFundingSource = window.selectedFundingSource.every((fund) =>
-          r.__sources_of_funding.includes(fund)
+          r.__sources_of_funding.includes(fund),
         )
         if (!passFundingSource) return false
       }
 
       if (window.selectedAreaTypes.length > 0) {
         const passAreaTypes = window.selectedAreaTypes.every((t) =>
-          r.__areaTypes.includes(t)
+          r.__areaTypes.includes(t),
         )
         if (!passAreaTypes) return false
       }
@@ -243,7 +254,7 @@ class ExplorationMode {
         (window.selectedCities.length <= 0 ||
           window.selectedCities.some((c) => r.city == c)) &&
         (window.selectedCountries.length <= 0 ||
-          window.selectedCountries.some((c) => r.country == c))
+          window.selectedCountries.some((c) => r.country == c)),
     )
   }
 }
@@ -267,6 +278,6 @@ function parseCostD3(value) {
   return numbers.length == 2
     ? d3.mean(numbers)
     : numbers.length == 1
-    ? numbers[0]
-    : null
+      ? numbers[0]
+      : null
 }
