@@ -37,7 +37,7 @@ function transitionAction(action, number) {
   action
     .text(
       number == 1
-        ? "Select one more project to compare"
+        ? "Select two or more projects to compare"
         : `Compare ${number} projects`,
     )
     .attr("class", number > 1 ? "" : "disabled")
