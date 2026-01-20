@@ -7,6 +7,23 @@ class ExplorationMode {
 
     this.components = null
 
+    var _selectedProjects =
+      typeof _selectedProjects !== "undefined" && Array.isArray(_selectedProjects)
+        ? _selectedProjects
+        : []
+
+    window._selectedProjects = _selectedProjects
+
+    Object.defineProperty(window, "selectedProjects", {
+      get: () => _selectedProjects,
+      set: (value) => {
+        _selectedProjects = Array.isArray(value) ? value : []
+        window._selectedProjects = _selectedProjects
+        this.components?.compareToolbar?.update(_selectedProjects) ?? null
+      },
+    })
+
+
     Object.defineProperty(window, "selectedEconomicImpacts", {
       get: () => _selectedEconomicImpacts,
       set: (value) => {
