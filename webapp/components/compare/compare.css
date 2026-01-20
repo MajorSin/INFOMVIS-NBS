@@ -1,6 +1,6 @@
 #compareMount {
   max-width: 1600px;
-  margin: 0 auto;
+  margin: 10px auto 50px auto;
   padding: 14px;
 }
 
@@ -15,6 +15,16 @@
 }
 
 #compareWrapper h1 {
-  margin-top: 10px;
   margin-bottom: 12px;
+}
+
+#compareHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#compareTable th {
+  cursor: default;
 }

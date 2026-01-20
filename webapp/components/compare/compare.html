@@ -1,8 +1,19 @@
 <section id="compareWrapper">
   <button id="backToExplore">
-    <i class="bi bi-arrow-left"></i> Go back to explore mode
+    <i class="bi bi-arrow-left"></i> Go back to exploration mode
   </button>
-  <h1>Compare projects</h1>
+  <div id="compareHeader">
+    <h1>Compare projects</h1>
+    <div class="switchWrapper">
+      <div>Only show differences</div>
+      <div>
+        <label class="switch">
+          <input type="checkbox" id="differentFieldsSlider" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
   <table id="compareTable">
     <thead>
       <tr></tr>
