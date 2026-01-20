@@ -25,6 +25,22 @@
   justify-content: space-between;
 }
 
-#compareTable th {
-  cursor: default;
+#compareTable {
+  table-layout: fixed;
+}
+
+#compareTable tr:hover td {
+  background: #171c29;
+}
+
+#compareTable td:first-child {
+  font-weight: bold;
+  background-color: #171b26;
+  min-width: 10px;
+}
+
+#compareTable tr:first-child {
+  color: var(--muted);
+  font-weight: 800;
+  background-color: #101624;
 }

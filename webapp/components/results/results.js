@@ -39,7 +39,6 @@ class Results {
 
     this.total = 0
     this.data = []
-    this.ids = []
 
     this.currentPage = 1
     this.totalPages = 0
@@ -69,7 +68,6 @@ class Results {
 
   update(rows) {
     this.data = rows
-    this.ids = rows.map((r) => r[""])
     this.setCurrentPage(1)
   }
 
@@ -94,9 +92,6 @@ class Results {
 
   // TODO: Fix semicolomns format
   render(rows) {
-    window.selectedProjects = window.selectedProjects.filter((d) =>
-      this.ids.includes(d),
-    )
     this.totalElement.text(`Showing ${rows.length} out of ${this.data.length}`)
 
     d3.select("#resultsTable thead tr")
