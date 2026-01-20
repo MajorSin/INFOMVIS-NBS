@@ -2,7 +2,7 @@ class Results {
   constructor(data) {
     this.tableBody = d3.select("#resultsTable tbody")
 
-    this.comparisonProjects = []
+    window._selectedProjects = []
 
     this.tableColums = [
       {
@@ -94,7 +94,7 @@ class Results {
 
   // TODO: Fix semicolomns format
   render(rows) {
-    this.comparisonProjects = this.comparisonProjects.filter((d) =>
+    window.selectedProjects = window.selectedProjects.filter((d) =>
       this.ids.includes(d),
     )
     this.totalElement.text(`Showing ${rows.length} out of ${this.data.length}`)
@@ -180,14 +180,14 @@ class Results {
             .on(
               "change",
               (_, d) =>
-                (this.comparisonProjects = this.comparisonProjects.includes(
+                (window.selectedProjects = window.selectedProjects.includes(
                   d[""],
                 )
-                  ? this.comparisonProjects.filter((r) => r != d[""])
-                  : [...this.comparisonProjects, d[""]]),
+                  ? window.selectedProjects.filter((r) => r != d[""])
+                  : [...window.selectedProjects, d[""]]),
             )
             .attr("type", "checkbox")
-            .property("checked", (d) => this.comparisonProjects.includes(d[""]))
+            .property("checked", (d) => window.selectedProjects.includes(d[""]))
         },
         (update) => {},
         (exit) => exit.remove(),

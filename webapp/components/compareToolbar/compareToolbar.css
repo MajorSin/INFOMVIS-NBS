@@ -1,0 +1,25 @@
+#compareToolbar {
+  position: fixed;
+  bottom: 0;
+  right: 20px;
+  box-shadow:
+    rgba(0, 0, 0, 0.3) 0px 0px 38px,
+    rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
+#compareToolbar button {
+  border-radius: 10px 10px 0px 0px;
+  background-color: #1c2027;
+  padding: 0px 0px;
+}
+
+#compareToolbar button:hover {
+  background-color: #232835;
+}
+
+#compareToolbar .disabled {
+  background-color: #252a32;
+  color: #8f97a6;
+  cursor: not-allowed;
+  border: 1px solid var(#343a43);
+}

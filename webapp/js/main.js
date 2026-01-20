@@ -87,6 +87,14 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "selectedProjects", {
+      get: () => _selectedProjects,
+      set: (value) => {
+        _selectedProjects = value
+        this.components?.compareToolbar?.update(value) ?? null
+      },
+    })
   }
 
   async init() {
@@ -151,6 +159,7 @@ class ExplorationMode {
         geo: topojson.feature(this.topo, this.topo.objects.countries),
       }),
       funding: new Funding(this.filteredData),
+      compareToolbar: new CompareToolbar(),
     }
 
     const fundingComponent = this.components.funding

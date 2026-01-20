@@ -26,10 +26,11 @@ async function injectHtml(selectors) {
       const res = await fetch(selector.url, { cache: "no-cache" })
       if (!res.ok) throw new Error(`Failed to load ${url} (${res.status})`)
       mount.innerHTML = await res.text()
-    })
+    }),
   )
 }
 
+// TODO: Fix links
 async function boot_similarity(jsFile) {
   await injectHtml([
     {
@@ -62,7 +63,6 @@ async function boot_similarity(jsFile) {
       jsFile: "./components/kpis/kpis.js",
     },
   ])
-
 
   const script = document.createElement("script")
   script.src = jsFile
@@ -106,8 +106,13 @@ async function boot(jsFile) {
       styleSheet: "./components/funding/funding.css",
       jsFile: "./components/funding/funding.js",
     },
+    {
+      element: "#compareToolbarMount",
+      url: "./components/compareToolbar/compareToolbar.html",
+      styleSheet: "./components/compareToolbar/compareToolbar.css",
+      jsFile: "./components/compareToolbar/compareToolbar.js",
+    },
   ])
-
 
   const script = document.createElement("script")
   script.src = jsFile
@@ -115,21 +120,20 @@ async function boot(jsFile) {
 }
 
 async function callBoot(jsFile, currentPage) {
-  if (currentPage === 'similarity_band') {
+  if (currentPage === "similarity_band") {
     await boot_similarity(jsFile).catch((err) => {
       console.error(err)
       document.body.insertAdjacentHTML(
         "beforeend",
-        `<pre style="padding:12px; border:1px solid #ccc; white-space:pre-wrap;">Failed to boot app:${err.message}</pre>`
+        `<pre style="padding:12px; border:1px solid #ccc; white-space:pre-wrap;">Failed to boot app:${err.message}</pre>`,
       )
     })
-
   } else {
     await boot(jsFile).catch((err) => {
       console.error(err)
       document.body.insertAdjacentHTML(
         "beforeend",
-        `<pre style="padding:12px; border:1px solid #ccc; white-space:pre-wrap;">Failed to boot app:${err.message}</pre>`
+        `<pre style="padding:12px; border:1px solid #ccc; white-space:pre-wrap;">Failed to boot app:${err.message}</pre>`,
       )
     })
   }
