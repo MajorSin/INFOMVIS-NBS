@@ -222,6 +222,10 @@ class ExplorationMode {
       mapComponent.currentOption = element.target.value
       mapComponent.update(mapComponent.transformData(this.filteredDataForMap))
     })
+    mapComponent.mapDomainOptions.on("change", (element) => {
+      mapComponent.domain = element.target.value
+      mapComponent.update(mapComponent.transformData(this.filteredDataForMap))
+    })
   }
 
   update() {

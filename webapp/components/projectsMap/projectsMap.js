@@ -2,6 +2,8 @@ class ProjectsMap {
   constructor(data) {
     this.allCountries = []
 
+    this.meta = d3.select("#projectsMapMeta")
+
     this.map = L.map("mapArea").setView([20, 0], 2)
 
     L.tileLayer(
@@ -17,7 +19,9 @@ class ProjectsMap {
     this.tooltip = d3.select("#mapTooltip")
 
     this.currentOption = "country"
-    this.mapOptions = d3.selectAll("#mapOptions input")
+    this.mapOptions = d3.selectAll("#mapLocationOptions input")
+    this.mapDomainOptions = d3.selectAll("#mapDomainOptions input")
+    this.domain = "projects"
 
     this.cityPath = L.layerGroup()
     this.countryPath = L.layerGroup()
@@ -58,6 +62,9 @@ class ProjectsMap {
   }
 
   update(data) {
+    this.meta.text(
+      `${window.selectedCountries.length} countries & ${window.selectedCities.length} cities selected`,
+    )
     this.currentOption == "country"
       ? this.updateCountries(data)
       : this.updateCities(data)
@@ -69,17 +76,28 @@ class ProjectsMap {
     const legend = document.getElementsByClassName("mapLegend")[0]
     if (legend != null) legend.remove()
 
-    const max = d3.max(data.features.map((d) => d.count))
+    const row =
+      this.domain == "projects"
+        ? "count"
+        : this.domain == "squareMeter"
+          ? "averageArea"
+          : "averageCost"
+    const cityPointStyle = this.cityPointStyle(row)
+
+    const max = d3.max(data.features.map((d) => d[row]))
     this.radiusScale.domain([1, max])
 
     this.cityPath = L.geoJSON(data.features, {
       pointToLayer: (d, latlng) =>
-        new L.circleMarker(latlng, this.cityPointStyle(d)),
+        new L.circleMarker(latlng, cityPointStyle(d)),
       onEachFeature: (d, layer) => {
         layer.on("mouseover", (event) => {
-          layer.setStyle(this.cityPointStyle(d, true))
+          layer.setStyle(cityPointStyle(d, true))
           this.tooltip
             .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
+            .html(
+              `<b>${d.city}, ${d.country}</b><br/><b>Projects:</b> ${d.count}<br/><b>Average area:</b> ${d.averageArea ?? 0} m²<br/><b>Average cost</b> € ${d.averageCost ?? 0}`,
+            )
             .style("left", event.originalEvent.pageX + 10 + "px")
             .style("top", event.originalEvent.pageY - 10 + "px")
             .style("display", "block")
@@ -99,27 +117,36 @@ class ProjectsMap {
               : [...window.selectedCities, d.city]),
         )
         layer.on("mouseout", () => {
-          layer.setStyle(this.cityPointStyle(d))
+          layer.setStyle(cityPointStyle(d))
           this.tooltip.style("display", "none")
         })
       },
     }).addTo(this.map)
   }
 
-  cityPointStyle(d, hover = false) {
-    const included = window.selectedCities.includes(d.city)
-    return {
-      radius: this.radiusScale(d.count),
-      fillOpacity: hover ? 1 : 0.7,
-      fillColor: included ? "white" : "#17becf",
-      color: included ? "white" : "#17becf",
+  cityPointStyle(row) {
+    return (d, hover = false) => {
+      const included = window.selectedCities.includes(d.city)
+      return {
+        radius: this.radiusScale(d[row]),
+        fillOpacity: hover ? 1 : 0.7,
+        fillColor: included ? "white" : "#17becf",
+        color: included ? "white" : "#17becf",
+      }
     }
   }
 
   updateCountries(data) {
     this.removePaths()
 
-    const max = d3.max(data.features.map((d) => d.values.count))
+    const row =
+      this.domain == "projects"
+        ? "count"
+        : this.domain == "squareMeter"
+          ? "averageArea"
+          : "averageCost"
+
+    const max = d3.max(data.features.map((d) => d.values[row] ?? 0))
     this.colorScale.domain([0, max])
 
     this.legend.onAdd = () => {
@@ -135,13 +162,13 @@ class ProjectsMap {
               ? [0, max]
               : [max]
 
-      div.innerHTML = "<strong>Projects</strong>"
+      div.innerHTML = `<strong>${row == "averageCost" ? "Average cost in €" : row == "averageArea" ? "Average area in m²" : "Total projects"}</strong>`
       const legendContent = document.createElement("div")
       legendContent.setAttribute("id", "legend")
 
       for (let i = 0; i < grades.length; i++) {
         const from = Math.round(grades[i])
-        legendContent.innerHTML += `<div><i style="background:${this.colorScale(from)}"></i><span>${from}</span></div>`
+        legendContent.innerHTML += `<div><i style="background:${this.colorScale(from)}"></i><span>${d3.format("~s")(from)}</span></div>`
       }
 
       div.append(legendContent)
@@ -157,7 +184,7 @@ class ProjectsMap {
         color: "black",
         weight: 1,
         className: d.values.count > 0 ? "" : "not-clickable",
-        fillColor: this.colorScale(d.values.count),
+        fillColor: this.colorScale(d.values[row] ?? 0),
         fillOpacity: window.selectedCountries.includes(d.values.country)
           ? 0.9
           : 0.7,
@@ -176,7 +203,9 @@ class ProjectsMap {
         )
         layer.on("mouseover", (event) =>
           this.tooltip
-            .html(`${d.properties.name}<br/>Projects: ${d.values.count}`)
+            .html(
+              `<b>${d.properties.name}</b><br/><b>Projects:</b> ${d.values.count}<br/><b>Average area:</b> ${d.values.averageArea ?? 0} m²<br/><b>Average cost</b> € ${d.values.averageCost ?? 0}`,
+            )
             .style("left", event.originalEvent.pageX + 10 + "px")
             .style("top", event.originalEvent.pageY - 10 + "px")
             .style("display", "block"),
@@ -204,6 +233,16 @@ class ProjectsMap {
         .map((d) => ({
           count: d[1].length,
           country: d[0],
+          averageCost:
+            Math.round(
+              (d[1].reduce((sum, item) => sum + item.cost, 0) / d[1].length) *
+                100,
+            ) / 100,
+          averageArea:
+            Math.round(
+              (d[1].reduce((sum, item) => sum + item.area, 0) / d[1].length) *
+                100,
+            ) / 100,
         }))
         .sort((a, b) => b.count - a.count)
 
@@ -239,6 +278,16 @@ class ProjectsMap {
           count: d[1].length,
           city: d[0],
           country: d[1][0].country,
+          averageCost:
+            Math.round(
+              (d[1].reduce((sum, item) => sum + item.cost, 0) / d[1].length) *
+                100,
+            ) / 100,
+          averageArea:
+            Math.round(
+              (d[1].reduce((sum, item) => sum + item.area, 0) / d[1].length) *
+                100,
+            ) / 100,
         }))
         .sort((a, b) => b.count - a.count),
     }
