@@ -30,17 +30,17 @@
 }
 
 #compareTable tr:hover td {
-  background: #171c29;
+  background: var(--bg-secondary);
 }
 
 #compareTable td:first-child {
   font-weight: bold;
-  background-color: #171b26;
+  background-color: var(--bg-secondary);
   min-width: 10px;
 }
 
 #compareTable tr:first-child {
   color: var(--muted);
   font-weight: 800;
-  background-color: #101624;
+  background-color: var(--bg-elevated);
 }

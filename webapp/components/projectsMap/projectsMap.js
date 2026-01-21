@@ -153,8 +153,10 @@ class ProjectsMap {
 
     this.countryPath = L.geoJSON(data.features, {
       style: (d) => ({
+        cursor: "default",
         color: "black",
         weight: 1,
+        className: d.values.count > 0 ? "" : "not-clickable",
         fillColor: this.colorScale(d.values.count),
         fillOpacity: window.selectedCountries.includes(d.values.country)
           ? 0.9

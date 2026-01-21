@@ -18,15 +18,15 @@ text {
 }
 
 .funding-source-bar {
-  fill: #17becf;
+  fill: var(--chart-primary);
 }
 
 .funding-source-bar:hover {
-  fill: #2ed8e6;
+  fill: var(--accent-cyan);
 }
 
 .funding-source-bar.active {
-  fill: #1096a4;
+  fill: var(--selected);
 }
 
 .labelInside {

@@ -15,7 +15,7 @@
   padding: 10px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-overlay-soft);
   max-height: 260px;
   overflow: auto;
 }
@@ -38,7 +38,7 @@
 .rangeBox {
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-overlay-soft);
   padding: 10px;
   display: grid;
   gap: 12px;
@@ -59,7 +59,7 @@
 }
 
 .ts-control {
-  background-color: var(--soft);
+  background-color: var(--bg-overlay-soft);
   border: 1px solid var(--border);
   border-radius: 10px;
 }
@@ -70,7 +70,7 @@
 }
 
 .ts-dropdown {
-  background-color: #1b212f;
+  background-color: var(--dropdown-bg);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 0px 0px 10px 10px;
@@ -81,12 +81,12 @@
 }
 
 .ts-dropdown .active {
-  background-color: #2ed8e6;
+  background-color: var(--accent-cyan);
   color: black;
 }
 
 .ts-wrapper .item {
   border-radius: 3px;
-  background-color: #1096a4 !important;
+  background-color: var(--selected) !important;
   color: black !important;
 }

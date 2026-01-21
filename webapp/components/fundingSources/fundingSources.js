@@ -222,14 +222,14 @@ class FundingSources {
         source: row.source,
         count: row.values.count,
         averageArea:
-          row.values.totalArea != null
+          row.values.totalArea > 0
             ? Math.round(
                 (row.values.totalArea / row.values.count + Number.EPSILON) *
                   100,
               ) / 100
             : 0,
         averageCost:
-          row.values.totalCost != null
+          row.values.totalCost > 0
             ? Math.round(
                 (row.values.totalCost / row.values.count + Number.EPSILON) *
                   100,
