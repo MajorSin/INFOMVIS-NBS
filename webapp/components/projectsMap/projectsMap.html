@@ -1,8 +1,13 @@
 <section id="map" class="card">
   <div class="card-header">
-    <h2>Project locations</h2>
+    <div>
+      <h2>Project locations</h2>
+      <span id="projectsMapMeta" class="card-meta"
+        >0 countries & 0 cities selected</span
+      >
+    </div>
 
-    <div id="mapOptions" class="toggle-group">
+    <div id="mapLocationOptions" class="toggle-group">
       <input
         type="radio"
         id="countryCheckbox"
@@ -14,6 +19,33 @@
 
       <input type="radio" id="cityCheckbox" name="map" value="city" />
       <label for="cityCheckbox">Per city</label>
+    </div>
+
+    <div id="mapDomainOptions" class="toggle-group">
+      <input
+        type="radio"
+        id="mapProjectsCheckbox"
+        name="mapDomain"
+        value="projects"
+        checked
+      />
+      <label for="mapProjectsCheckbox">Total projects</label>
+
+      <input
+        type="radio"
+        id="mapSquareMeterCheckbox"
+        name="mapDomain"
+        value="squareMeter"
+      />
+      <label for="mapSquareMeterCheckbox">Average area</label>
+
+      <input
+        type="radio"
+        id="mapAverageCostCheckbox"
+        name="mapDomain"
+        value="averageCost"
+      />
+      <label for="mapAverageCostCheckbox">Average cost</label>
     </div>
   </div>
 
