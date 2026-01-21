@@ -5,6 +5,9 @@ class ExplorationMode {
     this.filteredDataForMap = []
     this.topo = null
 
+    this.exploreWrapper = d3.select("#exploreMode")
+    this.compareWrapper = d3.select("#compareMode")
+
     this.components = null
 
     Object.defineProperty(window, "selectedEconomicImpacts", {
@@ -87,12 +90,29 @@ class ExplorationMode {
         this.update()
       },
     })
+
+    Object.defineProperty(window, "mode", {
+      get: () => _mode,
+      set: (value) => {
+        _mode = value
+        this.updateMode()
+      },
+    })
+
+    Object.defineProperty(window, "selectedProjects", {
+      get: () => _selectedProjects,
+      set: (value) => {
+        _selectedProjects = value
+        this.components?.compareToolbar?.update(value) ?? null
+      },
+    })
   }
 
   async init() {
     Promise.all([this.loadRows(), this.loadWorldMap()]).then(() =>
       this.render(),
     )
+    window._mode = "overview"
   }
 
   async loadWorldMap() {
@@ -123,19 +143,15 @@ class ExplorationMode {
                 .trim()
                 .split(";")
                 .map((s) => s.trim())
+                .filter(Boolean)
             : [],
-          cost: parseCost(row.total_cost),
-          startYear: row.start_year,
-          endYear: row.end_year,
-          lastUpdated: Date.parse(row.last_updated),
-          title: row.name_of_the_nbs_intervention_short_english_title,
-          titleNative: row.native_title_of_the_nbs_intervention,
-          area: row.nbs_area_m2,
-          currentStage: row.present_stage_of_the_intervention,
-          fundingSources: this.splitMultiValueField(row.sources_of_funding),
-          areaTypes: this.splitMultiValueField(
-            row.type_of_area_before_implementation_of_the_nbs,
-          ),
+          __areaTypes: row.type_of_area_before_implementation_of_the_nbs
+            ? row.type_of_area_before_implementation_of_the_nbs
+                .split(/[,;]+/)
+                .map((s) => s.trim())
+                .filter(Boolean)
+            : [],
+          __fundingSources: this.splitMultiValueField(row.sources_of_funding),
         })),
       )
 
@@ -153,7 +169,10 @@ class ExplorationMode {
         topo: this.topo,
         geo: topojson.feature(this.topo, this.topo.objects.countries),
       }),
+      lineChartModal: new LineChartPopout(this.filteredData),
       funding: new Funding(this.filteredData),
+      compareToolbar: new CompareToolbar(),
+      compare: new Compare(this.data),
     }
 
     const fundingComponent = this.components.funding
@@ -177,15 +196,23 @@ class ExplorationMode {
       this.components.kpis.transformData(this.filteredData),
     )
 
-    this.components.results.update(
-      this.components.results.transformData(this.filteredData),
+    this.components.lineChartModal.update(
+      this.components.lineChartModal.transformData(this.filteredData),
     )
+
+    this.components.lineChartModal.update(
+      this.components.lineChartModal.transformData(this.filteredData),
+    )
+
+    this.components.results.update(this.filteredData)
     this.components.mapFilteredCities.update(
       this.components.mapFilteredCities.transformData(this.filteredDataForMap),
     )
     this.components.funding.update(
       this.components.funding.transformData(this.filteredData),
     )
+
+    if (window.mode == "compare") this.components.compare.update()
   }
 
   filterData() {
@@ -204,21 +231,21 @@ class ExplorationMode {
 
       if (window.selectedEconomicImpacts.length > 0) {
         const passImpacts = window.selectedEconomicImpacts.every((impact) =>
-          r.economicImpacts.includes(impact),
+          r.__economicImpacts.includes(impact),
         )
         if (!passImpacts) return false
       }
 
       if (window.selectedFundingSource.length > 0) {
         const passFundingSource = window.selectedFundingSource.every((fund) =>
-          r.fundingSources.includes(fund),
+          r.__sources_of_funding.includes(fund),
         )
         if (!passFundingSource) return false
       }
 
       if (window.selectedAreaTypes.length > 0) {
         const passAreaTypes = window.selectedAreaTypes.every((t) =>
-          r.areaTypes.includes(t),
+          r.__areaTypes.includes(t),
         )
         if (!passAreaTypes) return false
       }
@@ -243,6 +270,17 @@ class ExplorationMode {
         (window.selectedCountries.length <= 0 ||
           window.selectedCountries.some((c) => r.country == c)),
     )
+  }
+
+  updateMode() {
+    if (window.mode == "compare") {
+      this.compareWrapper.style("display", "block")
+      this.exploreWrapper.style("display", "none")
+    } else {
+      this.compareWrapper.style("display", "none")
+      this.exploreWrapper.style("display", "block")
+    }
+    this.update()
   }
 }
 

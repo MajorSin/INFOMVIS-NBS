@@ -1,0 +1,28 @@
+<section id="lineChartCard" class="card">
+  <div class="card-header">
+    <h2>Num. active projects</h2>
+
+    <button id="lineChartExpandBtn" class="expand-btn" aria-label="Expand">
+      ⤢
+    </button>
+  </div>
+
+  <div id="lineChartHost" class="chart-host">
+    <div id="lineChartArea"></div>
+    <div class="helpText">Hover to see exact values.</div>
+    <div id="lineChartTooltip" class="tooltip"></div>
+  </div>
+</section>
+
+<div id="lineChartModal" class="modal" aria-hidden="true">
+  <div class="modal-backdrop" data-close="true"></div>
+
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="lineChartModalTitle">
+    <div class="modal-header">
+      <h2 id="lineChartModalTitle">Number of active projects in development per year</h2>
+      <button class="modal-close" aria-label="Close" data-close="true">✕</button>
+    </div>
+
+    <div class="modal-body" id="lineChartModalBody"></div>
+  </div>
+</div>

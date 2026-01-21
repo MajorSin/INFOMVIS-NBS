@@ -30,6 +30,7 @@ async function injectHtml(selectors) {
   )
 }
 
+// TODO: Fix links
 async function boot_similarity(jsFile) {
   await injectHtml([
     {
@@ -88,6 +89,12 @@ async function boot(jsFile) {
       jsFile: "./components/kpis/kpis.js",
     },
     {
+      element: "#lineChartMount",
+      url: "./components/lineChartPopout/lineChartPopout.html",
+      styleSheet: "./components/lineChartPopout/lineChartPopout.css",
+      jsFile: "./components/lineChartPopout/lineChartPopout.js",
+    },
+    {
       element: "#mapMount",
       url: "./components/mapFilteredCities/mapFilteredCities.html",
       styleSheet: "./components/mapFilteredCities/mapFilteredCities.css",
@@ -104,6 +111,18 @@ async function boot(jsFile) {
       url: "./components/funding/funding.html",
       styleSheet: "./components/funding/funding.css",
       jsFile: "./components/funding/funding.js",
+    },
+    {
+      element: "#compareToolbarMount",
+      url: "./components/compareToolbar/compareToolbar.html",
+      styleSheet: "./components/compareToolbar/compareToolbar.css",
+      jsFile: "./components/compareToolbar/compareToolbar.js",
+    },
+    {
+      element: "#compareMount",
+      url: "./components/compare/compare.html",
+      styleSheet: "./components/compare/compare.css",
+      jsFile: "./components/compare/compare.js",
     },
   ])
 
