@@ -1,0 +1,58 @@
+.tableHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0px 5px 10px 5px;
+}
+
+.tableHeader h2 {
+  margin-bottom: 0px;
+}
+
+#tableMeta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+#resultsPagination {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 10px auto;
+  width: 100%;
+}
+
+.paginationButton {
+  border-radius: 50%;
+  height: 35px;
+  width: 35px;
+  font-size: 10px;
+  padding: 0px;
+  text-align: center;
+}
+
+#resultsTable thead tr th div {
+  display: flex;
+  justify-content: space-between;
+}
+
+#resultsTable thead tr i {
+  color: var(--muted);
+}
+
+#resultsTable thead tr th .active {
+  color: var(--text);
+}
+
+#resultsTable thead tr .active {
+  background-color: var(--bg-secondary);
+}
+
+.staticColumn {
+  cursor: not-allowed !important;
+}
+
+.staticColumn div {
+  justify-content: center !important;
+}

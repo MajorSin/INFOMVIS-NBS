@@ -1,4 +1,4 @@
-class KPIs {
+class KPI {
   constructor(data) {
     this.update(this.transformData(data))
   }
@@ -11,7 +11,7 @@ class KPIs {
   }
 
   transformData(data) {
-    const years = data.map((r) => r.start_year).filter(Number.isFinite)
+    const years = data.map((r) => r.startYear).filter(Number.isFinite)
     const wrangledData = {
       yearRange: { min: d3.min(years), max: d3.max(years) },
       rows: data.length,
@@ -26,7 +26,7 @@ class KPIs {
     if (arr.length <= 0) return ""
 
     const counts = arr
-      .map((r) => r.__sources_of_funding)
+      .map((r) => r.fundingSources)
       .flat()
       .reduce((acc, val) => {
         acc[val] = (acc[val] || 0) + 1

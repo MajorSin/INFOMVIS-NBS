@@ -27,3 +27,7 @@
   flex-direction: row;
   font-size: 11px;
 }
+
+.not-clickable {
+  cursor: not-allowed;
+}

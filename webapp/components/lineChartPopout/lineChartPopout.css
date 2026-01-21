@@ -1,0 +1,56 @@
+.expand-btn {
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 18px;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.expand-btn:hover {
+  background: var(--bg-overlay-hover);
+}
+
+#lineChartArea {
+  height: 320px;
+  border-radius: 12px;
+}
+
+.modal .chart-host #lineChartArea {
+  height: 520px;
+}
+
+#lineChartModal {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 2147483647 !important;
+  display: none;
+}
+
+#lineChartModal.is-open {
+  display: block !important;
+}
+
+#lineChartModal .modal-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  background: var(--shadow-modal) !important;
+}
+
+#lineChartModal .modal-panel {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+
+  width: min(1100px, calc(100vw - 48px)) !important;
+  max-height: calc(100vh - 48px) !important;
+  overflow: hidden !important;
+
+  background: var(--bg) !important;
+  border-radius: 14px !important;
+}

@@ -219,7 +219,7 @@ class MapSimilarityBands {
       return
     }
 
-    const [cx, cy] = this.projection([data.coords.lon, data.coords.lat])
+    const [cx, cy] = this.projection(data.coordinates)
 
     const halo = this.mapG
       .selectAll("circle.city-halo")
@@ -343,8 +343,8 @@ class MapSimilarityBands {
           enter
             .append("circle")
             .attr("class", (d) => this.circleClass(d))
-            .attr("cx", (d) => this.projection([d.coords.lon, d.coords.lat])[0])
-            .attr("cy", (d) => this.projection([d.coords.lon, d.coords.lat])[1])
+            .attr("cx", (d) => this.projection(d.coordinates)[0])
+            .attr("cy", (d) => this.projection(d.coordinates)[1])
             .attr("r", (d) => getR(d))
             .attr("fill", (d) => this.getCircleFill(d))
             .attr("stroke", "rgba(255,255,255,0.7)")
@@ -364,8 +364,8 @@ class MapSimilarityBands {
             .attr("class", (d) => this.circleClass(d))
             .transition()
             .duration(200)
-            .attr("cx", (d) => this.projection([d.coords.lon, d.coords.lat])[0])
-            .attr("cy", (d) => this.projection([d.coords.lon, d.coords.lat])[1])
+            .attr("cx", (d) => this.projection(d.coordinates)[0])
+            .attr("cy", (d) => this.projection(d.coordinates)[1])
             .attr("r", (d) => getR(d))
             .attr("fill", (d) => this.getCircleFill(d)),
         (exit) => exit.remove()
@@ -528,8 +528,8 @@ class MapSimilarityBands {
       const ul = document.createElement("ul")
       for (const r of rows) {
         const title =
-          r.name_of_the_nbs_intervention_short_english_title ??
-          r.native_title_of_the_nbs_intervention ??
+          r.title ??
+          r.nativeTitle ??
           "Untitled"
 
         const li = document.createElement("li")
@@ -576,8 +576,8 @@ class MapSimilarityBands {
     const tbody = table.querySelector("tbody")
 
     const titleOf = (p) =>
-      p.name_of_the_nbs_intervention_short_english_title ??
-      p.native_title_of_the_nbs_intervention ??
+      p.title ??
+      p.nativeTitle ??
       "Untitled"
 
     const cityText = (p) => `${p.city ?? "—"}, ${p.country ?? "—"}`
