@@ -21,6 +21,12 @@ class FundingSources {
 
     this.labelsGroup = this.svg.append("g").attr("id", "fundingLabelsGroup")
 
+    this.xAxis = this.svg
+      .append("g")
+      .attr("transform", `translate(0,${this.height})`)
+      .attr("class", "fundAxis")
+    this.yAxis = this.svg.append("g").attr("class", "fundAxis")
+
     this.tooltip = d3.select("#fundingTooltip")
 
     this.fundingOptionsInput = d3.selectAll("#fundingOptions input")
@@ -41,20 +47,10 @@ class FundingSources {
   }
 
   wrangleData(data) {
-    this.render(this.transformData(data))
-  }
-
-  render(data) {
     this.xScale = d3.scaleSqrt().range([0, this.width])
     this.yScale = d3.scaleBand().range([0, this.height]).padding(0.3)
 
-    this.xAxis = this.svg
-      .append("g")
-      .attr("transform", `translate(0,${this.height})`)
-      .attr("class", "fundAxis")
-    this.yAxis = this.svg.append("g").attr("class", "fundAxis")
-
-    this.update(data)
+    this.update(this.transformData(data))
   }
 
   update(data) {

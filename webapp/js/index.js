@@ -9,7 +9,9 @@ class ExplorationMode {
     this.compareWrapper = d3.select("#compareMode")
 
     this.components = null
+  }
 
+  async init() {
     Object.defineProperty(window, "selectedEconomicImpacts", {
       get: () => _selectedEconomicImpacts,
       set: (value) => {
@@ -106,32 +108,24 @@ class ExplorationMode {
         this.components?.compareToolbar?.update(value) ?? null
       },
     })
-  }
-
-  async init() {
-    Promise.all([this.loadRows(), this.loadWorldMap()]).then(() =>
-      this.render(),
-    )
     window._mode = "overview"
+
+    Promise.all([this.loadData(), this.loadWorldMap()]).then((data) => {
+      this.data = [...data[0]]
+      this.filteredData = [...data[0]]
+      this.filteredDataForMap = [...data[0]]
+      this.render(data[1])
+    })
   }
 
   async loadWorldMap() {
-    this.topo = await fetch(
+    return await fetch(
       "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json",
     ).then((r) => r.json())
   }
 
-  splitMultiValueField(v) {
-    return (
-      v
-        ?.trim()
-        ?.split(/[;,]+/)
-        .map((item) => item.trim().replace(/^- /, "")) ?? []
-    )
-  }
-
-  async loadRows() {
-    this.data = await d3
+  async loadData() {
+    return await d3
       .csv("./data/cleaned_nbs_data.csv", d3.autoType)
       .then((rows) =>
         rows.map((row) => ({
@@ -147,11 +141,11 @@ class ExplorationMode {
             .map(Number)
             .reverse(),
           country: row.country,
-          economicImpacts: this.splitMultiValueField(row.economic_impacts),
-          areaTypes: this.splitMultiValueField(
+          economicImpacts: splitMultiValueField(row.economic_impacts),
+          areaTypes: splitMultiValueField(
             row.type_of_area_before_implementation_of_the_nbs,
           ),
-          fundingSources: this.splitMultiValueField(row.sources_of_funding),
+          fundingSources: splitMultiValueField(row.sources_of_funding),
           startYear: row.start_year,
           endYear: row.end_year,
           area: row.nbs_area_m2,
@@ -166,52 +160,44 @@ class ExplorationMode {
             row.nbs_intervention_implemented_in_response_to_a_national_regulations_strategy_plan,
           responseToEURegulation:
             row.nbs_intervention_implemented_in_response_to_an_eu_directive_strategy,
-          primaryBeneficiaries: this.splitMultiValueField(
-            row.primary_beneficiaries,
-          ),
-          socialCulturalImpacts: this.splitMultiValueField(
+          primaryBeneficiaries: splitMultiValueField(row.primary_beneficiaries),
+          socialCulturalImpacts: splitMultiValueField(
             row.social_and_cultural_impacts,
           ),
-          environmentalImpacts: this.splitMultiValueField(
-            row.environmental_impacts,
-          ),
-          focus: this.splitMultiValueField(row.focus_of_the_project),
+          environmentalImpacts: splitMultiValueField(row.environmental_impacts),
+          focus: splitMultiValueField(row.focus_of_the_project),
           goals: row.goals_of_the_intervention,
           governanceArrangements: row.governance_arrangements,
           implementationActivities: row.implementation_activities,
-          sustainabilityChallengesAddressed: this.splitMultiValueField(
+          sustainabilityChallengesAddressed: splitMultiValueField(
             row.sustainability_challenges_addressed,
           ),
-          keyActors: this.splitMultiValueField(
+          keyActors: splitMultiValueField(
             row.key_actors_initiating_organization,
           ),
           lastUpdated: new Date(row.last_updated),
           link: row.link,
         })),
       )
-
-    this.filteredData = this.data
-    this.filteredDataForMap = this.data
   }
 
-  render() {
+  render(geo) {
     this.components = {
-      filters: new Filters(this.filteredData),
-      kpis: new KPI(this.filteredData),
-      results: new Table(this.filteredData),
+      filters: new Filters([...this.data]),
+      kpis: new KPI([...this.data]),
+      results: new Table([...this.data]),
       mapFilteredCities: new ProjectsMap({
-        rows: this.filteredData,
-        topo: this.topo,
-        geo: topojson.feature(this.topo, this.topo.objects.countries),
+        rows: [...this.data],
+        topo: geo,
       }),
-      lineChartModal: new LineChartPopout(this.filteredData),
-      funding: new FundingSources(this.filteredData),
+      lineChartModal: new LineChartPopout([...this.data]),
+      funding: new FundingSources([...this.data]),
       compareToolbar: new CompareToolbar(),
-      compare: new CompareTable(this.data),
+      compare: new CompareTable([...this.data]),
     }
 
-    const fundingComponent = this.components.funding
     // TODO: put this in funding  component and everything else in a list
+    const fundingComponent = this.components.funding
     fundingComponent.fundingOptionsInput.on("change", (element) => {
       fundingComponent.currentOption = element.target.value
       fundingComponent.update(fundingComponent.transformData(this.filteredData))
@@ -229,29 +215,17 @@ class ExplorationMode {
   }
 
   update() {
+    this.components.mapFilteredCities.wrangleData([...this.filteredDataForMap])
+    this.components.kpis.wrangleData([...this.filteredData])
+    this.components.results.wrangleData([...this.filteredData])
+    this.components.funding.wrangleData([...this.filteredData])
     this.components.filters.update()
 
-    this.components.kpis.update(
-      this.components.kpis.transformData(this.filteredData),
-    )
-
     this.components.lineChartModal.update(
       this.components.lineChartModal.transformData(this.filteredData),
     )
 
-    this.components.lineChartModal.update(
-      this.components.lineChartModal.transformData(this.filteredData),
-    )
-
-    this.components.results.update(this.filteredData)
-    this.components.mapFilteredCities.update(
-      this.components.mapFilteredCities.transformData(this.filteredDataForMap),
-    )
-    this.components.funding.update(
-      this.components.funding.transformData(this.filteredData),
-    )
-
-    if (window.mode == "compare") this.components.compare.update()
+    if (window.mode == "compare") this.components.compare.wrangleData()
   }
 
   filterData() {
@@ -300,7 +274,6 @@ class ExplorationMode {
 
     this.filteredDataForMap = [...tempFiltered]
 
-    // TODO: Decide on filtering all data or only selected for map
     this.filteredData = tempFiltered.filter(
       (r) =>
         (window.selectedCities.length <= 0 ||
@@ -320,6 +293,15 @@ class ExplorationMode {
     }
     this.update()
   }
+}
+
+function splitMultiValueField(v) {
+  return (
+    v
+      ?.trim()
+      ?.split(/[;,]+/)
+      .map((item) => item.trim().replace(/^- /, "")) ?? []
+  )
 }
 
 new ExplorationMode().init()

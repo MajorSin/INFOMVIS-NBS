@@ -32,33 +32,29 @@ class ProjectsMap {
   }
 
   init(data) {
-    this.wrangleData({
-      ...data,
-      geo: {
-        ...data.geo,
-        features: data.geo.features.map((f) => ({
-          ...f,
-          geometry: {
-            ...f.geometry,
-            coordinates:
-              f.geometry.type == "Polygon"
-                ? this.normalizeCoords(f.geometry.coordinates)
-                : f.geometry.coordinates.map(this.normalizeCoords),
-          },
-        })),
-      },
-    })
-  }
-
-  wrangleData(data) {
-    this.allCountries = data.geo.features
+    this.allCountries = topojson
+      .feature(data.topo, data.topo.objects.countries)
+      .features.map((f) => ({
+        ...f,
+        geometry: {
+          ...f.geometry,
+          coordinates:
+            f.geometry.type == "Polygon"
+              ? normalizeCoords(f.geometry.coordinates)
+              : f.geometry.coordinates.map(normalizeCoords),
+        },
+      }))
 
     this.radiusScale = d3.scaleSqrt().range([4, 24])
     this.colorScale = d3
       .scaleSymlog()
       .range(["rgb(238, 247, 250)", "rgb(15, 43, 204)"])
 
-    this.update(this.transformData(data.rows))
+    this.wrangleData(data.rows)
+  }
+
+  wrangleData(data) {
+    this.update(this.transformData(data))
   }
 
   update(data) {
@@ -293,21 +289,21 @@ class ProjectsMap {
     }
   }
 
-  normalizeCoords(coords) {
-    return coords.map((ring) => {
-      let lastLng = ring[0][0]
-
-      return ring.map(([lng, lat]) => {
-        while (lng - lastLng > 180) lng -= 360
-        while (lng - lastLng < -180) lng += 360
-        lastLng = lng
-        return [lng, lat]
-      })
-    })
-  }
-
   removePaths() {
     this.map.removeLayer(this.cityPath)
     this.map.removeLayer(this.countryPath)
   }
+}
+
+function normalizeCoords(coords) {
+  return coords.map((ring) => {
+    let lastLng = ring[0][0]
+
+    return ring.map(([lng, lat]) => {
+      while (lng - lastLng > 180) lng -= 360
+      while (lng - lastLng < -180) lng += 360
+      lastLng = lng
+      return [lng, lat]
+    })
+  })
 }

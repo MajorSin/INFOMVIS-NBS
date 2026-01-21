@@ -94,18 +94,39 @@ class Filters {
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
 
-    this.wrangleData(this.transformData(data))
+    this.wrangleData(data)
   }
 
-  wrangleData(meta) {
-    this.startYearBounds = meta.yearRange
-    window._yearRange = meta.yearRange
+  wrangleData(data) {
+    const areas = data.map((r) => r.area).filter(Number.isFinite)
 
-    this.nbsAreaBounds = meta.nbsAreaRange
-    window._nbsAreaRange = meta.nbsAreaRange
+    this.render({
+      yearRange: {
+        min: d3.min(data.map((r) => r.startYear)),
+        max: d3.max(data.map((r) => r.endYear)),
+      },
+      nbsAreaRange: { min: d3.min(areas), max: d3.max(areas) },
+      costRange: { min: 0, max: d3.max(data.map((r) => r.cost)) },
+      rows: data.length,
+      cities: [...new Set(data.map((d) => d.city))]
+        .filter((r) => r != null)
+        .sort((a, b) => a.localeCompare(b)),
+      countries: [...new Set(data.map((d) => d.country))]
+        .filter((r) => r != null)
+        .sort((a, b) => a.localeCompare(b)),
+      fundingSources: data.flatMap((d) => d.__fundingSources || []),
+    })
+  }
 
-    this.costBounds = meta.costRange
-    window._costRange = meta.costRange
+  render(data) {
+    this.startYearBounds = data.yearRange
+    window._yearRange = data.yearRange
+
+    this.nbsAreaBounds = data.nbsAreaRange
+    window._nbsAreaRange = data.nbsAreaRange
+
+    this.costBounds = data.costRange
+    window._costRange = data.costRange
 
     this.yearRangeSlider = rangeSlider(d3.select("#yearRangeSlider").node(), {
       min: this.startYearBounds.min,
@@ -138,7 +159,7 @@ class Filters {
     })
 
     this.countriesDropdown = new TomSelect("#countriesInput", {
-      options: meta.countries.map((v) => ({
+      options: data.countries.map((v) => ({
         value: v,
         text: v,
       })),
@@ -155,7 +176,7 @@ class Filters {
     })
 
     this.citiesDropdown = new TomSelect("#cityInput", {
-      options: meta.cities.map((v) => ({
+      options: data.cities.map((v) => ({
         value: v,
         text: v,
       })),
@@ -170,26 +191,22 @@ class Filters {
       onChange: () => (window.selectedCities = this.citiesDropdown.items),
     })
 
-    this.render(meta)
-  }
-
-  render(meta) {
     d3.select("#startYearLabel").text(
-      `${meta.yearRange.min}–${meta.yearRange.max}`,
+      `${data.yearRange.min}–${data.yearRange.max}`,
     )
 
     d3.select("#nbsAreaLabel").text(
-      `${meta.nbsAreaRange.min}-${d3.format(",")(meta.nbsAreaRange.max)}`,
+      `${data.nbsAreaRange.min}-${d3.format(",")(data.nbsAreaRange.max)}`,
     )
 
     d3.select("#costRangeLabel").text(
-      `${meta.costRange.min}–${d3.format(",")(meta.costRange.max)}`,
+      `${data.costRange.min}–${d3.format(",")(data.costRange.max)}`,
     )
 
     this.update()
   }
 
-  update(meta) {
+  update() {
     this.countriesDropdown.setValue([...window.selectedCountries], true)
     this.citiesDropdown.setValue([...window.selectedCities], true)
 
@@ -374,30 +391,12 @@ class Filters {
   }
 
   updateNbsAreaUI() {
-    d3.select("#nbsAreaMaxVal").text(formatLargeNumbers(window.nbsAreaRange.max))
-    d3.select("#nbsAreaMinVal").text(formatLargeNumbers(window.nbsAreaRange.min))
-  }
-
-  transformData(data) {
-    const areas = data.map((r) => r.area).filter(Number.isFinite)
-    const cost = data.map((r) => r.cost)
-
-    return {
-      yearRange: {
-        min: d3.min(data.map((r) => r.startYear)),
-        max: d3.max(data.map((r) => r.endYear)),
-      },
-      nbsAreaRange: { min: d3.min(areas), max: d3.max(areas) },
-      costRange: { min: 0, max: d3.max(cost) },
-      rows: data.length,
-      cities: [...new Set(data.map((d) => d.city))]
-        .filter((r) => r != null)
-        .sort((a, b) => a.localeCompare(b)),
-      countries: [...new Set(data.map((d) => d.country))]
-        .filter((r) => r != null)
-        .sort((a, b) => a.localeCompare(b)),
-      fundingSources: data.flatMap((d) => d.__fundingSources || []),
-    }
+    d3.select("#nbsAreaMaxVal").text(
+      formatLargeNumbers(window.nbsAreaRange.max),
+    )
+    d3.select("#nbsAreaMinVal").text(
+      formatLargeNumbers(window.nbsAreaRange.min),
+    )
   }
 }
 
