@@ -149,6 +149,7 @@ class FundingSources {
       )
 
     const labelPosition = findLabelPosition(this.xScale)
+
     this.labelsGroup
       .selectAll(".fundingRectLabels")
       .data(data, (d) => d.source)
@@ -166,9 +167,9 @@ class FundingSources {
             )
             .text((d) =>
               this.row == "averageArea"
-                ? `${d.totalArea} m²`
+                ? `${d.averageArea} m²`
                 : this.row == "averageCost"
-                  ? `€ ${d.totalCost}`
+                  ? `€ ${d.averageCost}`
                   : d[this.row],
             )
             .call((text) => labelPosition(this.row, text)),
@@ -188,7 +189,7 @@ class FundingSources {
               this.row == "averageArea"
                 ? `${d.averageArea} m²`
                 : this.row == "averageCost"
-                  ? `€ ${d.averageArea}`
+                  ? `€ ${d.averageCost}`
                   : d[this.row],
             )
             .call((text) => labelPosition(this.row, text)),

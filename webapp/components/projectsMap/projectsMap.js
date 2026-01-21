@@ -96,7 +96,7 @@ class ProjectsMap {
           this.tooltip
             .html(`${d.city}, ${d.country}<br/>Projects: ${d.count}`)
             .html(
-              `<b>${d.city}, ${d.country}</b><br/><b>Projects:</b> ${d.count}<br/><b>Average area:</b> ${d.averageArea ?? 0} m²<br/><b>Average cost</b> € ${d.averageCost ?? 0}`,
+              `<span>${d.city}, ${d.country}</span><br/><b>- Projects:</b> ${d.count}<br/><b>- Average area:</b> ${d.averageArea ?? 0} m²<br/><b>- Average cost</b> € ${d.averageCost ?? 0}`,
             )
             .style("left", event.originalEvent.pageX + 10 + "px")
             .style("top", event.originalEvent.pageY - 10 + "px")
@@ -204,7 +204,7 @@ class ProjectsMap {
         layer.on("mouseover", (event) =>
           this.tooltip
             .html(
-              `<b>${d.properties.name}</b><br/><b>Projects:</b> ${d.values.count}<br/><b>Average area:</b> ${d.values.averageArea ?? 0} m²<br/><b>Average cost</b> € ${d.values.averageCost ?? 0}`,
+              `<span>${d.properties.name}</span><br/><b>- Projects:</b> ${d.values.count}<br/><b>- Average area:</b> ${d.values.averageArea ?? 0} m²<br/><b>- Average cost</b> € ${d.values.averageCost ?? 0}`,
             )
             .style("left", event.originalEvent.pageX + 10 + "px")
             .style("top", event.originalEvent.pageY - 10 + "px")

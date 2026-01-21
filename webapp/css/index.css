@@ -198,6 +198,11 @@ thead tr th:last-child {
   z-index: 400;
 }
 
+.tooltip span {
+  font-weight: 700;
+  font-size: 13px;
+}
+
 .toggle-group {
   display: inline-flex;
   border-radius: 10px;

@@ -53,4 +53,12 @@
 
   background: var(--bg) !important;
   border-radius: 14px !important;
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+
+.modal-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
