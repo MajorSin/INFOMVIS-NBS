@@ -122,7 +122,7 @@ class ExplorationMode {
   }
 
   splitMultiValueField(v) {
-    return v.trim().split(/[;,]+/) ?? []
+    return v?.trim()?.split(/[;,]+/) ?? []
   }
 
   async loadRows() {
@@ -130,6 +130,10 @@ class ExplorationMode {
       .csv("./data/cleaned_nbs_data.csv", d3.autoType)
       .then((rows) =>
         rows.map((row) => ({
+          id: row[""],
+          title: row.name_of_the_nbs_intervention_short_english_title,
+          description: row.short_description_of_the_intervention,
+          nativeTitle: row.native_title_of_the_nbs_intervention,
           city: row.city,
           cityPopulation: row.city_population,
           coordinates: row.coordinates
@@ -138,20 +142,50 @@ class ExplorationMode {
             .map(Number)
             .reverse(),
           country: row.country,
-          economicImpacts: row.economic_impacts
-            ? row.economic_impacts
-                .trim()
-                .split(";")
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [],
-          __areaTypes: row.type_of_area_before_implementation_of_the_nbs
-            ? row.type_of_area_before_implementation_of_the_nbs
-                .split(/[,;]+/)
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [],
-          __fundingSources: this.splitMultiValueField(row.sources_of_funding),
+          economicImpacts: this.splitMultiValueField(row.economic_impacts),
+          areaTypes: this.splitMultiValueField(
+            row.type_of_area_before_implementation_of_the_nbs,
+          ),
+          fundingSources: this.splitMultiValueField(row.sources_of_funding),
+          startYear: row.start_year,
+          endYear: row.end_year,
+          area: row.nbs_area_m2,
+          cost: parseCost(row.total_cost),
+          duration: row.duration,
+          cityPopulation: row.city_population,
+          spatialScale: row.spatial_scale,
+          presentStage: row.present_stage_of_the_intervention,
+          responseToLocalRegulation:
+            row.nbs_intervention_implemented_in_response_to_a_local_regulation_strategy_plan,
+          responseToNationalRegulation:
+            row.nbs_intervention_implemented_in_response_to_a_national_regulations_strategy_plan,
+          responseToEURegulation:
+            row.nbs_intervention_implemented_in_response_to_an_eu_directive_strategy,
+          primaryBeneficiaries: this.splitMultiValueField(
+            row.primary_beneficiaries,
+          ),
+          socialCulturalImpacts: this.splitMultiValueField(
+            row.social_and_cultural_impacts,
+          ),
+          environmentalImpacts: this.splitMultiValueField(
+            row.environmental_impacts,
+          ),
+          focus: this.splitMultiValueField(row.focus_of_the_project),
+          goals: this.splitMultiValueField(row.goals_of_the_intervention),
+          governanceArrangements: this.splitMultiValueField(
+            row.governance_arrangements,
+          ),
+          implementationActivities: this.splitMultiValueField(
+            row.implementation_activities,
+          ),
+          sustainabilityChallengesAddressed: this.splitMultiValueField(
+            row.sustainability_challenges_addressed,
+          ),
+          keyActors: this.splitMultiValueField(
+            row.key_actors_initiating_organization,
+          ),
+          lastUpdated: Date.parse(row.last_updated),
+          link: row.link,
         })),
       )
 
@@ -217,11 +251,10 @@ class ExplorationMode {
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
-      if (
-        (r.startYear != null && r.startYear < window.yearRange.min) ||
-        (r.endYear != null && r.endYear > window.yearRange.max)
-      )
+      if (r.startYear != null && r.startYear < window.yearRange.min) {
         return false
+      }
+      if (r.endYear != null && r.endYear > window.yearRange.max) return false
 
       const a = r.area
       if (Number.isFinite(a)) {
@@ -231,21 +264,21 @@ class ExplorationMode {
 
       if (window.selectedEconomicImpacts.length > 0) {
         const passImpacts = window.selectedEconomicImpacts.every((impact) =>
-          r.__economicImpacts.includes(impact),
+          r.economicImpacts.includes(impact),
         )
         if (!passImpacts) return false
       }
 
       if (window.selectedFundingSource.length > 0) {
         const passFundingSource = window.selectedFundingSource.every((fund) =>
-          r.__sources_of_funding.includes(fund),
+          r.fundingSources.includes(fund),
         )
         if (!passFundingSource) return false
       }
 
       if (window.selectedAreaTypes.length > 0) {
         const passAreaTypes = window.selectedAreaTypes.every((t) =>
-          r.__areaTypes.includes(t),
+          r.areaTypes.includes(t),
         )
         if (!passAreaTypes) return false
       }
@@ -260,7 +293,7 @@ class ExplorationMode {
       return true
     })
 
-    this.filteredDataForMap = tempFiltered
+    this.filteredDataForMap = [...tempFiltered]
 
     // TODO: Decide on filtering all data or only selected for map
     this.filteredData = tempFiltered.filter(
@@ -285,22 +318,3 @@ class ExplorationMode {
 }
 
 new ExplorationMode().init()
-
-function parseCost(value) {
-  if (!value || value.toLowerCase() === "unknown") return null
-
-  const normalized = value
-    .toLowerCase()
-    .replace(/€/g, "")
-    .replace(/\./g, "")
-    .replace(/,/g, "")
-    .trim()
-
-  const numbers = normalized.match(/\d+/g)?.map(Number) ?? []
-
-  return numbers.length == 2
-    ? d3.mean(numbers)
-    : numbers.length == 1
-      ? numbers[0]
-      : null
-}

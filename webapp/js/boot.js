@@ -152,3 +152,22 @@ async function callBoot(jsFile, currentPage) {
 
   document.getElementById(`${currentPage}Link`).style["font-weight"] = "700"
 }
+
+function parseCost(value) {
+  if (!value || value.toLowerCase() === "unknown") return null
+
+  const normalized = value
+    .toLowerCase()
+    .replace(/€/g, "")
+    .replace(/\./g, "")
+    .replace(/,/g, "")
+    .trim()
+
+  const numbers = normalized.match(/\d+/g)?.map(Number) ?? []
+
+  return numbers.length == 2
+    ? d3.mean(numbers)
+    : numbers.length == 1
+      ? numbers[0]
+      : null
+}

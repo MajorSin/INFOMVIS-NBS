@@ -40,7 +40,7 @@ class Compare {
 
   transformData() {
     const data = this.data
-      .filter((r) => window.selectedProjects.includes(r[""]))
+      .filter((r) => window.selectedProjects.includes(r.id))
       .reduce((acc, obj) => {
         Object.keys(obj).forEach((key) => {
           if (!acc[key]) acc[key] = []
