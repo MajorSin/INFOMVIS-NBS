@@ -196,17 +196,17 @@ class ExplorationMode {
   render() {
     this.components = {
       filters: new Filters(this.filteredData),
-      kpis: new KPIs(this.filteredData),
-      results: new Results(this.filteredData),
-      mapFilteredCities: new MapFilteredCities({
+      kpis: new KPI(this.filteredData),
+      results: new Table(this.filteredData),
+      mapFilteredCities: new ProjectsMap({
         rows: this.filteredData,
         topo: this.topo,
         geo: topojson.feature(this.topo, this.topo.objects.countries),
       }),
       lineChartModal: new LineChartPopout(this.filteredData),
-      funding: new Funding(this.filteredData),
+      funding: new FundingSources(this.filteredData),
       compareToolbar: new CompareToolbar(),
-      compare: new Compare(this.data),
+      compare: new CompareTable(this.data),
     }
 
     const fundingComponent = this.components.funding

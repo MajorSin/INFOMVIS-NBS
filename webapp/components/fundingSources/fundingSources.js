@@ -1,4 +1,4 @@
-class Funding {
+class FundingSources {
   constructor(data) {
     const parent = d3.select("#fundingChart")
 

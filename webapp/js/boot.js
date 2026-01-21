@@ -30,7 +30,6 @@ async function injectHtml(selectors) {
   )
 }
 
-// TODO: Fix links
 async function boot_similarity(jsFile) {
   await injectHtml([
     {
@@ -51,16 +50,16 @@ async function boot_similarity(jsFile) {
       jsFile: "./components/mapSimilarityBands/mapSimilarityBands.js",
     },
     {
-      element: "#resultsMount",
-      url: "./components/results/results.html",
-      styleSheet: "./components/results/results.css",
-      jsFile: "./components/results/results.js",
+      element: "#tableMount",
+      url: "./components/table/table.html",
+      styleSheet: "./components/table/table.css",
+      jsFile: "./components/table/table.js",
     },
     {
-      element: "#kpisMount",
-      url: "./components/kpis/kpis.html",
-      styleSheet: "./components/kpis/kpis.css",
-      jsFile: "./components/kpis/kpis.js",
+      element: "#kpiMount",
+      url: "./components/kpi/kpi.html",
+      styleSheet: "./components/kpi/kpi.css",
+      jsFile: "./components/kpi/kpi.js",
     },
   ])
 
@@ -83,10 +82,10 @@ async function boot(jsFile) {
       jsFile: "./components/filters/filters.js",
     },
     {
-      element: "#kpisMount",
-      url: "./components/kpis/kpis.html",
-      styleSheet: "./components/kpis/kpis.css",
-      jsFile: "./components/kpis/kpis.js",
+      element: "#kpiMount",
+      url: "./components/kpi/kpi.html",
+      styleSheet: "./components/kpi/kpi.css",
+      jsFile: "./components/kpi/kpi.js",
     },
     {
       element: "#lineChartMount",
@@ -95,22 +94,22 @@ async function boot(jsFile) {
       jsFile: "./components/lineChartPopout/lineChartPopout.js",
     },
     {
-      element: "#mapMount",
-      url: "./components/mapFilteredCities/mapFilteredCities.html",
-      styleSheet: "./components/mapFilteredCities/mapFilteredCities.css",
-      jsFile: "./components/mapFilteredCities/mapFilteredCities.js",
+      element: "#projectsMap",
+      url: "./components/projectsMap/projectsMap.html",
+      styleSheet: "./components/projectsMap/projectsMap.css",
+      jsFile: "./components/projectsMap/projectsMap.js",
     },
     {
-      element: "#resultsMount",
-      url: "./components/results/results.html",
-      styleSheet: "./components/results/results.css",
-      jsFile: "./components/results/results.js",
+      element: "#tableMount",
+      url: "./components/table/table.html",
+      styleSheet: "./components/table/table.css",
+      jsFile: "./components/table/table.js",
     },
     {
-      element: "#fundingMount",
-      url: "./components/funding/funding.html",
-      styleSheet: "./components/funding/funding.css",
-      jsFile: "./components/funding/funding.js",
+      element: "#fundingSourcesMount",
+      url: "./components/fundingSources/fundingSources.html",
+      styleSheet: "./components/fundingSources/fundingSources.css",
+      jsFile: "./components/fundingSources/fundingSources.js",
     },
     {
       element: "#compareToolbarMount",
@@ -119,10 +118,10 @@ async function boot(jsFile) {
       jsFile: "./components/compareToolbar/compareToolbar.js",
     },
     {
-      element: "#compareMount",
-      url: "./components/compare/compare.html",
-      styleSheet: "./components/compare/compare.css",
-      jsFile: "./components/compare/compare.js",
+      element: "#compareTableMount",
+      url: "./components/compareTable/compareTable.html",
+      styleSheet: "./components/compareTable/compareTable.css",
+      jsFile: "./components/compareTable/compareTable.js",
     },
   ])
 

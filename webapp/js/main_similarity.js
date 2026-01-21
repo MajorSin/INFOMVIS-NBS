@@ -219,8 +219,8 @@ class ExplorationMode {
   render() {
     this.components = {
       filters: new Filters(this.filteredData),
-      kpis: new KPIs(this.filteredData),
-      results: new Results(this.filteredData),
+      kpis: new KPI(this.filteredData),
+      results: new Table(this.filteredData),
       mapSimilarityBands: new MapSimilarityBands({
         rows: this.filteredData,
         geo: this.worldmapData,

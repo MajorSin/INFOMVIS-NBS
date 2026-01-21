@@ -1,4 +1,4 @@
-class Compare {
+class CompareTable {
   constructor(data) {
     this.data = data
 

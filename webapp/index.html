@@ -19,7 +19,7 @@
       href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/index.css" />
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -43,11 +43,11 @@
           <div id="filtersMount"></div>
         </div>
         <div class="grid-vertical">
-          <div id="kpisMount"></div>
-          <div id="mapMount"></div>
-          <div id="fundingMount"></div>
+          <div id="kpiMount"></div>
+          <div id="projectsMap"></div>
+          <div id="fundingSourcesMount"></div>
           <div id="lineChartMount"></div>
-          <div id="resultsMount"></div>
+          <div id="tableMount"></div>
         </div>
       </div>
 
@@ -55,11 +55,11 @@
     </div>
 
     <div id="compareMode">
-        <div id="compareMount"></div>
+        <div id="compareTableMount"></div>
       </div>
     </div>
 
-    <script src="components/compare/columns.js" type="text/javascript"></script>
+    <script src="components/compareTable/columns.js" type="text/javascript"></script>
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
     <script src="https://unpkg.com/range-slider-input@2"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -72,7 +72,7 @@
     ></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
     <script>
-      callBoot("./js/main.js", "exploration")
+      callBoot("./js/index.js", "exploration")
     </script>
   </body>
 </html>

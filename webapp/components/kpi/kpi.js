@@ -1,4 +1,4 @@
-class KPIs {
+class KPI {
   constructor(data) {
     this.update(this.transformData(data))
   }

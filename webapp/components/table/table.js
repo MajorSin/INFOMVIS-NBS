@@ -1,4 +1,4 @@
-class Results {
+class Table {
   constructor(data) {
     this.tableBody = d3.select("#resultsTable tbody")
 

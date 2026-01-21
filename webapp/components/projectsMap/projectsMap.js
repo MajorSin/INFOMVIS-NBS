@@ -1,4 +1,4 @@
-class MapFilteredCities {
+class ProjectsMap {
   constructor(data) {
     this.allCountries = []
 
