@@ -19,7 +19,7 @@
 
 #compareToolbar .disabled {
   background-color: var(--bg-overlay-disabled);
-  color: var(--muted);
+  color: var(--inactive);
   cursor: not-allowed;
   border: 1px solid var(--border-disabled);
 }
