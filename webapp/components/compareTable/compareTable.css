@@ -15,14 +15,7 @@
 }
 
 #compareWrapper h1 {
-  margin-bottom: 12px;
-}
-
-#compareHeader {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 #compareTable {
@@ -37,10 +30,12 @@
   font-weight: bold;
   background-color: var(--bg-secondary);
   min-width: 10px;
+  font-size: 13px;
 }
 
 #compareTable tr:first-child {
   color: var(--muted);
   font-weight: 800;
   background-color: var(--bg-elevated);
+  font-size: 13px;
 }

@@ -50,7 +50,7 @@ body {
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 10px;
 }
 
 .card-meta {
@@ -65,7 +65,7 @@ body {
 }
 
 h2 {
-  margin: 0 0 10px 0;
+  margin: 0 0 0px 0;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.2px;
@@ -150,6 +150,7 @@ table {
   background: var(--bg-overlay-soft);
   border-radius: 12px;
   overflow: hidden;
+  font-size: 12px;
 }
 
 th,
@@ -165,6 +166,7 @@ th {
   font-weight: 800;
   position: sticky;
   background: var(--bg-elevated);
+  font-size: 13px;
 }
 
 th:hover {
@@ -245,6 +247,7 @@ select option {
   gap: 8px;
   align-items: center;
   color: var(--muted);
+  font-size: 12px;
 }
 
 .switch {
