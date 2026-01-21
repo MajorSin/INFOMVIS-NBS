@@ -293,3 +293,17 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translate(16px, -50%);
 }
+
+a {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+ul {
+  margin: 0;
+}

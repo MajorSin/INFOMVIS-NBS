@@ -35,7 +35,13 @@ class CompareTable {
       .selectAll("td")
       .data((column) => rows[column])
       .join("td")
-      .html((d) => d ?? "")
+      .html((d) =>
+        Array.isArray(d)
+          ? `<ul>${d.map((e) => `<li>${e}</li>`).join("")}</ul>`
+          : typeof d === "string" && d.startsWith("https://")
+            ? `<a href="${d}" target="_blank">${d}</a>`
+            : (d ?? '<span class="undefined">-</span>'),
+      )
   }
 
   transformData() {

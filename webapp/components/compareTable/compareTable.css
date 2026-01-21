@@ -39,3 +39,8 @@
   background-color: var(--bg-elevated);
   font-size: 13px;
 }
+
+.undefined{
+  font-style: italic;
+  color: var(--muted);
+}

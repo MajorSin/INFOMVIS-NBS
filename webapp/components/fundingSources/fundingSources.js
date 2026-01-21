@@ -164,7 +164,13 @@ class FundingSources {
               "y",
               (d) => this.yScale(d.source) + this.yScale.bandwidth() / 2,
             )
-            .text((d) => d[this.row])
+            .text((d) =>
+              this.row == "averageArea"
+                ? `${d.totalArea} m²`
+                : this.row == "averageCost"
+                  ? `€ ${d.totalCost}`
+                  : d[this.row],
+            )
             .call((text) => labelPosition(this.row, text)),
         (update) =>
           update
@@ -178,7 +184,13 @@ class FundingSources {
               "y",
               (d) => this.yScale(d.source) + this.yScale.bandwidth() / 2,
             )
-            .text((d) => d[this.row])
+            .text((d) =>
+              this.row == "averageArea"
+                ? `${d.averageArea} m²`
+                : this.row == "averageCost"
+                  ? `€ ${d.averageArea}`
+                  : d[this.row],
+            )
             .call((text) => labelPosition(this.row, text)),
         (exit) => exit.remove(),
       )

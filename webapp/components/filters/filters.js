@@ -179,13 +179,11 @@ class Filters {
     )
 
     d3.select("#nbsAreaLabel").text(
-      `${this.formatArea(meta.nbsAreaRange.min)}–${this.formatArea(
-        meta.nbsAreaRange.max,
-      )}`,
+      `${meta.nbsAreaRange.min}-${d3.format(",")(meta.nbsAreaRange.max)}`,
     )
 
     d3.select("#costRangeLabel").text(
-      `${meta.costRange.min}–${meta.costRange.max}`,
+      `${meta.costRange.min}–${d3.format(",")(meta.costRange.max)}`,
     )
 
     this.update()
@@ -371,18 +369,13 @@ class Filters {
   }
 
   updateCostUI() {
-    d3.select("#costMinVal").text(window.costRange.min)
-    d3.select("#costMaxVal").text(window.costRange.max)
-  }
-
-  formatArea(v) {
-    if (!Number.isFinite(v)) return "—"
-    return `${Math.round(v).toLocaleString()}`
+    d3.select("#costMaxVal").text(formatLargeNumbers(window.costRange.max))
+    d3.select("#costMinVal").text(formatLargeNumbers(window.costRange.min))
   }
 
   updateNbsAreaUI() {
-    d3.select("#nbsAreaMinVal").text(this.formatArea(window.nbsAreaRange.min))
-    d3.select("#nbsAreaMaxVal").text(this.formatArea(window.nbsAreaRange.max))
+    d3.select("#nbsAreaMaxVal").text(formatLargeNumbers(window.nbsAreaRange.max))
+    d3.select("#nbsAreaMinVal").text(formatLargeNumbers(window.nbsAreaRange.min))
   }
 
   transformData(data) {
@@ -407,3 +400,5 @@ class Filters {
     }
   }
 }
+
+const formatLargeNumbers = (v) => d3.format(".2s")(v)

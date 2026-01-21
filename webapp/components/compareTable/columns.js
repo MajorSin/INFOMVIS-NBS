@@ -53,7 +53,7 @@ const columns = [
   },
   {
     name: "Type of area before implementation",
-    fieldName: "type_of_area_before_implementation_of_the_nbs",
+    fieldName: "areaTypes",
   },
   {
     name: "Present stage",
@@ -61,18 +61,15 @@ const columns = [
   },
   {
     name: "Implemented in response to local regulation strategy plan",
-    fieldName:
-      "responseToLocalRegulation:",
+    fieldName: "responseToLocalRegulation",
   },
   {
     name: "Implemented in response to national regulations strategy plan",
-    fieldName:
-      "nbs_intervention_implemented_in_response_to_a_national_regulations_strategy_plan",
+    fieldName: "responseToNationalRegulation",
   },
   {
     name: "Implemented in response to EU regulation strategy plan",
-    fieldName:
-      "nbs_intervention_implemented_in_response_to_an_eu_directive_strategy",
+    fieldName: "responseToEURegulation",
   },
   {
     name: "Primary beneficiaries",

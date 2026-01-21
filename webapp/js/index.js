@@ -122,7 +122,12 @@ class ExplorationMode {
   }
 
   splitMultiValueField(v) {
-    return v?.trim()?.split(/[;,]+/) ?? []
+    return (
+      v
+        ?.trim()
+        ?.split(/[;,]+/)
+        .map((item) => item.trim().replace(/^- /, "")) ?? []
+    )
   }
 
   async loadRows() {
@@ -171,20 +176,16 @@ class ExplorationMode {
             row.environmental_impacts,
           ),
           focus: this.splitMultiValueField(row.focus_of_the_project),
-          goals: this.splitMultiValueField(row.goals_of_the_intervention),
-          governanceArrangements: this.splitMultiValueField(
-            row.governance_arrangements,
-          ),
-          implementationActivities: this.splitMultiValueField(
-            row.implementation_activities,
-          ),
+          goals: row.goals_of_the_intervention,
+          governanceArrangements: row.governance_arrangements,
+          implementationActivities: row.implementation_activities,
           sustainabilityChallengesAddressed: this.splitMultiValueField(
             row.sustainability_challenges_addressed,
           ),
           keyActors: this.splitMultiValueField(
             row.key_actors_initiating_organization,
           ),
-          lastUpdated: Date.parse(row.last_updated),
+          lastUpdated: new Date(row.last_updated),
           link: row.link,
         })),
       )
