@@ -1,4 +1,4 @@
-class Results {
+class Table {
   constructor(data) {
     this.tableBody = d3.select("#resultsTable tbody")
 
@@ -90,7 +90,6 @@ class Results {
     this.setCurrentPage(1)
   }
 
-  // TODO: Fix semicolomns format
   render(rows) {
     this.totalElement.text(`Showing ${rows.length} out of ${this.data.length}`)
 
@@ -155,34 +154,29 @@ class Results {
 
     this.tableBody
       .selectAll("tr")
-      .data(rows, (d) => d[""])
+      .data(rows, (d) => d.id)
       .join(
         (enter) => {
           const tr = enter.append("tr")
 
-          tr.append("td").text(
-            (d) =>
-              d.name_of_the_nbs_intervention_short_english_title ??
-              d.native_title_of_the_nbs_intervention ??
-              "",
-          )
+          tr.append("td").text((d) => d.title ?? d.nativeTitle ?? "")
           tr.append("td").text((d) => d.country)
           tr.append("td").text((d) => d.city)
-          tr.append("td").text((d) => d.start_year)
-          tr.append("td").text((d) => d.end_year)
+          tr.append("td").text((d) => d.startYear)
+          tr.append("td").text((d) => d.endYear)
           tr.append("td")
             .append("input")
             .on(
               "change",
               (_, d) =>
                 (window.selectedProjects = window.selectedProjects.includes(
-                  d[""],
+                  d.id,
                 )
-                  ? window.selectedProjects.filter((r) => r != d[""])
-                  : [...window.selectedProjects, d[""]]),
+                  ? window.selectedProjects.filter((r) => r != d.id)
+                  : [...window.selectedProjects, d.id]),
             )
             .attr("type", "checkbox")
-            .property("checked", (d) => window.selectedProjects.includes(d[""]))
+            .property("checked", (d) => window.selectedProjects.includes(d.id))
         },
         (update) => {},
         (exit) => exit.remove(),
@@ -198,17 +192,11 @@ class Results {
     return data
       .sort((a, b) => {
         if (sortOn == null) {
-          return a.name_of_the_nbs_intervention_short_english_title.localeCompare(
-            b.name_of_the_nbs_intervention_short_english_title,
-          )
+          return a.title.localeCompare(b.title)
         } else if (sortOn.column == "Title") {
           return sortOn.sortStatus == "asc"
-            ? a.name_of_the_nbs_intervention_short_english_title.localeCompare(
-                b.name_of_the_nbs_intervention_short_english_title,
-              )
-            : b.name_of_the_nbs_intervention_short_english_title.localeCompare(
-                a.name_of_the_nbs_intervention_short_english_title,
-              )
+            ? a.title.localeCompare(b.title)
+            : b.title.localeCompare(a.title)
         } else if (sortOn.column == "Country") {
           return sortOn.sortStatus == "asc"
             ? (a.country ?? "").localeCompare(b.country ?? "")
@@ -219,12 +207,12 @@ class Results {
             : b.city.localeCompare(a.city)
         } else if (sortOn.column == "Start year") {
           return sortOn.sortStatus == "asc"
-            ? a.start_year - b.start_year
-            : b.start_year - a.start_year
+            ? a.startYear - b.startYear
+            : b.startYear - a.startYear
         }
         return sortOn.sortStatus == "asc"
-          ? a.end_year - b.end_year
-          : b.end_year - a.end_year
+          ? a.endYear - b.endYear
+          : b.endYear - a.endYear
       })
       .slice(start, start + this.viewPerPage)
   }

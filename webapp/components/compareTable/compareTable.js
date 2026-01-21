@@ -1,4 +1,4 @@
-class Compare {
+class CompareTable {
   constructor(data) {
     this.data = data
 
@@ -35,12 +35,18 @@ class Compare {
       .selectAll("td")
       .data((column) => rows[column])
       .join("td")
-      .html((d) => d ?? "")
+      .html((d) =>
+        Array.isArray(d)
+          ? `<ul>${d.map((e) => `<li>${e}</li>`).join("")}</ul>`
+          : typeof d === "string" && d.startsWith("https://")
+            ? `<a href="${d}" target="_blank">${d}</a>`
+            : (d ?? '<span class="undefined">-</span>'),
+      )
   }
 
   transformData() {
     const data = this.data
-      .filter((r) => window.selectedProjects.includes(r[""]))
+      .filter((r) => window.selectedProjects.includes(r.id))
       .reduce((acc, obj) => {
         Object.keys(obj).forEach((key) => {
           if (!acc[key]) acc[key] = []

@@ -40,8 +40,8 @@ class LineChartPopout {
 
     const numericYears = []
     for (const r of rows) {
-      const sy = this.toYear(r.start_year)
-      const ey = this.toYear(r.end_year)
+      const sy = this.toYear(r.startYear)
+      const ey = this.toYear(r.endYear)
       if (Number.isFinite(sy)) numericYears.push(sy)
       if (Number.isFinite(ey)) numericYears.push(ey)
       const dur = this.parseDuration(r.duration)
@@ -51,7 +51,9 @@ class LineChartPopout {
     }
 
     const fallbackOngoingEnd =
-      numericYears.length > 0 ? Math.max(...numericYears) : new Date().getFullYear()
+      numericYears.length > 0
+        ? Math.max(...numericYears)
+        : new Date().getFullYear()
 
     const yearCounts = new Map()
     let minYear = Infinity
@@ -70,7 +72,11 @@ class LineChartPopout {
       }
     }
 
-    if (!Number.isFinite(minYear) || !Number.isFinite(maxYear) || minYear > maxYear) {
+    if (
+      !Number.isFinite(minYear) ||
+      !Number.isFinite(maxYear) ||
+      minYear > maxYear
+    ) {
       return []
     }
 
@@ -88,7 +94,7 @@ class LineChartPopout {
 
   getProjectRange(row, ongoingEndYear) {
     const sy = this.toYear(row.start_year)
-    const ey = this.toYear(row.end_year)
+    const ey = this.toYear(row.endYear)
 
     if (Number.isFinite(sy)) {
       const end = Number.isFinite(ey) ? ey : sy
@@ -126,7 +132,9 @@ class LineChartPopout {
       const start = Number(m[1])
       const endToken = m[2]
       const end =
-        endToken === "ongoing" || endToken === "unknown" ? endToken : Number(endToken)
+        endToken === "ongoing" || endToken === "unknown"
+          ? endToken
+          : Number(endToken)
       return { start: Number.isFinite(start) ? start : null, end }
     }
     const y = norm.match(/^(\d{4})$/)

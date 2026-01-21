@@ -122,13 +122,12 @@ class ExplorationMode {
   }
 
   splitMultiValueField(v) {
-    if (v == null) return []
-    const s = String(v).trim()
-    if (!s) return []
-    return s
-      .split(/[;,]+/)
-      .map((x) => x.trim())
-      .filter(Boolean)
+    return (
+      v
+        ?.trim()
+        ?.split(/[;,]+/)
+        .map((item) => item.trim().replace(/^- /, "")) ?? []
+    )
   }
 
   async loadRows() {
@@ -136,23 +135,58 @@ class ExplorationMode {
       .csv("./data/cleaned_nbs_data.csv", d3.autoType)
       .then((rows) =>
         rows.map((row) => ({
-          ...row,
-          cost: parseCostD3(row.total_cost),
-          __sources_of_funding: row.sources_of_funding.trim().split(";"),
-          __economicImpacts: row.economic_impacts
-            ? row.economic_impacts
-                .trim()
-                .split(";")
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [],
-          __areaTypes: row.type_of_area_before_implementation_of_the_nbs
-            ? row.type_of_area_before_implementation_of_the_nbs
-                .split(/[,;]+/)
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [],
-          __fundingSources: this.splitMultiValueField(row.sources_of_funding),
+          id: row[""],
+          title: row.name_of_the_nbs_intervention_short_english_title,
+          description: row.short_description_of_the_intervention,
+          nativeTitle: row.native_title_of_the_nbs_intervention,
+          city: row.city,
+          cityPopulation: row.city_population,
+          coordinates: row.coordinates
+            .substring(1, row.coordinates.length - 1)
+            .split(",")
+            .map(Number)
+            .reverse(),
+          country: row.country,
+          economicImpacts: this.splitMultiValueField(row.economic_impacts),
+          areaTypes: this.splitMultiValueField(
+            row.type_of_area_before_implementation_of_the_nbs,
+          ),
+          fundingSources: this.splitMultiValueField(row.sources_of_funding),
+          startYear: row.start_year,
+          endYear: row.end_year,
+          area: row.nbs_area_m2,
+          cost: parseCost(row.total_cost),
+          duration: row.duration,
+          cityPopulation: row.city_population,
+          spatialScale: row.spatial_scale,
+          presentStage: row.present_stage_of_the_intervention,
+          responseToLocalRegulation:
+            row.nbs_intervention_implemented_in_response_to_a_local_regulation_strategy_plan,
+          responseToNationalRegulation:
+            row.nbs_intervention_implemented_in_response_to_a_national_regulations_strategy_plan,
+          responseToEURegulation:
+            row.nbs_intervention_implemented_in_response_to_an_eu_directive_strategy,
+          primaryBeneficiaries: this.splitMultiValueField(
+            row.primary_beneficiaries,
+          ),
+          socialCulturalImpacts: this.splitMultiValueField(
+            row.social_and_cultural_impacts,
+          ),
+          environmentalImpacts: this.splitMultiValueField(
+            row.environmental_impacts,
+          ),
+          focus: this.splitMultiValueField(row.focus_of_the_project),
+          goals: row.goals_of_the_intervention,
+          governanceArrangements: row.governance_arrangements,
+          implementationActivities: row.implementation_activities,
+          sustainabilityChallengesAddressed: this.splitMultiValueField(
+            row.sustainability_challenges_addressed,
+          ),
+          keyActors: this.splitMultiValueField(
+            row.key_actors_initiating_organization,
+          ),
+          lastUpdated: new Date(row.last_updated),
+          link: row.link,
         })),
       )
 
@@ -163,21 +197,21 @@ class ExplorationMode {
   render() {
     this.components = {
       filters: new Filters(this.filteredData),
-      kpis: new KPIs(this.filteredData),
-      results: new Results(this.filteredData),
-      mapFilteredCities: new MapFilteredCities({
+      kpis: new KPI(this.filteredData),
+      results: new Table(this.filteredData),
+      mapFilteredCities: new ProjectsMap({
         rows: this.filteredData,
         topo: this.topo,
         geo: topojson.feature(this.topo, this.topo.objects.countries),
       }),
       lineChartModal: new LineChartPopout(this.filteredData),
-      funding: new Funding(this.filteredData),
+      funding: new FundingSources(this.filteredData),
       compareToolbar: new CompareToolbar(),
-      compare: new Compare(this.data),
+      compare: new CompareTable(this.data),
     }
 
     const fundingComponent = this.components.funding
-    // todo: put this in funding  component and everything else in a list
+    // TODO: put this in funding  component and everything else in a list
     fundingComponent.fundingOptionsInput.on("change", (element) => {
       fundingComponent.currentOption = element.target.value
       fundingComponent.update(fundingComponent.transformData(this.filteredData))
@@ -218,13 +252,12 @@ class ExplorationMode {
 
   filterData() {
     const tempFiltered = this.data.filter((r) => {
-      if (
-        (r.start_year != null && r.start_year < window.yearRange.min) ||
-        (r.end_year != null && r.end_year > window.yearRange.max)
-      )
+      if (r.startYear != null && r.startYear < window.yearRange.min) {
         return false
+      }
+      if (r.endYear != null && r.endYear > window.yearRange.max) return false
 
-      const a = r.nbs_area_m2
+      const a = r.area
       if (Number.isFinite(a)) {
         if (a < window.nbsAreaRange.min || a > window.nbsAreaRange.max)
           return false
@@ -232,21 +265,21 @@ class ExplorationMode {
 
       if (window.selectedEconomicImpacts.length > 0) {
         const passImpacts = window.selectedEconomicImpacts.every((impact) =>
-          r.__economicImpacts.includes(impact),
+          r.economicImpacts.includes(impact),
         )
         if (!passImpacts) return false
       }
 
       if (window.selectedFundingSource.length > 0) {
         const passFundingSource = window.selectedFundingSource.every((fund) =>
-          r.__sources_of_funding.includes(fund),
+          r.fundingSources.includes(fund),
         )
         if (!passFundingSource) return false
       }
 
       if (window.selectedAreaTypes.length > 0) {
         const passAreaTypes = window.selectedAreaTypes.every((t) =>
-          r.__areaTypes.includes(t),
+          r.areaTypes.includes(t),
         )
         if (!passAreaTypes) return false
       }
@@ -261,9 +294,9 @@ class ExplorationMode {
       return true
     })
 
-    this.filteredDataForMap = tempFiltered
+    this.filteredDataForMap = [...tempFiltered]
 
-    // Todo: Decide on filtering all data or only selected for map
+    // TODO: Decide on filtering all data or only selected for map
     this.filteredData = tempFiltered.filter(
       (r) =>
         (window.selectedCities.length <= 0 ||
@@ -286,24 +319,3 @@ class ExplorationMode {
 }
 
 new ExplorationMode().init()
-
-function parseCostD3(value) {
-  if (!value || value.toLowerCase() === "unknown") {
-    return null
-  }
-
-  const normalized = value
-    .toLowerCase()
-    .replace(/€/g, "")
-    .replace(/\./g, "")
-    .replace(/,/g, "")
-    .trim()
-
-  const numbers = normalized.match(/\d+/g)?.map(Number) ?? []
-
-  return numbers.length == 2
-    ? d3.mean(numbers)
-    : numbers.length == 1
-      ? numbers[0]
-      : null
-}

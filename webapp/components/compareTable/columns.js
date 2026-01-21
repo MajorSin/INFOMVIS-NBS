@@ -1,11 +1,11 @@
 const columns = [
   {
     name: "Title",
-    fieldName: "name_of_the_nbs_intervention_short_english_title",
+    fieldName: "title",
   },
   {
     name: "Native title",
-    fieldName: "native_title_of_the_nbs_intervention",
+    fieldName: "nativeTitle",
   },
   {
     name: "Description",
@@ -21,15 +21,15 @@ const columns = [
   },
   {
     name: "City's population",
-    fieldName: "city_population",
+    fieldName: "cityPopulation",
   },
   {
     name: "Start year",
-    fieldName: "start_year",
+    fieldName: "startYear",
   },
   {
     name: "End year",
-    fieldName: "end_year",
+    fieldName: "endYear",
   },
   {
     name: "Duration",
@@ -41,38 +41,35 @@ const columns = [
   },
   {
     name: "Funding source(s)",
-    fieldName: "sources_of_funding",
+    fieldName: "fundingSources",
   },
   {
     name: "Spacial scale",
-    fieldName: "spatial_scale",
+    fieldName: "spatialScale",
   },
   {
     name: "Area in m^2",
-    fieldName: "nbs_area_m2",
+    fieldName: "area",
   },
   {
     name: "Type of area before implementation",
-    fieldName: "type_of_area_before_implementation_of_the_nbs",
+    fieldName: "areaTypes",
   },
   {
     name: "Present stage",
-    fieldName: "present_stage_of_the_intervention",
+    fieldName: "presentStage",
   },
   {
     name: "Implemented in response to local regulation strategy plan",
-    fieldName:
-      "nbs_intervention_implemented_in_response_to_a_local_regulation_strategy_plan",
+    fieldName: "responseToLocalRegulation",
   },
   {
     name: "Implemented in response to national regulations strategy plan",
-    fieldName:
-      "nbs_intervention_implemented_in_response_to_a_national_regulations_strategy_plan",
+    fieldName: "responseToNationalRegulation",
   },
   {
     name: "Implemented in response to EU regulation strategy plan",
-    fieldName:
-      "nbs_intervention_implemented_in_response_to_an_eu_directive_strategy",
+    fieldName: "responseToEURegulation",
   },
   {
     name: "Primary beneficiaries",
@@ -80,39 +77,39 @@ const columns = [
   },
   {
     name: "Social and cultural impacts",
-    fieldName: "social_and_cultural_impacts",
+    fieldName: "socialCulturalImpacts",
   },
   {
     name: "Environmental impacts",
-    fieldName: "environmental_impacts",
+    fieldName: "environmentalImpacts",
   },
   {
     name: "Focus of the project",
-    fieldName: "focus_of_the_project",
+    fieldName: "focus",
   },
   {
     name: "Goals of the intervention",
-    fieldName: "goals_of_the_intervention",
+    fieldName: "goals",
   },
   {
     name: "Governance arrangements",
-    fieldName: "governance_arrangements",
+    fieldName: "governanceArrangements",
   },
   {
     name: "Implementation activities",
-    fieldName: "implementation_activities",
+    fieldName: "implementationActivities",
   },
   {
     name: "Sustainability challanges addressed",
-    fieldName: "sustainability_challenges_addressed",
+    fieldName: "sustainabilityChallengesAddressed",
   },
   {
     name: "Key actors",
-    fieldName: "key_actors_initiating_organization",
+    fieldName: "keyActors",
   },
   {
     name: "Last updated",
-    fieldName: "last_updated",
+    fieldName: "lastUpdated",
   },
   {
     name: "Link to NBS area",

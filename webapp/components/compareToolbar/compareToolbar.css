@@ -9,17 +9,17 @@
 
 #compareToolbar button {
   border-radius: 10px 10px 0px 0px;
-  background-color: #1c2027;
+  background-color: var(--bg-secondary);
   padding: 0px 0px;
 }
 
 #compareToolbar button:hover {
-  background-color: #232835;
+  background-color: var(--bg-overlay-hover-secondary);
 }
 
 #compareToolbar .disabled {
-  background-color: #252a32;
-  color: #8f97a6;
+  background-color: var(--bg-overlay-disabled);
+  color: var(--inactive);
   cursor: not-allowed;
-  border: 1px solid var(#343a43);
+  border: 1px solid var(--border-disabled);
 }

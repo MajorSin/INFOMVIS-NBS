@@ -79,17 +79,17 @@ class Filters {
     })
 
     this.economicImpactValues = [
-      ...new Set(data.map((r) => r.__economicImpacts).flat()),
+      ...new Set(data.map((r) => r.economicImpacts).flat()),
     ]
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
 
-    this.areaTypeValues = [...new Set(data.map((r) => r.__areaTypes).flat())]
+    this.areaTypeValues = [...new Set(data.map((r) => r.areaTypes).flat())]
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
 
     this.fundingSourceValues = [
-      ...new Set(data.map((r) => r.__fundingSources || []).flat()),
+      ...new Set(data.map((r) => r.fundingSources || []).flat()),
     ]
       .filter(Boolean)
       .sort((a, b) => a.localeCompare(b))
@@ -175,17 +175,15 @@ class Filters {
 
   render(meta) {
     d3.select("#startYearLabel").text(
-      `${meta.yearRange.min}–${meta.yearRange.max}`
+      `${meta.yearRange.min}–${meta.yearRange.max}`,
     )
 
     d3.select("#nbsAreaLabel").text(
-      `${this.formatArea(meta.nbsAreaRange.min)}–${this.formatArea(
-        meta.nbsAreaRange.max
-      )}`
+      `${meta.nbsAreaRange.min}-${d3.format(",")(meta.nbsAreaRange.max)}`,
     )
 
     d3.select("#costRangeLabel").text(
-      `${meta.costRange.min}–${meta.costRange.max}`
+      `${meta.costRange.min}–${d3.format(",")(meta.costRange.max)}`,
     )
 
     this.update()
@@ -257,7 +255,7 @@ class Filters {
 
   setEconomicImpactsText() {
     d3.select("#economicImpactMeta").text(
-      `${window.selectedEconomicImpacts.length} selected`
+      `${window.selectedEconomicImpacts.length} selected`,
     )
   }
 
@@ -309,7 +307,7 @@ class Filters {
 
   setAreaTypesText() {
     d3.select("#areaTypeMeta").text(
-      `${window.selectedAreaTypes.length} selected`
+      `${window.selectedAreaTypes.length} selected`,
     )
   }
 
@@ -361,7 +359,7 @@ class Filters {
 
   setFundingSourcesText() {
     d3.select("#fundingSourceMeta").text(
-      `${window.selectedFundingSource.length} selected`
+      `${window.selectedFundingSource.length} selected`,
     )
   }
 
@@ -371,28 +369,23 @@ class Filters {
   }
 
   updateCostUI() {
-    d3.select("#costMinVal").text(window.costRange.min)
-    d3.select("#costMaxVal").text(window.costRange.max)
-  }
-
-  formatArea(v) {
-    if (!Number.isFinite(v)) return "—"
-    return `${Math.round(v).toLocaleString()}`
+    d3.select("#costMaxVal").text(formatLargeNumbers(window.costRange.max))
+    d3.select("#costMinVal").text(formatLargeNumbers(window.costRange.min))
   }
 
   updateNbsAreaUI() {
-    d3.select("#nbsAreaMinVal").text(this.formatArea(window.nbsAreaRange.min))
-    d3.select("#nbsAreaMaxVal").text(this.formatArea(window.nbsAreaRange.max))
+    d3.select("#nbsAreaMaxVal").text(formatLargeNumbers(window.nbsAreaRange.max))
+    d3.select("#nbsAreaMinVal").text(formatLargeNumbers(window.nbsAreaRange.min))
   }
 
   transformData(data) {
-    const areas = data.map((r) => r.nbs_area_m2).filter(Number.isFinite)
+    const areas = data.map((r) => r.area).filter(Number.isFinite)
     const cost = data.map((r) => r.cost)
 
     return {
       yearRange: {
-        min: d3.min(data.map((r) => r.start_year)),
-        max: d3.max(data.map((r) => r.end_year)),
+        min: d3.min(data.map((r) => r.startYear)),
+        max: d3.max(data.map((r) => r.endYear)),
       },
       nbsAreaRange: { min: d3.min(areas), max: d3.max(areas) },
       costRange: { min: 0, max: d3.max(cost) },
@@ -407,3 +400,5 @@ class Filters {
     }
   }
 }
+
+const formatLargeNumbers = (v) => d3.format(".2s")(v)

@@ -2,7 +2,7 @@
   cursor: pointer;
   border: 0;
   background: transparent;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text);
   font-size: 18px;
   line-height: 1;
   padding: 6px 8px;
@@ -10,10 +10,9 @@
 }
 
 .expand-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bg-overlay-hover);
 }
 
-/* normal (card) height */
 #lineChartArea {
   height: 320px;
   border-radius: 12px;
@@ -39,7 +38,7 @@
 #lineChartModal .modal-backdrop {
   position: absolute !important;
   inset: 0 !important;
-  background: rgba(0, 0, 0, 0.6) !important;
+  background: var(--shadow-modal) !important;
 }
 
 #lineChartModal .modal-panel {
@@ -52,6 +51,6 @@
   max-height: calc(100vh - 48px) !important;
   overflow: hidden !important;
 
-  background: #0f0f12 !important;
+  background: var(--bg) !important;
   border-radius: 14px !important;
 }

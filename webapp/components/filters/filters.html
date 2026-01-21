@@ -1,54 +1,64 @@
 <section id="filters" class="card">
-  <h2>Filters</h2>
+  <div class="card-header">
+    <h2>Filters</h2>
+  </div>
 
   <div class="filterControls">
     <div class="filterControl">
-      <div class="card-header">
+      <div class="filter-header">
         <span>Country</span>
       </div>
       <div id="countriesInputWrapper">
         <input type="text" id="countriesInput" autocomplete="off" />
       </div>
+      <span class="helpText">
+        Projects from any selected country will be shown. If none are selected,
+        all options are shown.
+      </span>
     </div>
 
     <div class="filterControl">
-      <div class="card-header">
+      <div class="filter-header">
         <span>City</span>
       </div>
       <div id="citiesInputWrapper">
         <input type="text" id="cityInput" autocomplete="off" />
       </div>
+      <span class="helpText">
+        Projects from any selected city will be shown. If none are selected, all
+        options are shown.
+      </span>
     </div>
 
     <div class="filterControl">
-      <div class="card-header">
+      <div class="filter-header">
         <span>Economic impacts</span>
         <span class="card-meta" id="economicImpactMeta"></span>
       </div>
       <div class="filterCheckbox" id="economicImpactCheckboxes"></div>
       <button id="clearEconomicImpacts" type="button">Clear</button>
-      <small class="helpText">
-        Tick impacts to filter (AND across selected impacts). If none are
-        ticked, all options are shown.
-      </small>
+      <span class="helpText">
+        Projects that match all selected impacts will be shown. If none are
+        selected, all options are shown.
+      </span>
     </div>
 
     <div class="filterControl">
-      <div class="card-header">
-        <span>Type of area (before implementation)</span>
+      <div class="filter-header">
+        <span>Type of area before implementation</span>
         <span class="card-meta" id="areaTypeMeta"></span>
       </div>
       <div class="filterCheckbox" id="areaTypeCheckboxes"></div>
       <button id="clearAreaTypes" type="button">Clear</button>
-      <small class="helpText">
-        Tick area types to filter (AND across selected types). If none are
-        ticked, all options are shown.
-      </small>
+      <span class="helpText">
+        Projects that match all selected area types will be shown. If none are
+        selected, all options are shown.
+      </span>
     </div>
 
     <div class="filterControl">
-      <div class="card-header">
-        <span>Start year range</span>
+      <div class="filter-header">
+        <span>Start & end year</span>
         <span class="card-meta" class="yearRangeMeta" id="startYearLabel"
           >—</span
         >
@@ -61,14 +71,15 @@
         </label>
         <button id="resetYearBtn" type="button">Reset years</button>
       </div>
-      <small class="helpText">
-        Bounds come from dataset min/max <code>start_year</code>.
-      </small>
+      <span class="helpText">
+        Projects within the year range are shown. If some project doesn't have
+        the value, it's included in the results.
+      </span>
     </div>
 
     <div class="filterControl">
-      <div class="card-header">
-        <span>NBS area range (m²)</span>
+      <div class="filter-header">
+        <span>NBS area in m²</span>
         <span class="card-meta" class="nbsAreaMeta" id="nbsAreaLabel">—</span>
       </div>
       <div class="rangeBox">
@@ -79,23 +90,27 @@
         </div>
         <button id="resetNbsAreaBtn" type="button">Reset area</button>
       </div>
+      <span class="helpText">
+        Projects within the area range are shown. If some project doesn't have
+        the value, it's included in the results.
+      </span>
     </div>
 
     <div class="filterControl">
-      <div class="card-header">
+      <div class="filter-header">
         <span>Sources of funding</span>
         <span class="card-meta" id="fundingSourceMeta"></span>
       </div>
       <div class="filterCheckbox" id="fundingSourceCheckboxes"></div>
       <button id="clearFundingSources" type="button">Clear</button>
-      <small class="helpText">
-        Tick funding sources to filter (AND across selected sources). If none
-        are ticked, all options are shown.
-      </small>
+      <span class="helpText">
+        Projects that match all selected funding source will be shown. If none
+        are selected, all options are shown.
+      </span>
     </div>
 
     <div class="filterControl">
-      <div class="card-header">
+      <div class="filter-header">
         <span>Total cost</span>
         <span class="card-meta" class="yearRangeMeta" id="costRangeLabel"
           >—</span
@@ -109,9 +124,10 @@
         </label>
         <button id="resetCostBtn" type="button">Reset cost</button>
       </div>
-      <small class="helpText">
-        Bounds come from dataset min/max <code>total_cost</code>.
-      </small>
+      <span class="helpText">
+        Projects within the total cost range are shown. If some project doesn't
+        have the value, it's included in the results.
+      </span>
     </div>
   </div>
 </section>

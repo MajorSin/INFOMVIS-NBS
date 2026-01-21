@@ -1,4 +1,4 @@
-class Funding {
+class FundingSources {
   constructor(data) {
     const parent = d3.select("#fundingChart")
 
@@ -28,7 +28,7 @@ class Funding {
     this.currentOption = "totalProjects"
 
     this.fundingOptions = [
-      ...new Set(data.map((row) => row.__sources_of_funding).flat()),
+      ...new Set(data.map((row) => row.fundingSources).flat()),
     ]
 
     window._selectedFundingSource = []
@@ -69,9 +69,9 @@ class Funding {
           .axisBottom(this.xScale)
           .tickValues(this.xScale.ticks().filter((d) => Number.isInteger(d)))
           .tickFormat((d) =>
-            Math.abs(d) < 1000 ? d3.format("d")(d) : d3.format(".0s")(d)
+            Math.abs(d) < 1000 ? d3.format("d")(d) : d3.format(".0s")(d),
           )
-          .ticks(20)
+          .ticks(20),
       )
     this.yAxis.transition().duration(200).call(d3.axisLeft(this.yScale))
 
@@ -96,7 +96,7 @@ class Funding {
             .attr("class", (d) =>
               window.selectedFundingSource.includes(d.source)
                 ? "funding-source-bar active"
-                : "funding-source-bar"
+                : "funding-source-bar",
             )
             .attr("id", (d) => d.source)
             .attr("x", 0)
@@ -104,7 +104,7 @@ class Funding {
             .attr("width", (d) => this.xScale(d[this.row]))
             .attr("height", this.yScale.bandwidth())
             .style("display", (d) =>
-              this.xScale(d[this.row]) == 0 ? "none" : "block"
+              this.xScale(d[this.row]) == 0 ? "none" : "block",
             )
             .on("mouseover", (event, d) =>
               this.tooltip
@@ -112,13 +112,13 @@ class Funding {
                 .style("left", event.pageX + 10 + "px")
                 .style("top", event.pageY - 10 + "px")
                 .html(
-                  `<b>Projects:</b> ${d.count}<br/><b>NBS average area:</b> ${d.averageArea} m<sup>2</sup><br/><b>Average cost:</b> €${d.averageCost}`
-                )
+                  `<b>Projects:</b> ${d.count}<br/><b>NBS average area:</b> ${d.averageArea} m<sup>2</sup><br/><b>Average cost:</b> €${d.averageCost}`,
+                ),
             )
             .on("mousemove", (event) =>
               this.tooltip
                 .style("left", event.pageX + 10 + "px")
-                .style("top", event.pageY - 10 + "px")
+                .style("top", event.pageY - 10 + "px"),
             )
             .on("mouseout", () => this.tooltip.style("display", "none"))
             .on("click", (_, d) => clickFundingOption(d.source)),
@@ -127,8 +127,8 @@ class Funding {
             this.currentOption == "totalProjects"
               ? "Projects"
               : this.currentOption == "squareMeter"
-              ? "Average square meters (m²)"
-              : "Average cost in euro (€)"
+                ? "Average square meters (m²)"
+                : "Average cost in euro (€)",
           )
           return update
             .transition()
@@ -136,16 +136,16 @@ class Funding {
             .attr("class", (d) =>
               window.selectedFundingSource.includes(d.source)
                 ? "funding-source-bar active"
-                : "funding-source-bar"
+                : "funding-source-bar",
             )
             .attr("y", (d) => this.yScale(d.source))
             .attr("height", this.yScale.bandwidth())
             .attr("width", (d) => this.xScale(d[this.row]))
             .style("display", (d) =>
-              this.xScale(d[this.row]) == 0 ? "none" : "block"
+              this.xScale(d[this.row]) == 0 ? "none" : "block",
             )
         },
-        (exit) => exit.remove()
+        (exit) => exit.remove(),
       )
 
     const labelPosition = findLabelPosition(this.xScale)
@@ -162,9 +162,15 @@ class Funding {
             .attr("x", (d) => this.xScale(d[this.row]))
             .attr(
               "y",
-              (d) => this.yScale(d.source) + this.yScale.bandwidth() / 2
+              (d) => this.yScale(d.source) + this.yScale.bandwidth() / 2,
             )
-            .text((d) => d[this.row])
+            .text((d) =>
+              this.row == "averageArea"
+                ? `${d.totalArea} m²`
+                : this.row == "averageCost"
+                  ? `€ ${d.totalCost}`
+                  : d[this.row],
+            )
             .call((text) => labelPosition(this.row, text)),
         (update) =>
           update
@@ -176,18 +182,24 @@ class Funding {
             .attr("x", (d) => this.xScale(d[this.row]))
             .attr(
               "y",
-              (d) => this.yScale(d.source) + this.yScale.bandwidth() / 2
+              (d) => this.yScale(d.source) + this.yScale.bandwidth() / 2,
             )
-            .text((d) => d[this.row])
+            .text((d) =>
+              this.row == "averageArea"
+                ? `${d.averageArea} m²`
+                : this.row == "averageCost"
+                  ? `€ ${d.averageArea}`
+                  : d[this.row],
+            )
             .call((text) => labelPosition(this.row, text)),
-        (exit) => exit.remove()
+        (exit) => exit.remove(),
       )
 
     this.svg
       .selectAll(".fundAxis .tick")
       .on("click", (_, d) => clickFundingOption(d))
     d3.select("#fundingsMeta").text(
-      `${window.selectedFundingSource.length} selected`
+      `${window.selectedFundingSource.length} selected`,
     )
   }
 
@@ -196,17 +208,18 @@ class Funding {
       this.currentOption == "totalProjects"
         ? "count"
         : this.currentOption == "squareMeter"
-        ? "averageArea"
-        : "averageCost"
+          ? "averageArea"
+          : "averageCost"
+
     return this.fundingOptions
       .map((key) => ({
         source: key,
         values: data.reduce(
           (acc, row) =>
-            row.__sources_of_funding.includes(key)
+            row.fundingSources.includes(key)
               ? {
                   count: acc.count + 1,
-                  totalArea: acc.totalArea + (row.nbs_area_m2 || 0),
+                  totalArea: acc.totalArea + (row.area || 0),
                   totalCost: acc.totalCost + (row.cost || 0),
                 }
               : acc,
@@ -214,7 +227,7 @@ class Funding {
             count: 0,
             totalArea: 0,
             totalCost: 0,
-          }
+          },
         ),
       }))
       .map((row) => ({
@@ -223,13 +236,15 @@ class Funding {
         averageArea:
           row.values.totalArea > 0
             ? Math.round(
-                (row.values.totalArea / row.values.count + Number.EPSILON) * 100
+                (row.values.totalArea / row.values.count + Number.EPSILON) *
+                  100,
               ) / 100
             : 0,
         averageCost:
           row.values.totalCost > 0
             ? Math.round(
-                (row.values.totalCost / row.values.count + Number.EPSILON) * 100
+                (row.values.totalCost / row.values.count + Number.EPSILON) *
+                  100,
               ) / 100
             : 0,
       }))

@@ -1,4 +1,4 @@
-#compareMount {
+#compareTableMount {
   max-width: 1600px;
   margin: 10px auto 50px auto;
   padding: 14px;
@@ -15,14 +15,7 @@
 }
 
 #compareWrapper h1 {
-  margin-bottom: 12px;
-}
-
-#compareHeader {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 #compareTable {
@@ -30,17 +23,24 @@
 }
 
 #compareTable tr:hover td {
-  background: #171c29;
+  background: var(--bg-secondary);
 }
 
 #compareTable td:first-child {
   font-weight: bold;
-  background-color: #171b26;
+  background-color: var(--bg-secondary);
   min-width: 10px;
+  font-size: 13px;
 }
 
 #compareTable tr:first-child {
   color: var(--muted);
   font-weight: 800;
-  background-color: #101624;
+  background-color: var(--bg-elevated);
+  font-size: 13px;
+}
+
+.undefined{
+  font-style: italic;
+  color: var(--muted);
 }
