@@ -17,11 +17,11 @@ class CompareTable {
     )
   }
 
-  update() {
-    this.render(this.transformData())
+  wrangleData() {
+    this.update(this.transformData())
   }
 
-  render(rows) {
+  update(rows) {
     const columnsToShow = Object.keys(rows)
 
     this.table

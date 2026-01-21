@@ -32,6 +32,10 @@
   text-align: center;
 }
 
+.paginationButton.active {
+  background: var(--bg-overlay-active);
+}
+
 #resultsTable thead tr th div {
   display: flex;
   justify-content: space-between;

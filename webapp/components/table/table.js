@@ -62,13 +62,43 @@ class Table {
     this.wrangleData(data)
   }
 
-  wrangleData(data) {
-    this.update(data)
+  wrangleData(data, resetPage = true) {
+    if (resetPage) this.currentPage = 1
+
+    this.totalPages = Math.ceil(data.length / this.viewPerPage)
+
+    const sortOn = this.tableColums.find((r) => r.sortStatus != null)
+
+    this.data = [...data].sort((a, b) =>
+      sortOn == null
+        ? a.title.localeCompare(b.title)
+        : sortOn.column == "Title"
+          ? sortOn.sortStatus == "asc"
+            ? a.title.localeCompare(b.title)
+            : b.title.localeCompare(a.title)
+          : sortOn.column == "Country"
+            ? sortOn.sortStatus == "asc"
+              ? (a.country ?? "").localeCompare(b.country ?? "")
+              : (b.country ?? "").localeCompare(a.country ?? "")
+            : sortOn.column == "City"
+              ? sortOn.sortStatus == "asc"
+                ? a.city.localeCompare(b.city)
+                : b.city.localeCompare(a.city)
+              : sortOn.column == "Start year"
+                ? sortOn.sortStatus == "asc"
+                  ? a.startYear - b.startYear
+                  : b.startYear - a.startYear
+                : sortOn.sortStatus == "asc"
+                  ? a.endYear - b.endYear
+                  : b.endYear - a.endYear,
+    )
+
+    this.update()
   }
 
-  update(rows) {
-    this.data = rows
-    this.setCurrentPage(1)
+  update() {
+    const start = this.viewPerPage * (this.currentPage - 1)
+    this.render(this.data.slice(start, start + this.viewPerPage))
   }
 
   setViewPerPage(number) {
@@ -78,7 +108,7 @@ class Table {
 
   setCurrentPage(pageNumber) {
     this.currentPage = pageNumber
-    this.render(this.transformData(this.data))
+    this.update()
   }
 
   updateSortStatus(d) {
@@ -87,15 +117,15 @@ class Table {
         ? { ...r, sortStatus: r.sortStatus == "asc" ? "desc" : "asc" }
         : { ...r, sortStatus: null },
     )
-    this.setCurrentPage(1)
+    this.wrangleData(this.data, false)
   }
 
-  render(rows) {
-    this.totalElement.text(`Showing ${rows.length} out of ${this.data.length}`)
+  render(data) {
+    this.totalElement.text(`Showing ${data.length} out of ${data.length}`)
 
     d3.select("#resultsTable thead tr")
       .selectAll("th")
-      .data(this.tableColums)
+      .data(this.tableColums, (d) => d.id)
       .join(
         (enter) =>
           enter
@@ -152,68 +182,23 @@ class Table {
         (exit) => exit.remove(),
       )
 
-    this.tableBody
-      .selectAll("tr")
-      .data(rows, (d) => d.id)
-      .join(
-        (enter) => {
-          const tr = enter.append("tr")
+    const rows = this.tableBody.selectAll("tr").data(data).join("tr")
 
-          tr.append("td").text((d) => d.title ?? d.nativeTitle ?? "")
-          tr.append("td").text((d) => d.country)
-          tr.append("td").text((d) => d.city)
-          tr.append("td").text((d) => d.startYear)
-          tr.append("td").text((d) => d.endYear)
-          tr.append("td")
-            .append("input")
-            .on(
-              "change",
-              (_, d) =>
-                (window.selectedProjects = window.selectedProjects.includes(
-                  d.id,
-                )
-                  ? window.selectedProjects.filter((r) => r != d.id)
-                  : [...window.selectedProjects, d.id]),
-            )
-            .attr("type", "checkbox")
-            .property("checked", (d) => window.selectedProjects.includes(d.id))
-        },
-        (update) => {},
-        (exit) => exit.remove(),
-      )
-  }
+    rows
+      .selectAll("td")
+      .data((d) => [d.title, d.country, d.city, d.startYear, d.endYear])
+      .join("td")
+      .text((d) => d)
 
-  transformData(data) {
-    this.totalPages = Math.ceil(data.length / this.viewPerPage)
-    const start = this.viewPerPage * (this.currentPage - 1)
-
-    const sortOn = this.tableColums.find((r) => r.sortStatus != null)
-
-    return data
-      .sort((a, b) => {
-        if (sortOn == null) {
-          return a.title.localeCompare(b.title)
-        } else if (sortOn.column == "Title") {
-          return sortOn.sortStatus == "asc"
-            ? a.title.localeCompare(b.title)
-            : b.title.localeCompare(a.title)
-        } else if (sortOn.column == "Country") {
-          return sortOn.sortStatus == "asc"
-            ? (a.country ?? "").localeCompare(b.country ?? "")
-            : (b.country ?? "").localeCompare(a.country ?? "")
-        } else if (sortOn.column == "City") {
-          return sortOn.sortStatus == "asc"
-            ? a.city.localeCompare(b.city)
-            : b.city.localeCompare(a.city)
-        } else if (sortOn.column == "Start year") {
-          return sortOn.sortStatus == "asc"
-            ? a.startYear - b.startYear
-            : b.startYear - a.startYear
-        }
-        return sortOn.sortStatus == "asc"
-          ? a.endYear - b.endYear
-          : b.endYear - a.endYear
+    rows
+      .append("td")
+      .append("input")
+      .attr("type", "checkbox")
+      .property("checked", (d) => window.selectedProjects.includes(d.id))
+      .on("change", (event, d) => {
+        window.selectedProjects = event.target.checked
+          ? [...window.selectedProjects, d.id]
+          : window.selectedProjects.filter((r) => r != d.id)
       })
-      .slice(start, start + this.viewPerPage)
   }
 }
