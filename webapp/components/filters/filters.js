@@ -16,12 +16,6 @@ class Filters {
     this.areaTypeValues = []
     this.fundingSourceValues = []
 
-    window._selectedEconomicImpacts = []
-    window._selectedAreaTypes = []
-    window._selectedFundingSource = []
-    window._selectedCountries = []
-    window._selectedCities = []
-
     this.init(data)
   }
 

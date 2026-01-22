@@ -39,8 +39,6 @@ class FundingSources {
       ...new Set(data.map((row) => row.fundingSources).flat()),
     ]
 
-    window._selectedFundingSource = []
-
     this.init(data)
   }
 

@@ -2,8 +2,6 @@ class Table {
   constructor(data) {
     this.tableBody = d3.select("#resultsTable tbody")
 
-    window._selectedProjects = []
-
     this.tableColums = [
       {
         column: "Title",
