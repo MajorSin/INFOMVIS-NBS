@@ -4,7 +4,11 @@ class Main {
     this.filteredData = []
     this.filteredDataForMap = []
     this.topo = {}
+
     this.components = {}
+
+    this.mainWrapper = d3.select("#main")
+    this.compareWrapper = d3.select("#compareMode")
   }
 
   init() {
@@ -192,6 +196,8 @@ class Main {
       filters: new Filters([...this.data]),
       kpi: new KPI([...this.data]),
       table: new Table([...this.data]),
+      compareToolbar: new CompareToolbar(),
+      compareTable: new CompareTable([...this.data]),
     }
   }
 
@@ -255,5 +261,18 @@ class Main {
     this.components.kpi.wrangleData([...this.filteredData])
     this.components.table.wrangleData([...this.filteredData])
     this.components.filters.update()
+
+    if (window.mode == "compare") this.components.compareTable.wrangleData()
+  }
+
+  updateMode() {
+    if (window.mode == "compare") {
+      this.compareWrapper.style("display", "block")
+      this.mainWrapper.style("display", "none")
+    } else {
+      this.compareWrapper.style("display", "none")
+      this.mainWrapper.style("display", "block")
+    }
+    this.update()
   }
 }

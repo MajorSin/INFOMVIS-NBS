@@ -1,14 +1,10 @@
 class ExplorationMode extends Main {
   constructor() {
     super()
-
-    this.exploreWrapper = d3.select("#exploreMode")
-    this.compareWrapper = d3.select("#compareMode")
   }
 
   async init() {
     super.init()
-
 
     await this.loadData()
 
@@ -25,8 +21,6 @@ class ExplorationMode extends Main {
       }),
       lineChartModal: new LineChartPopout([...this.data]),
       fundingSources: new FundingSources([...this.data]),
-      compareToolbar: new CompareToolbar(),
-      compareTable: new CompareTable([...this.data]),
     }
   }
 
@@ -38,19 +32,6 @@ class ExplorationMode extends Main {
     this.components.lineChartModal.update(
       this.components.lineChartModal.transformData(this.filteredData),
     )
-
-    if (window.mode == "compare") this.components.compareTable.wrangleData()
-  }
-
-  updateMode() {
-    if (window.mode == "compare") {
-      this.compareWrapper.style("display", "block")
-      this.exploreWrapper.style("display", "none")
-    } else {
-      this.compareWrapper.style("display", "none")
-      this.exploreWrapper.style("display", "block")
-    }
-    this.update()
   }
 }
 

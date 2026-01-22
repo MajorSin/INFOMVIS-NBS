@@ -40,8 +40,6 @@ async function boot(jsFile, currentPage) {
           components.lineChart,
           components.fundingSources,
           components.projectsMap,
-          components.compareTable,
-          components.compareToolbar,
         ],
   )
 
@@ -119,4 +117,6 @@ const baseComponents = [
   components.navbar,
   components.table,
   components.kpi,
+  components.compareTable,
+  components.compareToolbar,
 ]
