@@ -4,9 +4,16 @@
 }
 
 .headerInner {
+  display: flex;
+  align-items: center;
+  gap: 15px;
   padding: 18px 16px;
   max-width: 1600px;
   margin: 0 auto;
+}
+
+#webIcon {
+  width: 40px;
 }
 
 #navbar {
