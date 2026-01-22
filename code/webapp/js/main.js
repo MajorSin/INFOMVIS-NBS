@@ -136,7 +136,7 @@ class Main {
 
   async loadRows() {
     return await d3
-      .csv("./data/cleaned_nbs_data.csv", d3.autoType)
+      .csv("../../data/cleaned_nbs_data.csv", d3.autoType)
       .then((rows) =>
         rows.map((row) => ({
           id: row[""],

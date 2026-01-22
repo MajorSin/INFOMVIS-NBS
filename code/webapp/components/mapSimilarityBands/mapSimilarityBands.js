@@ -1,7 +1,10 @@
-var _selectedCities = typeof _selectedCities !== "undefined" ? _selectedCities : []
+var _selectedCities =
+  typeof _selectedCities !== "undefined" ? _selectedCities : []
 var _searchQuery = typeof _searchQuery !== "undefined" ? _searchQuery : ""
 var _selectedEconomicImpacts =
-  typeof _selectedEconomicImpacts !== "undefined" ? _selectedEconomicImpacts : []
+  typeof _selectedEconomicImpacts !== "undefined"
+    ? _selectedEconomicImpacts
+    : []
 var _selectedAreaTypes =
   typeof _selectedAreaTypes !== "undefined" ? _selectedAreaTypes : []
 var _selectedTotalCosts =
@@ -9,9 +12,13 @@ var _selectedTotalCosts =
 var _selectedFundingSource =
   typeof _selectedFundingSource !== "undefined" ? _selectedFundingSource : []
 var _yearRange =
-  typeof _yearRange !== "undefined" ? _yearRange : { min: -Infinity, max: Infinity }
+  typeof _yearRange !== "undefined"
+    ? _yearRange
+    : { min: -Infinity, max: Infinity }
 var _nbsAreaRange =
-  typeof _nbsAreaRange !== "undefined" ? _nbsAreaRange : { min: -Infinity, max: Infinity }
+  typeof _nbsAreaRange !== "undefined"
+    ? _nbsAreaRange
+    : { min: -Infinity, max: Infinity }
 
 const cityKey = (city, country) => `${city}-${country}`
 
@@ -24,7 +31,6 @@ class MapSimilarityBands {
 
     this.tooltip = d3.select("#mapTooltip")
     this.hasTooltip = !this.tooltip.empty()
-    
 
     this.hoveredKey = null
     this.hoverRadiusPx = 8
@@ -43,7 +49,7 @@ class MapSimilarityBands {
       }
     }
 
-    this.sim = new SimilarityMatrixCSV("data/similarity_matrix.csv")
+    this.sim = new SimilarityMatrixCSV("../../data/similarity_matrix.csv")
 
     this.mapSvg = d3.select("#mapVis")
     this.w = +this.mapSvg.attr("width")
@@ -88,7 +94,7 @@ class MapSimilarityBands {
     this._currentCircleKeys = new Set()
     this.currentRows = this.allRows
     this._allowedIndexSet = new Set(
-      this.allRows.map((r) => r?.__index).filter(Number.isInteger)
+      this.allRows.map((r) => r?.__index).filter(Number.isInteger),
     )
 
     this.update(this.transformData(this.currentRows))
@@ -103,7 +109,14 @@ class MapSimilarityBands {
       const key = cityKey(r.city, r.country)
       let entry = byCity.get(key)
       if (!entry) {
-        entry = { key, city: r.city, country: r.country, coordinates: r.coordinates, count: 0, projects: [] }
+        entry = {
+          key,
+          city: r.city,
+          country: r.country,
+          coordinates: r.coordinates,
+          count: 0,
+          projects: [],
+        }
         byCity.set(key, entry)
       }
       entry.count++
@@ -124,13 +137,16 @@ class MapSimilarityBands {
 
     this.currentRows = transformed.rows || []
     this._allowedIndexSet = new Set(
-      this.currentRows.map((r) => r?.__index).filter(Number.isInteger)
+      this.currentRows.map((r) => r?.__index).filter(Number.isInteger),
     )
 
-    const selected = Array.isArray(window.selectedCities) ? window.selectedCities : []
+    const selected = Array.isArray(window.selectedCities)
+      ? window.selectedCities
+      : []
     let cityName = null
     if (selected.length) {
-      if (this._activeCityName && selected.includes(this._activeCityName)) cityName = this._activeCityName
+      if (this._activeCityName && selected.includes(this._activeCityName))
+        cityName = this._activeCityName
       else {
         cityName = selected[selected.length - 1]
         this._activeCityName = cityName
@@ -141,7 +157,11 @@ class MapSimilarityBands {
       const found = transformed.cities.find((c) => c.city === cityName)
       if (found) {
         if (!this.selectedCity || this.selectedCity.key !== found.key) {
-          this.selectedCity = { key: found.key, city: found.city, country: found.country }
+          this.selectedCity = {
+            key: found.key,
+            city: found.city,
+            country: found.country,
+          }
           this.selectedProject = null
           this.clearLinks()
         }
@@ -156,7 +176,10 @@ class MapSimilarityBands {
       this.clearLinks()
     }
 
-    if (this.selectedProject && !this._allowedIndexSet.has(this.selectedProject.__index)) {
+    if (
+      this.selectedProject &&
+      !this._allowedIndexSet.has(this.selectedProject.__index)
+    ) {
       this.selectedProject = null
       this.clearLinks()
     }
@@ -194,7 +217,10 @@ class MapSimilarityBands {
   }
 
   isSelectedCityName(cityName) {
-    return Array.isArray(window.selectedCities) && window.selectedCities.some((s) => s === cityName)
+    return (
+      Array.isArray(window.selectedCities) &&
+      window.selectedCities.some((s) => s === cityName)
+    )
   }
 
   renderSelectionHalo() {
@@ -212,39 +238,36 @@ class MapSimilarityBands {
 
     const [cx, cy] = this.projection(data.coordinates)
 
-    const halo = this.mapG
-      .selectAll("circle.city-halo")
-      .data([{ cx, cy }])
+    const halo = this.mapG.selectAll("circle.city-halo").data([{ cx, cy }])
 
-    halo
-      .join(
-        (enter) =>
-          enter
-            .append("circle")
-            .attr("class", "city-halo")
-            .attr("cx", (d) => d.cx)
-            .attr("cy", (d) => d.cy)
-            .attr("r", 10)
-            .attr("fill", "none")
-            .attr("stroke", "rgba(140, 190, 255, 0.95)")
-            .attr("stroke-width", 3)
-            .attr("pointer-events", "none")
-            .call((sel) => sel.transition().duration(200).attr("r", 18)),
-        (update) =>
-          update
-            .transition()
-            .duration(200)
-            .attr("cx", (d) => d.cx)
-            .attr("cy", (d) => d.cy),
-        (exit) => exit.remove()
-      )
+    halo.join(
+      (enter) =>
+        enter
+          .append("circle")
+          .attr("class", "city-halo")
+          .attr("cx", (d) => d.cx)
+          .attr("cy", (d) => d.cy)
+          .attr("r", 10)
+          .attr("fill", "none")
+          .attr("stroke", "rgba(140, 190, 255, 0.95)")
+          .attr("stroke-width", 3)
+          .attr("pointer-events", "none")
+          .call((sel) => sel.transition().duration(200).attr("r", 18)),
+      (update) =>
+        update
+          .transition()
+          .duration(200)
+          .attr("cx", (d) => d.cx)
+          .attr("cy", (d) => d.cy),
+      (exit) => exit.remove(),
+    )
 
     halo.raise()
   }
 
-
   getCircleFill(d) {
-    const hasSel = Array.isArray(window.selectedCities) && window.selectedCities.length > 0
+    const hasSel =
+      Array.isArray(window.selectedCities) && window.selectedCities.length > 0
     const isSel = this.isSelectedCityName(d.city)
     if (isSel) return "rgba(231,238,252,0.95)"
     return hasSel ? "rgba(231,238,252,0.08)" : "rgba(231,238,252,0.65)"
@@ -259,8 +282,12 @@ class MapSimilarityBands {
     this.hoveredKey = key
     const sel = this.pointsG.selectAll("circle")
     sel
-      .attr("fill", (d) => (d.key === this.hoveredKey ? "blue" : this.getCircleFill(d)))
-      .attr("stroke", (d) => (d.key === this.hoveredKey ? "blue" : "rgba(255,255,255,0.7)"))
+      .attr("fill", (d) =>
+        d.key === this.hoveredKey ? "blue" : this.getCircleFill(d),
+      )
+      .attr("stroke", (d) =>
+        d.key === this.hoveredKey ? "blue" : "rgba(255,255,255,0.7)",
+      )
       .attr("stroke-width", (d) => (d.key === this.hoveredKey ? 1.5 : 0.7))
     if (this.hoveredKey) sel.filter((d) => d.key === this.hoveredKey).raise()
   }
@@ -303,7 +330,9 @@ class MapSimilarityBands {
 
   tooltipMove(event) {
     if (!this.hasTooltip) return
-    this.tooltip.style("left", event.pageX + 10 + "px").style("top", event.pageY - 10 + "px")
+    this.tooltip
+      .style("left", event.pageX + 10 + "px")
+      .style("top", event.pageY - 10 + "px")
   }
 
   tooltipOff() {
@@ -341,10 +370,16 @@ class MapSimilarityBands {
             .attr("stroke", "rgba(255,255,255,0.7)")
             .attr("stroke-width", 0.7)
             .on("click", (event, d) => {
-              const selected = Array.isArray(window.selectedCities) ? window.selectedCities : []
+              const selected = Array.isArray(window.selectedCities)
+                ? window.selectedCities
+                : []
               const isSelected = selected.includes(d.city)
-              const nextSelected = isSelected ? selected.filter((s) => s !== d.city) : [...selected, d.city]
-              this._activeCityName = isSelected ? (nextSelected[nextSelected.length - 1] ?? null) : d.city
+              const nextSelected = isSelected
+                ? selected.filter((s) => s !== d.city)
+                : [...selected, d.city]
+              this._activeCityName = isSelected
+                ? (nextSelected[nextSelected.length - 1] ?? null)
+                : d.city
               window.selectedCities = nextSelected
             })
             .on("mouseover", (event, d) => this.tooltipOn(event, d))
@@ -359,7 +394,7 @@ class MapSimilarityBands {
             .attr("cy", (d) => this.projection(d.coordinates)[1])
             .attr("r", (d) => getR(d))
             .attr("fill", (d) => this.getCircleFill(d)),
-        (exit) => exit.remove()
+        (exit) => exit.remove(),
       )
 
     this._hoverData = dataWithCoords
@@ -367,7 +402,8 @@ class MapSimilarityBands {
     this.renderSelectionHalo()
 
     this.mapSvg.on("mousemove.hover", (event) => {
-      if (!this._hoverData || !this._hoverData.length) return this.setHovered(null)
+      if (!this._hoverData || !this._hoverData.length)
+        return this.setHovered(null)
 
       const [mx0, my0] = d3.pointer(event, this.mapSvg.node())
       const t = d3.zoomTransform(this.mapSvg.node())
@@ -397,7 +433,11 @@ class MapSimilarityBands {
   async getTopSimilarProjects(targetProject) {
     if (!targetProject) return []
     const idx = targetProject.__index
-    const sims = await this.sim.topNByIndexFiltered(idx, this.topN, this._allowedIndexSet)
+    const sims = await this.sim.topNByIndexFiltered(
+      idx,
+      this.topN,
+      this._allowedIndexSet,
+    )
     return sims
       .map(({ index, score }) => {
         const p = this.allRows[index]
@@ -450,7 +490,11 @@ class MapSimilarityBands {
             .attr("stroke-linecap", "round")
             .attr("stroke-width", 0)
             .attr("opacity", 0)
-            .attr("d", (d) => this.quadCurvePath(d.src.x, d.src.y, d.dst.x, d.dst.y) ?? "")
+            .attr(
+              "d",
+              (d) =>
+                this.quadCurvePath(d.src.x, d.src.y, d.dst.x, d.dst.y) ?? "",
+            )
             .filter(function () {
               return this.getAttribute("d") !== ""
             })
@@ -459,16 +503,20 @@ class MapSimilarityBands {
                 .transition()
                 .duration(250)
                 .attr("stroke-width", (d) => wScale(d.score))
-                .attr("opacity", (d) => oScale(d.score))
+                .attr("opacity", (d) => oScale(d.score)),
             ),
         (update) =>
           update
             .transition()
             .duration(250)
-            .attr("d", (d) => this.quadCurvePath(d.src.x, d.src.y, d.dst.x, d.dst.y) ?? "")
+            .attr(
+              "d",
+              (d) =>
+                this.quadCurvePath(d.src.x, d.src.y, d.dst.x, d.dst.y) ?? "",
+            )
             .attr("stroke-width", (d) => wScale(d.score))
             .attr("opacity", (d) => oScale(d.score)),
-        (exit) => exit.transition().duration(150).attr("opacity", 0).remove()
+        (exit) => exit.transition().duration(150).attr("opacity", 0).remove(),
       )
 
     this.linksG
@@ -487,8 +535,13 @@ class MapSimilarityBands {
             .attr("stroke-width", 2)
             .attr("opacity", 0.9)
             .call((sel) => sel.transition().duration(250).attr("r", 10)),
-        (update) => update.transition().duration(250).attr("cx", (d) => d.x).attr("cy", (d) => d.y),
-        (exit) => exit.remove()
+        (update) =>
+          update
+            .transition()
+            .duration(250)
+            .attr("cx", (d) => d.x)
+            .attr("cy", (d) => d.y),
+        (exit) => exit.remove(),
       )
   }
 
@@ -513,15 +566,14 @@ class MapSimilarityBands {
     }
 
     if (!this.selectedProject) {
-      const rows = this.currentRows.filter((r) => cityKey(r.city, r.country) === this.selectedCity.key)
+      const rows = this.currentRows.filter(
+        (r) => cityKey(r.city, r.country) === this.selectedCity.key,
+      )
       this.cityResultsTitle.textContent = `${this.selectedCity.city}, ${this.selectedCity.country} (${rows.length})`
 
       const ul = document.createElement("ul")
       for (const r of rows) {
-        const title =
-          r.title ??
-          r.nativeTitle ??
-          "Untitled"
+        const title = r.title ?? r.nativeTitle ?? "Untitled"
 
         const li = document.createElement("li")
         const a = document.createElement("a")
@@ -566,10 +618,7 @@ class MapSimilarityBands {
     `
     const tbody = table.querySelector("tbody")
 
-    const titleOf = (p) =>
-      p.title ??
-      p.nativeTitle ??
-      "Untitled"
+    const titleOf = (p) => p.title ?? p.nativeTitle ?? "Untitled"
 
     const cityText = (p) => `${p.city ?? "—"}, ${p.country ?? "—"}`
 
@@ -637,7 +686,7 @@ class MapSimilarityBands {
     this.cityResultsBody.innerHTML = ""
     this.cityResultsBody.appendChild(table)
   }
-  }
+}
 
 class SimilarityMatrixCSV {
   constructor(csvUrl) {
@@ -671,7 +720,12 @@ class SimilarityMatrixCSV {
     return this._loadPromise
   }
 
-  async topNByIndexFiltered(index, N, allowedSet, { includeSelf = false } = {}) {
+  async topNByIndexFiltered(
+    index,
+    N,
+    allowedSet,
+    { includeSelf = false } = {},
+  ) {
     await this._ensureLoaded()
 
     if (!Number.isInteger(index) || index < 0 || index >= this.size) {
@@ -757,7 +811,7 @@ class SimilarityMatrixCSV {
       for (let i = 0; i < size; i++) {
         if (table[i].length !== size) {
           throw new Error(
-            `Matrix is not square at row ${i}: expected ${size} cols, got ${table[i].length}`
+            `Matrix is not square at row ${i}: expected ${size} cols, got ${table[i].length}`,
           )
         }
         const arr = new Float32Array(size)
@@ -773,7 +827,7 @@ class SimilarityMatrixCSV {
     const size = rowIds.length
     if (colIds.length !== size) {
       throw new Error(
-        `Labeled matrix mismatch: ${colIds.length} column ids vs ${size} row ids`
+        `Labeled matrix mismatch: ${colIds.length} column ids vs ${size} row ids`,
       )
     }
 
@@ -786,7 +840,7 @@ class SimilarityMatrixCSV {
       const row = table[i + 1].slice(1)
       if (row.length !== size) {
         throw new Error(
-          `Labeled matrix row ${i} not size ${size} (got ${row.length})`
+          `Labeled matrix row ${i} not size ${size} (got ${row.length})`,
         )
       }
       const arr = new Float32Array(size)
@@ -833,7 +887,9 @@ class SimilarityMatrixCSV {
   async topNById(id, N, opts) {
     await this._ensureLoaded()
     if (!this.indexById)
-      throw new Error("Matrix has no ids (not labeled). Use topNByIndex instead.")
+      throw new Error(
+        "Matrix has no ids (not labeled). Use topNByIndex instead.",
+      )
     const idx = this.indexById.get(String(id))
     if (idx == null) throw new Error(`Unknown id: ${id}`)
     return this.topNByIndex(idx, N, opts)
@@ -842,14 +898,20 @@ class SimilarityMatrixCSV {
 
 ;(function patchExplorationModeUpdateFundingGuard() {
   const tryPatch = () => {
-    if (typeof ExplorationMode === "undefined") return requestAnimationFrame(tryPatch)
+    if (typeof ExplorationMode === "undefined")
+      return requestAnimationFrame(tryPatch)
     const EM = ExplorationMode
     if (!EM || !EM.prototype || EM.__patchedFundingGuard) return
 
     const origUpdate = EM.prototype.update
     EM.prototype.update = function patchedUpdate(...args) {
       if (this.components && !this.components.funding) {
-        this.components.funding = { update() {}, transformData() { return null } }
+        this.components.funding = {
+          update() {},
+          transformData() {
+            return null
+          },
+        }
       }
       return origUpdate.apply(this, args)
     }
