@@ -205,15 +205,42 @@ class MapSimilarityBands {
       .attr("stroke-width", 0.7)
   }
 
-  parseCoords(str) {
-    if (!str) return null
-    const [lat, lon] = str
+  parseCoords(input) {
+    if (!input) return null
+
+    if (Array.isArray(input) && input.length >= 2) {
+      const a = Number(input[0])
+      const b = Number(input[1])
+      if (!Number.isFinite(a) || !Number.isFinite(b)) return null
+
+      const looksLikeLonLat = Math.abs(a) <= 180 && Math.abs(b) <= 90
+      const looksLikeLatLon = Math.abs(a) <= 90 && Math.abs(b) <= 180
+
+      if (looksLikeLonLat && !looksLikeLatLon) return { lon: a, lat: b }
+      if (looksLikeLatLon && !looksLikeLonLat) return { lon: b, lat: a }
+
+      return { lon: a, lat: b }
+    }
+
+    const parts = input
       .toString()
       .replace(/[()]/g, "")
       .split(",")
       .map((v) => Number(v.trim()))
-    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null
-    return { lat, lon }
+
+    if (parts.length < 2) return null
+
+    const a = parts[0]
+    const b = parts[1]
+    if (!Number.isFinite(a) || !Number.isFinite(b)) return null
+
+    const looksLikeLatLon = Math.abs(a) <= 90 && Math.abs(b) <= 180
+    const looksLikeLonLat = Math.abs(a) <= 180 && Math.abs(b) <= 90
+
+    if (looksLikeLonLat && !looksLikeLatLon) return { lon: a, lat: b }
+    if (looksLikeLatLon && !looksLikeLonLat) return { lon: b, lat: a }
+
+    return { lon: b, lat: a }
   }
 
   isSelectedCityName(cityName) {

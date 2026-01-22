@@ -1,4 +1,7 @@
 function parseCost(value) {
+  if (typeof(value) === 'number') {
+    return value 
+  }
   if (!value || value.toLowerCase() === "unknown") return null
 
   const normalized = value
