@@ -3,6 +3,17 @@ import numpy as np
 import re
 import os
 from datetime import datetime
+import torch
+from sentence_transformers.util import cos_sim
+import time
+import requests
+import numpy as np
+import pandas as pd
+import numpy as np
+import re
+import os
+from SPARQLWrapper import SPARQLWrapper, JSON
+from sentence_transformers import SentenceTransformer
 
 file_path = "../dataset/nbs-xls-export 20251119.xlsx"
 df = pd.read_excel(file_path, sheet_name="Worksheet")
@@ -75,8 +86,6 @@ def extract_years(x):
 
 df[["start_year", "end_year"]] = df["duration"].apply(lambda x: pd.Series(extract_years(x)))
 
-import numpy as np
-import re
 
 def parse_area(value):
     if pd.isna(value):
@@ -171,11 +180,9 @@ main_output = f"{output_folder}/cleaned_nbs_data.csv"
 
 
 
-import os
 
 os.listdir("../dataset_cleaning_working_folder")
 
-from SPARQLWrapper import SPARQLWrapper, JSON
 
 def get_coordinates(row):
     endpoint_url = "https://query.wikidata.org/sparql"
@@ -270,7 +277,6 @@ df['total_cost_high_float'] = df['total_cost'].apply(lambda string : max([float(
 df['cost_per_sq_m_low'] = df.total_cost_low_float / df.nbs_area_float
 df['cost_per_sq_m_high'] = df.total_cost_high_float / df.nbs_area_float
 
-from sentence_transformers import SentenceTransformer
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 embeddings_columns = df[["name_of_the_nbs_intervention_short_english_title", "native_title_of_the_nbs_intervention", "short_description_of_the_intervention"]]
@@ -278,8 +284,6 @@ text_for_embeddings = embeddings_columns.fillna("").agg(" ".join, axis=1)
 
 embeddings = model.encode(text_for_embeddings, convert_to_tensor=True)
 
-import torch
-from sentence_transformers.util import cos_sim
 
 similarity_matrix = cos_sim(embeddings, embeddings)
 
@@ -288,11 +292,6 @@ np.savetxt("similarity_matrix.csv", similarity_matrix.cpu().numpy(), delimiter="
 with open("../dataset_cleaned/similarity_matrix.pt", "wb") as f:
     torch.save(similarity_matrix, f)
     
-
-import time
-import requests
-import numpy as np
-import pandas as pd
 
 missing_coords_indexes = np.argwhere(df["coordinates"].isna()).flatten()
 
