@@ -74,6 +74,6 @@ class CompareTable {
 
   setDifferentTarget(value) {
     this.showDifferentFields = value
-    this.update()
+    this.wrangleData()
   }
 }

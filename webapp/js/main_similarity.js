@@ -232,14 +232,8 @@ class ExplorationMode {
     if (!this.components) return
 
     this.components.filters.update()
-
-    this.components.kpis.update(
-      this.components.kpis.transformData(this.filteredData),
-    )
-
-    this.components.results.update(
-      this.components.results.transformData(this.filteredData),
-    )
+    this.components.kpis.wrangleData([...this.filteredData])
+    this.components.results.wrangleData([...this.filteredData])
     this.components.mapSimilarityBands.update(
       this.components.mapSimilarityBands.transformData(this.filteredDataForMap),
     )
