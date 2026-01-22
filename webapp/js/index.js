@@ -16,7 +16,7 @@ class ExplorationMode {
       get: () => _selectedEconomicImpacts,
       set: (value) => {
         _selectedEconomicImpacts = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -25,7 +25,7 @@ class ExplorationMode {
       get: () => _selectedAreaTypes,
       set: (value) => {
         _selectedAreaTypes = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -34,7 +34,7 @@ class ExplorationMode {
       get: () => _selectedTotalCosts,
       set: (value) => {
         _selectedTotalCosts = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -43,7 +43,7 @@ class ExplorationMode {
       get: () => _yearRange,
       set: (value) => {
         _yearRange = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -52,7 +52,7 @@ class ExplorationMode {
       get: () => _nbsAreaRange,
       set: (value) => {
         _nbsAreaRange = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -61,7 +61,7 @@ class ExplorationMode {
       get: () => _costRange,
       set: (value) => {
         _costRange = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -70,7 +70,7 @@ class ExplorationMode {
       get: () => _selectedCities,
       set: (value) => {
         _selectedCities = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -79,7 +79,7 @@ class ExplorationMode {
       get: () => _selectedFundingSource,
       set: (value) => {
         _selectedFundingSource = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -88,7 +88,7 @@ class ExplorationMode {
       get: () => _selectedCountries,
       set: (value) => {
         _selectedCountries = value
-        this.filterData()
+        this.wrangleData()
         this.update()
       },
     })
@@ -105,7 +105,7 @@ class ExplorationMode {
       get: () => _selectedProjects,
       set: (value) => {
         _selectedProjects = value
-        this.components?.compareToolbar?.update(value) ?? null
+        this.components?.compareToolbar?.wrangleData(value) ?? null
       },
     })
     window._mode = "overview"
@@ -184,102 +184,85 @@ class ExplorationMode {
   render(geo) {
     this.components = {
       filters: new Filters([...this.data]),
-      kpis: new KPI([...this.data]),
-      results: new Table([...this.data]),
-      mapFilteredCities: new ProjectsMap({
+      kpi: new KPI([...this.data]),
+      table: new Table([...this.data]),
+      projectsMap: new ProjectsMap({
         rows: [...this.data],
         topo: geo,
       }),
       lineChartModal: new LineChartPopout([...this.data]),
-      funding: new FundingSources([...this.data]),
+      fundingSources: new FundingSources([...this.data]),
       compareToolbar: new CompareToolbar(),
-      compare: new CompareTable([...this.data]),
+      compareTable: new CompareTable([...this.data]),
     }
-
-    // TODO: put this in funding  component and everything else in a list
-    const fundingComponent = this.components.funding
-    fundingComponent.fundingOptionsInput.on("change", (element) => {
-      fundingComponent.currentOption = element.target.value
-      fundingComponent.update(fundingComponent.transformData(this.filteredData))
-    })
-
-    const mapComponent = this.components.mapFilteredCities
-    mapComponent.mapOptions.on("change", (element) => {
-      mapComponent.currentOption = element.target.value
-      mapComponent.update(mapComponent.transformData(this.filteredDataForMap))
-    })
-    mapComponent.mapDomainOptions.on("change", (element) => {
-      mapComponent.domain = element.target.value
-      mapComponent.update(mapComponent.transformData(this.filteredDataForMap))
-    })
   }
 
   update() {
-    this.components.mapFilteredCities.wrangleData([...this.filteredDataForMap])
-    this.components.kpis.wrangleData([...this.filteredData])
-    this.components.results.wrangleData([...this.filteredData])
-    this.components.funding.wrangleData([...this.filteredData])
+    this.components.projectsMap.wrangleData([...this.filteredDataForMap])
+    this.components.kpi.wrangleData([...this.filteredData])
+    this.components.table.wrangleData([...this.filteredData])
+    this.components.fundingSources.wrangleData([...this.filteredData])
     this.components.filters.update()
-
     this.components.lineChartModal.update(
       this.components.lineChartModal.transformData(this.filteredData),
     )
 
-    if (window.mode == "compare") this.components.compare.wrangleData()
+    if (window.mode == "compare") this.components.compareTable.wrangleData()
   }
 
-  filterData() {
-    const tempFiltered = this.data.filter((r) => {
-      if (r.startYear != null && r.startYear < window.yearRange.min) {
-        return false
-      }
-      if (r.endYear != null && r.endYear > window.yearRange.max) return false
+  wrangleData() {
+    const {
+      yearRange,
+      nbsAreaRange,
+      costRange,
+      selectedEconomicImpacts,
+      selectedFundingSource,
+      selectedAreaTypes,
+      selectedCities,
+      selectedCountries,
+    } = window
 
-      const a = r.area
-      if (Number.isFinite(a)) {
-        if (a < window.nbsAreaRange.min || a > window.nbsAreaRange.max)
-          return false
-      }
+    const hasEconomicImpacts = selectedEconomicImpacts.length > 0
+    const hasFundingSource = selectedFundingSource.length > 0
+    const hasAreaTypes = selectedAreaTypes.length > 0
+    const hasCities = selectedCities.length > 0
+    const hasCountries = selectedCountries.length > 0
 
-      if (window.selectedEconomicImpacts.length > 0) {
-        const passImpacts = window.selectedEconomicImpacts.every((impact) =>
-          r.economicImpacts.includes(impact),
-        )
-        if (!passImpacts) return false
-      }
+    const citiesSet = new Set(selectedCities)
+    const countriesSet = new Set(selectedCountries)
 
-      if (window.selectedFundingSource.length > 0) {
-        const passFundingSource = window.selectedFundingSource.every((fund) =>
-          r.fundingSources.includes(fund),
-        )
-        if (!passFundingSource) return false
-      }
-
-      if (window.selectedAreaTypes.length > 0) {
-        const passAreaTypes = window.selectedAreaTypes.every((t) =>
-          r.areaTypes.includes(t),
-        )
-        if (!passAreaTypes) return false
-      }
-
-      const cost = r.cost
-      if (Number.isFinite(cost)) {
-        if (cost < window.costRange.min || cost > window.costRange.max) {
-          return false
-        }
-      }
-
-      return true
-    })
-
-    this.filteredDataForMap = [...tempFiltered]
-
-    this.filteredData = tempFiltered.filter(
+    const filtered = this.data.filter(
       (r) =>
-        (window.selectedCities.length <= 0 ||
-          window.selectedCities.some((c) => r.city == c)) &&
-        (window.selectedCountries.length <= 0 ||
-          window.selectedCountries.some((c) => r.country == c)),
+        !(r.startYear != null && r.startYear < yearRange.min) &&
+        !(r.endYear != null && r.endYear > yearRange.max) &&
+        !(
+          Number.isFinite(r.area) &&
+          (r.area < nbsAreaRange.min || r.area > nbsAreaRange.max)
+        ) &&
+        !(
+          Number.isFinite(r.cost) &&
+          (r.cost < costRange.min || r.cost > costRange.max)
+        ) &&
+        !(
+          hasEconomicImpacts &&
+          !selectedEconomicImpacts.every((i) => r.economicImpacts.includes(i))
+        ) &&
+        !(
+          hasFundingSource &&
+          !selectedFundingSource.every((f) => r.fundingSources.includes(f))
+        ) &&
+        !(
+          hasAreaTypes &&
+          !selectedAreaTypes.every((t) => r.areaTypes.includes(t))
+        ),
+    )
+
+    this.filteredDataForMap = [...filtered]
+
+    this.filteredData = filtered.filter(
+      (r) =>
+        (!hasCities || citiesSet.has(r.city)) &&
+        (!hasCountries || countriesSet.has(r.country)),
     )
   }
 
@@ -293,15 +276,6 @@ class ExplorationMode {
     }
     this.update()
   }
-}
-
-function splitMultiValueField(v) {
-  return (
-    v
-      ?.trim()
-      ?.split(/[;,]+/)
-      .map((item) => item.trim().replace(/^- /, "")) ?? []
-  )
 }
 
 new ExplorationMode().init()

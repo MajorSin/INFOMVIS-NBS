@@ -4,11 +4,11 @@ class CompareToolbar {
     this.number = 0
   }
 
-  update(data) {
-    this.render(this.wrangleData(data))
+  wrangleData(data) {
+    this.update(data.length)
   }
 
-  render(number) {
+  update(number) {
     if (this.number == number) return
 
     this.compareElement
@@ -32,10 +32,6 @@ class CompareToolbar {
       )
 
     this.number = number
-  }
-
-  wrangleData(data) {
-    return data.length
   }
 }
 

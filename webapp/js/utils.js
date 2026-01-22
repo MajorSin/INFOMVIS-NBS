@@ -1,3 +1,31 @@
+function parseCost(value) {
+  if (!value || value.toLowerCase() === "unknown") return null
+
+  const normalized = value
+    .toLowerCase()
+    .replace(/€/g, "")
+    .replace(/\./g, "")
+    .replace(/,/g, "")
+    .trim()
+
+  const numbers = normalized.match(/\d+/g)?.map(Number) ?? []
+
+  return numbers.length == 2
+    ? d3.mean(numbers)
+    : numbers.length == 1
+      ? numbers[0]
+      : null
+}
+
+function splitMultiValueField(v) {
+  return (
+    v
+      ?.trim()
+      ?.split(/[;,]+/)
+      .map((item) => item.trim().replace(/^- /, "")) ?? []
+  )
+}
+
 const columns = [
   {
     name: "Title",
@@ -112,7 +140,7 @@ const columns = [
     fieldName: "lastUpdated",
   },
   {
-    name: "Link to NBS area",
+    name: "Link to UNA city",
     fieldName: "link",
   },
 ]

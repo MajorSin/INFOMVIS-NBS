@@ -2,6 +2,8 @@ class FundingSources {
   constructor(data) {
     const parent = d3.select("#fundingChart")
 
+    this.data = []
+
     this.margin = { top: 20, right: 40, bottom: 0, left: 340 }
     this.width =
       parent.node().getBoundingClientRect().width -
@@ -43,19 +45,73 @@ class FundingSources {
   }
 
   init(data) {
+    d3.selectAll("#fundingOptions input").on("change", (element) => {
+      this.currentOption = element.target.value
+      this.wrangleData(this.data)
+    })
+
     this.wrangleData(data)
   }
 
   wrangleData(data) {
+    this.data = data
+
+    this.row =
+      this.currentOption == "totalProjects"
+        ? "count"
+        : this.currentOption == "squareMeter"
+          ? "averageArea"
+          : "averageCost"
+
+    const renderData = this.fundingOptions
+      .map((key) => ({
+        source: key,
+        values: data.reduce(
+          (acc, row) =>
+            row.fundingSources.includes(key)
+              ? {
+                  count: acc.count + 1,
+                  totalArea: acc.totalArea + (row.area || 0),
+                  totalCost: acc.totalCost + (row.cost || 0),
+                }
+              : acc,
+          {
+            count: 0,
+            totalArea: 0,
+            totalCost: 0,
+          },
+        ),
+      }))
+      .map((row) => ({
+        source: row.source,
+        count: row.values.count,
+        averageArea:
+          row.values.totalArea > 0
+            ? Math.round(
+                (row.values.totalArea / row.values.count + Number.EPSILON) *
+                  100,
+              ) / 100
+            : 0,
+        averageCost:
+          row.values.totalCost > 0
+            ? Math.round(
+                (row.values.totalCost / row.values.count + Number.EPSILON) *
+                  100,
+              ) / 100
+            : 0,
+      }))
+      .sort((a, b) => a.source.localeCompare(b.source))
+      .sort((a, b) => b[this.row] - a[this.row])
+
     this.xScale = d3.scaleSqrt().range([0, this.width])
     this.yScale = d3.scaleBand().range([0, this.height]).padding(0.3)
 
-    this.update(this.transformData(data))
+    this.update(renderData)
   }
 
-  update(data) {
-    this.xScale.domain([0, d3.max(data, (d) => d[this.row])])
-    this.yScale.domain(data.map((d) => d.source))
+  update(renderData) {
+    this.xScale.domain([0, d3.max(renderData, (d) => d[this.row])])
+    this.yScale.domain(renderData.map((d) => d.source))
 
     this.xAxis
       .transition()
@@ -84,7 +140,7 @@ class FundingSources {
 
     this.rectGroup
       .selectAll(".funding-source-bar")
-      .data(data, (d) => d.source)
+      .data(renderData, (d) => d.source)
       .join(
         (enter) =>
           enter
@@ -148,7 +204,7 @@ class FundingSources {
 
     this.labelsGroup
       .selectAll(".fundingRectLabels")
-      .data(data, (d) => d.source)
+      .data(renderData, (d) => d.source)
       .join(
         (enter) =>
           enter
@@ -198,55 +254,6 @@ class FundingSources {
     d3.select("#fundingsMeta").text(
       `${window.selectedFundingSource.length} selected`,
     )
-  }
-
-  transformData(data) {
-    this.row =
-      this.currentOption == "totalProjects"
-        ? "count"
-        : this.currentOption == "squareMeter"
-          ? "averageArea"
-          : "averageCost"
-
-    return this.fundingOptions
-      .map((key) => ({
-        source: key,
-        values: data.reduce(
-          (acc, row) =>
-            row.fundingSources.includes(key)
-              ? {
-                  count: acc.count + 1,
-                  totalArea: acc.totalArea + (row.area || 0),
-                  totalCost: acc.totalCost + (row.cost || 0),
-                }
-              : acc,
-          {
-            count: 0,
-            totalArea: 0,
-            totalCost: 0,
-          },
-        ),
-      }))
-      .map((row) => ({
-        source: row.source,
-        count: row.values.count,
-        averageArea:
-          row.values.totalArea > 0
-            ? Math.round(
-                (row.values.totalArea / row.values.count + Number.EPSILON) *
-                  100,
-              ) / 100
-            : 0,
-        averageCost:
-          row.values.totalCost > 0
-            ? Math.round(
-                (row.values.totalCost / row.values.count + Number.EPSILON) *
-                  100,
-              ) / 100
-            : 0,
-      }))
-      .sort((a, b) => a.source.localeCompare(b.source))
-      .sort((a, b) => b[this.row] - a[this.row])
   }
 }
 
