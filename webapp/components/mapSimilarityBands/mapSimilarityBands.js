@@ -13,15 +13,6 @@ var _yearRange =
 var _nbsAreaRange =
   typeof _nbsAreaRange !== "undefined" ? _nbsAreaRange : { min: -Infinity, max: Infinity }
 
-window._selectedCities = _selectedCities
-window._searchQuery = _searchQuery
-window._selectedEconomicImpacts = _selectedEconomicImpacts
-window._selectedAreaTypes = _selectedAreaTypes
-window._selectedTotalCosts = _selectedTotalCosts
-window._selectedFundingSource = _selectedFundingSource
-window._yearRange = _yearRange
-window._nbsAreaRange = _nbsAreaRange
-
 const cityKey = (city, country) => `${city}-${country}`
 
 class MapSimilarityBands {

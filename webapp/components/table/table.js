@@ -2,8 +2,6 @@ class Table {
   constructor(data) {
     this.tableBody = d3.select("#resultsTable tbody")
 
-    window._selectedProjects = []
-
     this.tableColums = [
       {
         column: "Title",
@@ -98,30 +96,12 @@ class Table {
 
   update() {
     const start = this.viewPerPage * (this.currentPage - 1)
-    this.render(this.data.slice(start, start + this.viewPerPage))
-  }
 
-  setViewPerPage(number) {
-    this.viewPerPage = number
-    this.setCurrentPage(1)
-  }
-
-  setCurrentPage(pageNumber) {
-    this.currentPage = pageNumber
-    this.update()
-  }
-
-  updateSortStatus(d) {
-    this.tableColums = this.tableColums.map((r) =>
-      r.column == d.column
-        ? { ...r, sortStatus: r.sortStatus == "asc" ? "desc" : "asc" }
-        : { ...r, sortStatus: null },
+    const currentData = this.data.slice(start, start + this.viewPerPage)
+    
+    this.totalElement.text(
+      `Showing ${currentData.length} out of ${currentData.length}`,
     )
-    this.wrangleData(this.data, false)
-  }
-
-  render(data) {
-    this.totalElement.text(`Showing ${data.length} out of ${data.length}`)
 
     d3.select("#resultsTable thead tr")
       .selectAll("th")
@@ -182,7 +162,7 @@ class Table {
         (exit) => exit.remove(),
       )
 
-    const rows = this.tableBody.selectAll("tr").data(data).join("tr")
+    const rows = this.tableBody.selectAll("tr").data(currentData).join("tr")
 
     rows
       .selectAll("td")
@@ -200,5 +180,24 @@ class Table {
           ? [...window.selectedProjects, d.id]
           : window.selectedProjects.filter((r) => r != d.id)
       })
+  }
+
+  setViewPerPage(number) {
+    this.viewPerPage = number
+    this.setCurrentPage(1)
+  }
+
+  setCurrentPage(pageNumber) {
+    this.currentPage = pageNumber
+    this.update()
+  }
+
+  updateSortStatus(d) {
+    this.tableColums = this.tableColums.map((r) =>
+      r.column == d.column
+        ? { ...r, sortStatus: r.sortStatus == "asc" ? "desc" : "asc" }
+        : { ...r, sortStatus: null },
+    )
+    this.wrangleData(this.data, false)
   }
 }

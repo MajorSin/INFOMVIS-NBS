@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>NBS Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico" />
 
     <link
       rel="stylesheet"
@@ -37,22 +38,37 @@
 
     <div id="navMount"></div>
 
-    <main class="grid">
-      <div id="filtersMount"></div>
-      <div class="grid-vertical">
-        <div id="kpiMount"></div>
-        <div id="mapSimilarityBandsMount"></div>
-        <div id="tableMount"></div>
+    <div id="main">
+      <div class="grid">
+        <div id="filtersMount"></div>
+        <div class="grid-vertical">
+          <div id="kpiMount"></div>
+          <div id="mapSimilarityBandsMount"></div>
+          <div id="tableMount"></div>
+        </div>
       </div>
-    </main>
+      <div id="compareToolbarMount"></div>
+    </div>
+
+    <div id="compareMode">
+      <div id="compareTableMount"></div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
     <script src="https://unpkg.com/range-slider-input@2"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
+    <script src="js/main.js" type="text/javascript"></script>
+    <script src="js/utils.js" type="text/javascript"></script>
     <script src="js/boot.js" type="text/javascript"></script>
     <script>
-      callBoot("js/main_similarity.js", "similarity_band")
+      boot("js/similarity_band.js", "similarity_band")
     </script>
   </body>
 </html>

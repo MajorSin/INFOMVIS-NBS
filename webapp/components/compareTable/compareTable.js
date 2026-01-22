@@ -1,24 +1,54 @@
 class CompareTable {
   constructor(data) {
-    this.data = data
-
-    this.table = d3.select("#compareTable")
-    this.showDifferentFields = false
-
+    this.data = []
     this.columns = columns
 
-    this.init()
+    this.table = d3.select("#compareTable")
+
+    this.showDifferentFields = false
+
+    this.init(data)
   }
 
-  init() {
+  init(data) {
+    this.data = data
+
     d3.select("#backToExplore").on("click", () => (window.mode = "explore"))
     d3.select("#differentFieldsSlider").on("change", (e) =>
-      this.setDifferentTarget(e.target.checked),
+      this.changeTarget(e.target.checked),
     )
   }
 
   wrangleData() {
-    this.update(this.transformData())
+    const data = this.data
+      .filter((r) => window.selectedProjects.includes(r.id))
+      .reduce((acc, obj) => {
+        Object.keys(obj).forEach((key) => {
+          if (!acc[key]) acc[key] = []
+          acc[key].push(obj[key])
+        })
+        return acc
+      }, {})
+
+    this.update(
+      Object.fromEntries(
+        Object.keys(
+          this.showDifferentFields
+            ? Object.fromEntries(
+                Object.entries(data).filter(
+                  ([_, arr]) => new Set(arr).size > 1,
+                ),
+              )
+            : data,
+        ).map((column) => [
+          column,
+          [
+            this.columns.find((r) => r.fieldName == column)?.name ?? "",
+            ...data[column],
+          ],
+        ]),
+      ),
+    )
   }
 
   update(rows) {
@@ -44,35 +74,7 @@ class CompareTable {
       )
   }
 
-  transformData() {
-    const data = this.data
-      .filter((r) => window.selectedProjects.includes(r.id))
-      .reduce((acc, obj) => {
-        Object.keys(obj).forEach((key) => {
-          if (!acc[key]) acc[key] = []
-          acc[key].push(obj[key])
-        })
-        return acc
-      }, {})
-
-    return Object.fromEntries(
-      Object.keys(
-        this.showDifferentFields
-          ? Object.fromEntries(
-              Object.entries(data).filter(([_, arr]) => new Set(arr).size > 1),
-            )
-          : data,
-      ).map((column) => [
-        column,
-        [
-          this.columns.find((r) => r.fieldName == column)?.name ?? "",
-          ...data[column],
-        ],
-      ]),
-    )
-  }
-
-  setDifferentTarget(value) {
+  changeTarget(value) {
     this.showDifferentFields = value
     this.wrangleData()
   }

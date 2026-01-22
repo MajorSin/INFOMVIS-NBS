@@ -2,6 +2,8 @@ class ProjectsMap {
   constructor(data) {
     this.allCountries = []
 
+    this.data = data
+
     this.meta = d3.select("#projectsMapMeta")
 
     this.map = L.map("mapArea").setView([20, 0], 2)
@@ -19,8 +21,6 @@ class ProjectsMap {
     this.tooltip = d3.select("#mapTooltip")
 
     this.currentOption = "country"
-    this.mapOptions = d3.selectAll("#mapLocationOptions input")
-    this.mapDomainOptions = d3.selectAll("#mapDomainOptions input")
     this.domain = "projects"
 
     this.cityPath = L.layerGroup()
@@ -32,6 +32,15 @@ class ProjectsMap {
   }
 
   init(data) {
+    d3.selectAll("#mapLocationOptions input").on("change", (element) => {
+      this.currentOption = element.target.value
+      this.wrangleData(this.data)
+    })
+    d3.selectAll("#mapDomainOptions input").on("change", (element) => {
+      this.domain = element.target.value
+      this.wrangleData(this.data)
+    })
+
     this.allCountries = topojson
       .feature(data.topo, data.topo.objects.countries)
       .features.map((f) => ({
@@ -54,7 +63,81 @@ class ProjectsMap {
   }
 
   wrangleData(data) {
-    this.update(this.transformData(data))
+    this.data = data
+
+    this.update(
+      this.currentOption == "country"
+        ? {
+            ...data.geo,
+            features: this.allCountries.map((row) => ({
+              ...row,
+              values: Array.from(
+                d3.rollup(
+                  data,
+                  (leaves) => leaves,
+                  (d) => d.country,
+                ),
+              )
+                .filter((d) => d[0] != null)
+                .map((d) => ({
+                  count: d[1].length,
+                  country: d[0],
+                  averageCost:
+                    Math.round(
+                      (d[1].reduce((sum, item) => sum + item.cost, 0) /
+                        d[1].length) *
+                        100,
+                    ) / 100,
+                  averageArea:
+                    Math.round(
+                      (d[1].reduce((sum, item) => sum + item.area, 0) /
+                        d[1].length) *
+                        100,
+                    ) / 100,
+                }))
+                .sort((a, b) => b.count - a.count)
+                .find(
+                  (element) =>
+                    element.country.includes(row.properties.name) ||
+                    row.properties.name.includes(element.country),
+                ) ?? { count: 0 },
+            })),
+          }
+        : {
+            type: "FeatureCollection",
+            features: Array.from(
+              d3.rollup(
+                data,
+                (leaves) => leaves,
+                (d) => d.city,
+              ),
+            )
+              .filter((d) => d[0] != null)
+              .map((d) => ({
+                type: "Feature",
+                geometry: {
+                  type: "Point",
+                  coordinates: d[1][0].coordinates,
+                },
+                count: d[1].length,
+                city: d[0],
+                country: d[1][0].country,
+                averageCost:
+                  Math.round(
+                    (d[1].reduce((sum, item) => sum + item.cost, 0) /
+                      d[1].length) *
+                      100,
+                  ) / 100,
+                averageArea:
+                  Math.round(
+                    (d[1].reduce((sum, item) => sum + item.area, 0) /
+                      d[1].length) *
+                      100,
+                  ) / 100,
+              }))
+              .sort((a, b) => b.count - a.count),
+          },
+    )
   }
 
   update(data) {
@@ -216,78 +299,7 @@ class ProjectsMap {
     }).addTo(this.map)
   }
 
-  transformData(data) {
-    if (this.currentOption == "country") {
-      const countriesData = Array.from(
-        d3.rollup(
-          data,
-          (leaves) => leaves,
-          (d) => d.country,
-        ),
-      )
-        .filter((d) => d[0] != null)
-        .map((d) => ({
-          count: d[1].length,
-          country: d[0],
-          averageCost:
-            Math.round(
-              (d[1].reduce((sum, item) => sum + item.cost, 0) / d[1].length) *
-                100,
-            ) / 100,
-          averageArea:
-            Math.round(
-              (d[1].reduce((sum, item) => sum + item.area, 0) / d[1].length) *
-                100,
-            ) / 100,
-        }))
-        .sort((a, b) => b.count - a.count)
-
-      return {
-        ...data.geo,
-        features: this.allCountries.map((row) => ({
-          ...row,
-          values: countriesData.find(
-            (element) =>
-              element.country.includes(row.properties.name) ||
-              row.properties.name.includes(element.country),
-          ) ?? { count: 0 },
-        })),
-      }
-    }
-
-    return {
-      type: "FeatureCollection",
-      features: Array.from(
-        d3.rollup(
-          data,
-          (leaves) => leaves,
-          (d) => d.city,
-        ),
-      )
-        .filter((d) => d[0] != null)
-        .map((d) => ({
-          type: "Feature",
-          geometry: {
-            type: "Point",
-            coordinates: d[1][0].coordinates,
-          },
-          count: d[1].length,
-          city: d[0],
-          country: d[1][0].country,
-          averageCost:
-            Math.round(
-              (d[1].reduce((sum, item) => sum + item.cost, 0) / d[1].length) *
-                100,
-            ) / 100,
-          averageArea:
-            Math.round(
-              (d[1].reduce((sum, item) => sum + item.area, 0) / d[1].length) *
-                100,
-            ) / 100,
-        }))
-        .sort((a, b) => b.count - a.count),
-    }
-  }
+  transformData(data) {}
 
   removePaths() {
     this.map.removeLayer(this.cityPath)
