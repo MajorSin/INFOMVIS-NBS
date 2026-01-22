@@ -289,10 +289,6 @@ similarity_matrix = cos_sim(embeddings, embeddings)
 
 np.savetxt("similarity_matrix.csv", similarity_matrix.cpu().numpy(), delimiter=",")
 
-with open("../dataset_cleaned/similarity_matrix.pt", "wb") as f:
-    torch.save(similarity_matrix, f)
-    
-
 missing_coords_indexes = np.argwhere(df["coordinates"].isna()).flatten()
 
 session = requests.Session()
