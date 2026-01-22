@@ -15,7 +15,7 @@ import os
 from SPARQLWrapper import SPARQLWrapper, JSON
 from sentence_transformers import SentenceTransformer
 
-file_path = "../dataset/nbs-xls-export 20251119.xlsx"
+file_path = "../../data/nbs-xls-export 20251119.xlsx"
 df = pd.read_excel(file_path, sheet_name="Worksheet")
 
 def clean_columns(df):
@@ -287,7 +287,7 @@ embeddings = model.encode(text_for_embeddings, convert_to_tensor=True)
 
 similarity_matrix = cos_sim(embeddings, embeddings)
 
-np.savetxt("similarity_matrix.csv", similarity_matrix.cpu().numpy(), delimiter=",")
+np.savetxt("../../data/similarity_matrix.csv", similarity_matrix.cpu().numpy(), delimiter=",")
 
 missing_coords_indexes = np.argwhere(df["coordinates"].isna()).flatten()
 
@@ -323,4 +323,4 @@ for i in missing_coords_indexes:
 
     time.sleep(0.5)
 
-df.to_csv("./data/cleaned_nbs_data.csv", index=True)
+df.to_csv("../../data/cleaned_nbs_data.csv", index=True)
